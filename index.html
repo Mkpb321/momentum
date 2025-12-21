@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Reading Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <div class="brand">
+        <div class="brand__mark" aria-hidden="true"></div>
+        <div>
+          <div class="brand__title">Reading Tracker</div>
+          <div class="brand__subtitle">Clean, minimal, habit-first</div>
+        </div>
+      </div>
+
+      <div class="topbar__actions">
+        <button class="btn btn--ghost" id="btnExport" title="Daten exportieren">Export</button>
+        <button class="btn btn--ghost" id="btnImport" title="Daten importieren">Import</button>
+        <button class="btn" id="btnAddBook">Buch hinzufügen</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap grid">
+    <section class="panel">
+      <div class="panel__head">
+        <h2>Momentum</h2>
+        <div class="panel__meta" id="streakMeta">—</div>
+      </div>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="kpi__label">Aktueller Streak</div>
+          <div class="kpi__value" id="kpiCurrentStreak">0</div>
+          <div class="kpi__hint">Tage in Folge gelesen</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Längster Streak</div>
+          <div class="kpi__value" id="kpiLongestStreak">0</div>
+          <div class="kpi__hint" id="kpiLongestHint">—</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Heute</div>
+          <div class="kpi__value" id="kpiTodayPages">0</div>
+          <div class="kpi__hint">Seiten (alle Bücher)</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="charts">
+        <div class="chart">
+          <div class="chart__head">
+            <div>
+              <div class="chart__title">Letzte 12 Tage</div>
+              <div class="chart__sub" id="subDays">—</div>
+            </div>
+            <div class="chip" id="sumDays">0</div>
+          </div>
+          <div class="chart__body" id="chartDays"></div>
+        </div>
+
+        <div class="chart">
+          <div class="chart__head">
+            <div>
+              <div class="chart__title">Letzte 12 Wochen</div>
+              <div class="chart__sub" id="subWeeks">—</div>
+            </div>
+            <div class="chip" id="sumWeeks">0</div>
+          </div>
+          <div class="chart__body" id="chartWeeks"></div>
+        </div>
+
+        <div class="chart">
+          <div class="chart__head">
+            <div>
+              <div class="chart__title">Letzte 12 Monate</div>
+              <div class="chart__sub" id="subMonths">—</div>
+            </div>
+            <div class="chip" id="sumMonths">0</div>
+          </div>
+          <div class="chart__body" id="chartMonths"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head">
+        <h2>Bücher</h2>
+        <div class="panel__meta" id="booksMeta">—</div>
+      </div>
+
+      <div id="bookList" class="booklist" aria-live="polite"></div>
+
+      <div class="empty" id="emptyState" hidden>
+        <div class="empty__title">Noch keine Bücher</div>
+        <div class="empty__text">
+          Füge ein Buch hinzu und trage deinen Fortschritt ein. Die Grafiken und der Streak bauen sich automatisch auf.
+        </div>
+        <button class="btn" id="btnAddBookEmpty">Buch hinzufügen</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add Book Modal -->
+  <dialog class="modal" id="dlgAddBook">
+    <form method="dialog" class="modal__card" id="formAddBook">
+      <div class="modal__head">
+        <div>
+          <div class="modal__title">Buch hinzufügen</div>
+          <div class="modal__sub">Minimal, schnell, ohne Ablenkung</div>
+        </div>
+        <button class="iconbtn" value="cancel" aria-label="Schließen">×</button>
+      </div>
+
+      <div class="fields">
+        <label class="field">
+          <span>Titel</span>
+          <input required name="title" autocomplete="off" placeholder="z.B. Die Verwandlung" />
+        </label>
+
+        <label class="field">
+          <span>Autor (optional)</span>
+          <input name="author" autocomplete="off" placeholder="z.B. Franz Kafka" />
+        </label>
+
+        <label class="field">
+          <span>Gesamtseiten</span>
+          <input required name="totalPages" inputmode="numeric" type="number" min="1" step="1" placeholder="z.B. 220" />
+        </label>
+      </div>
+
+      <div class="modal__actions">
+        <button class="btn btn--ghost" value="cancel">Abbrechen</button>
+        <button class="btn" id="btnCreateBook" value="default">Hinzufügen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Book Detail Modal -->
+  <dialog class="modal" id="dlgBook">
+    <form method="dialog" class="modal__card modal__card--wide" id="formBook">
+      <div class="modal__head">
+        <div>
+          <div class="modal__title" id="bookTitle">—</div>
+          <div class="modal__sub" id="bookSub">—</div>
+        </div>
+        <button class="iconbtn" value="cancel" aria-label="Schließen">×</button>
+      </div>
+
+      <div class="bookdetail">
+        <div class="bookdetail__progress">
+          <div class="progress">
+            <div class="progress__bar" id="bookProgBar" style="width:0%"></div>
+          </div>
+          <div class="progress__meta">
+            <span id="bookProgText">0 / 0</span>
+            <span class="muted" id="bookProgPct">0%</span>
+          </div>
+        </div>
+
+        <div class="bookdetail__update">
+          <div class="bookdetail__label">Heute gelesen bis Seite</div>
+          <div class="bookdetail__row">
+            <input id="inpPage" type="number" min="0" step="1" inputmode="numeric" placeholder="z.B. 75" />
+            <button class="btn" id="btnSavePage" value="default">Speichern</button>
+          </div>
+          <div class="hint" id="pageHint">Tipp: jeden Tag kurz eintragen – der Streak zählt.</div>
+        </div>
+
+        <div class="bookdetail__history">
+          <div class="bookdetail__label">Letzte Einträge</div>
+          <div class="history" id="historyList"></div>
+        </div>
+      </div>
+
+      <div class="modal__actions modal__actions--spread">
+        <button class="btn btn--danger" id="btnDeleteBook" value="cancel">Buch löschen</button>
+        <div>
+          <button class="btn btn--ghost" value="cancel">Schließen</button>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Hidden file input for import -->
+  <input type="file" id="fileImport" accept="application/json" hidden />
+
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
