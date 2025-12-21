@@ -1,7 +1,7 @@
 
 
 
-github projekt umbenennen fals app umbenannt
+github projekt umbenennen fals app umbenannt und ordner lokal
 
 header auf handy nicht so gross
 
@@ -21,31 +21,7 @@ gesammtstatistik pro tag aber kummulierend
 
 
 
----
 
-mach den header nicht so gross, vorallem auf der handy ansicht ist der gross
-Reading, sauber getrackt" kannst du ganz weglassen. statt "buch hinzufügen" nur ein +
-
-Mach erst die 12 tage grafik und der curent streak und den rest darunter
-
-Bücher sortiert nach zuletzt gelesen und durchsuchbar
-ganz gelesene bücher versteckt und erst nach klick angezeigt
-
-auf dem bild noch ein bug. das fester wird abgeschnitten in einer schmalen darstellung z.b. handy. zusätzlich zoomt es auf dem handy dann bisschen rein wegen dem eingabefeld. das soll nicht passieren
-
----
-
-App umbenennen in Momentum. dementsprechend muss die karte die heute Momentum heisst irgendwie anders heissen. 
-
-"Tage in Folge gelesen" raus beim streak. nutzer weiss was ein streak ist
-"Bestleistung bisher." ebenfalls raus
-"Heute" in "Seiten Heute" dafür "Seiten (alle Bücher)" raus
-
-wenn man en buch hinzufügt kann man zusätzlich ein wert setzen für bereits gelesene seiten. falls man ein buch schon vor dem nutzen des trackers angefangen hat. so werden die statistiken nicht verfällscht. wenn ich ein buch ab heute trache, das ic aber in vergangenen monaten schon bis seite 50 gelesen habe. und heute bis 55 lesen. dann wird in der statistik so nur 5 seiten statt 55 seiten gespeichert. verstehst du?
-
-----
-
-am anfang ist ja erst der streak und die grafik der zwölf tage. kombinier die 2 irgendwie, dass sie nicht so nebeneinander, sondern sinvoll ineinander sind, als ein element. und mach die letzten 12 tage zusätzlich auch unten bei den anderen grafiken
 
 
 
