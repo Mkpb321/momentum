@@ -534,7 +534,8 @@ function formatDateShort(yyyy_mm_dd) {
   const d = parseDate(yyyy_mm_dd);
   const dd = String(d.getDate()).padStart(2, "0");
   const mm = String(d.getMonth() + 1).padStart(2, "0");
-  return `${dd}.${mm}.`;
+  const yyyy = String(d.getFullYear());
+  return `${dd}.${mm}.${yyyy}`;
 }
 
 function formatDayLabel(d) {
@@ -581,149 +582,115 @@ function debounce(fn, wait) {
 /* ------------------ demo data ------------------ */
 
 function createDemoState() {
-  // Demo goal:
-  // - last 2 years
-  // - every day: pages read (so streak is continuous)
+  // Fixed demo timeline:
+  // - last 2 years ending on 20.12.2025
+  // - every day has reading (continuous streak)
   // - overlaps: typically 2–3 books read in parallel
-  // - mix: short/medium/long books, some finished, some ongoing, plus at least one not-started book
+  // - mix: short/medium/long, some finished, some ongoing, at least one not started
 
-  const today = new Date();
-  const start = addDays(today, -Math.round(365.25 * 2)); // ~2 years
+  const end = new Date(2025, 11, 20); // 20.12.2025 (month is 0-based)
+  const start = addDays(end, -Math.round(365.25 * 2)); // ~2 years back from end
 
-  // Book catalog (varied lengths)
-  const catalog = [
-    mkBookShell("Die Verwandlung", "Franz Kafka", 90),
-    mkBookShell("Atomic Habits", "James Clear", 320),
-    mkBookShell("Siddhartha", "Hermann Hesse", 160),
-    mkBookShell("The Pragmatic Programmer", "Andrew Hunt & David Thomas", 352),
+  const books = [
+    mkBookShell("Der Mann ohne Eigenschaften", "Robert Musil", 1800), // ongoing anchor (daily)
+    mkBookShell("Gödel, Escher, Bach", "Douglas Hofstadter", 777),    // long, slow, overlapping
     mkBookShell("Sapiens", "Yuval Noah Harari", 560),
     mkBookShell("Thinking, Fast and Slow", "Daniel Kahneman", 499),
-    mkBookShell("Der Mann ohne Eigenschaften", "Robert Musil", 1800),
-    mkBookShell("Ulysses", "James Joyce", 900),
-    mkBookShell("Gödel, Escher, Bach", "Douglas Hofstadter", 777),
-    mkBookShell("Meditations", "Marcus Aurelius", 256),
-    mkBookShell("On Writing", "Stephen King", 288),
-    mkBookShell("Gedichte", "Rainer Maria Rilke", 200), // intentionally not started
+    mkBookShell("The Pragmatic Programmer", "Andrew Hunt & David Thomas", 352),
+    mkBookShell("Atomic Habits", "James Clear", 320),
     mkBookShell("Der Prozess", "Franz Kafka", 260),
     mkBookShell("1984", "George Orwell", 328),
+    mkBookShell("On Writing", "Stephen King", 288),
+    mkBookShell("Meditations", "Marcus Aurelius", 256),
+    mkBookShell("Siddhartha", "Hermann Hesse", 160),
+    mkBookShell("Die Verwandlung", "Franz Kafka", 90),
+    mkBookShell("Gedichte", "Rainer Maria Rilke", 200), // intentionally not started
+    mkBookShell("Ulysses", "James Joyce", 900), // ongoing/slow (optional overlap)
   ];
 
-  // The reading engine schedules daily totals and distributes across active books.
-  // Model: 3 active slots; when a book finishes, it is replaced immediately (keeps overlap).
-  // Additionally, some days have only 2 active books (still daily reading).
+  const byTitle = new Map(books.map(b => [b.title, b]));
 
-  const rng = mulberry32(987654321);
+  // Deterministic RNG for repeatable demo
+  const rng = mulberry32(20251220);
 
-  // Do not start "Gedichte" (keep empty history)
-  const neverStartTitle = "Gedichte";
+  // Reading configuration
+  const anchor = byTitle.get("Der Mann ohne Eigenschaften"); // always read daily (2–6 pages)
+  const longSlow = byTitle.get("Gödel, Escher, Bach");        // often read (1–4 pages)
+  const optionalOngoing = byTitle.get("Ulysses");             // sometimes read (0–6 pages)
 
-  // pick order excluding neverStart
-  const queue = catalog.filter(b => b.title !== neverStartTitle);
+  // Primary rotation queue (books that get finished sequentially)
+  const rotation = books
+    .filter(b => !["Der Mann ohne Eigenschaften", "Gödel, Escher, Bach", "Ulysses", "Gedichte"].includes(b.title));
 
-  // Active set: start with first 3
-  const active = [queue.shift(), queue.shift(), queue.shift()].filter(Boolean);
+  let primaryIdx = 0;
+  let secondaryIdx = 1;
 
-  // Some books should remain ongoing at end:
-  // We'll bias the engine to keep one long book not finished by limiting its daily share.
-  const keepOngoingTitles = new Set(["Der Mann ohne Eigenschaften", "Gödel, Escher, Bach"]);
-
-  // For each day, compute total pages (high reader) and split.
-  for (let d = new Date(start.getTime()); d <= today; d = addDays(d, 1)) {
-    const weekday = d.getDay(); // 0 Sun ... 6 Sat
-
-    // Total pages per day (high volume), slightly higher on weekends
-    const base = (weekday === 0 || weekday === 6) ? 75 : 55;
-    const totalToday = clampInt(Math.round(base + (rng() - 0.5) * 30), 25, 120);
-
-    // Usually 3 books, sometimes 2
-    const booksToday = rng() < 0.22 ? 2 : 3;
-
-    // Ensure we have enough active books
-    while (active.length < booksToday && queue.length) active.push(queue.shift());
-
-    // If active has more than booksToday, we still keep them active, but distribute among the first N randomly chosen
-    const candidates = shuffle([...active], rng).slice(0, Math.min(booksToday, active.length));
-
-    // weights: default equal, but keep ongoing books get smaller weight to avoid finishing
-    let weights = candidates.map(b => keepOngoingTitles.has(b.title) ? 0.6 : 1.0);
-    // normalize
-    const ws = weights.reduce((a, x) => a + x, 0) || 1;
-    weights = weights.map(w => w / ws);
-
-    // allocate pages with some randomness while preserving sum
-    let remaining = totalToday;
-    const alloc = [];
-    for (let i = 0; i < candidates.length; i++) {
-      const isLast = i === candidates.length - 1;
-      const target = isLast ? remaining : Math.max(1, Math.round(totalToday * weights[i] + (rng() - 0.5) * 10));
-      const give = isLast ? remaining : clampInt(target, 1, remaining - (candidates.length - i - 1));
-      alloc.push(give);
-      remaining -= give;
-    }
-
-    // Apply allocations
+  for (let d = new Date(start.getTime()); d <= end; d = addDays(d, 1)) {
     const key = dateKey(d);
-    for (let i = 0; i < candidates.length; i++) {
-      const book = candidates[i];
-      const pages = alloc[i];
 
-      const cur = latestPage(book);
-      if (cur >= book.totalPages) continue;
+    // Daily total pages (high reader). Weekends slightly higher.
+    const weekday = d.getDay();
+    const base = (weekday === 0 || weekday === 6) ? 85 : 65;
+    const total = clampInt(Math.round(base + (rng() - 0.5) * 28), 40, 125);
 
-      const next = Math.min(book.totalPages, cur + pages);
-      // Record daily "read up to" entry
-      book.history.push({ date: key, page: next });
+    // 1) Anchor progress: always 2–6 pages
+    addProgress(anchor, key, randInt(rng, 2, 6));
+
+    // 2) Long slow: most days 1–4 pages (keeps overlap, likely ongoing)
+    if (rng() < 0.88) addProgress(longSlow, key, randInt(rng, 1, 4));
+
+    // 3) Primary (finish sequentially), 25–90 pages/day
+    let primary = rotation[primaryIdx % rotation.length];
+    // If primary finished, advance until unfinished (or loop)
+    let guard = 0;
+    while (primary && latestPage(primary) >= primary.totalPages && guard < rotation.length) {
+      primaryIdx += 1;
+      primary = rotation[primaryIdx % rotation.length];
+      guard += 1;
+    }
+    if (primary && latestPage(primary) < primary.totalPages) {
+      addProgress(primary, key, randInt(rng, 25, 90));
     }
 
-    // Cleanup: sort and remove finished from active; replace with next in queue
-    for (let i = active.length - 1; i >= 0; i--) {
-      const b = active[i];
-      const cur = latestPage(b);
-      if (cur >= b.totalPages) {
-        // finished: keep it in catalog, remove from active
-        active.splice(i, 1);
-        // replace immediately to keep overlap
-        if (queue.length) active.push(queue.shift());
+    // 4) Secondary overlap: on many days read a second rotating book 10–40 pages
+    if (rng() < 0.72) {
+      let secondary = rotation[secondaryIdx % rotation.length];
+      guard = 0;
+      while (secondary && (secondary === primary || latestPage(secondary) >= secondary.totalPages) && guard < rotation.length) {
+        secondaryIdx += 1;
+        secondary = rotation[secondaryIdx % rotation.length];
+        guard += 1;
+      }
+      if (secondary && latestPage(secondary) < secondary.totalPages) {
+        addProgress(secondary, key, randInt(rng, 10, 40));
       }
     }
 
-    // Make sure histories stay sorted-ish (final sort after loop)
-  }
-
-  // Ensure at least one ongoing book remains ongoing by trimming last entries if needed
-  for (const b of catalog) {
-    if (!keepOngoingTitles.has(b.title)) continue;
-    const cur = latestPage(b);
-    if (cur >= b.totalPages) {
-      // Trim to ~70% to show ongoing
-      const target = Math.max(1, Math.floor(b.totalPages * 0.72));
-      // rebuild history down to target while keeping daily entries
-      const hist = [...b.history].sort((a, c) => a.date.localeCompare(c.date));
-      let prev = 0;
-      const newHist = [];
-      for (const e of hist) {
-        const clamped = Math.min(target, e.page);
-        if (clamped <= prev) continue;
-        newHist.push({ date: e.date, page: clamped });
-        prev = clamped;
-        if (prev >= target) break;
+    // 5) Occasionally add a third overlap (short burst) 6–18 pages
+    if (rng() < 0.22) {
+      const pick = rotation[Math.floor(rng() * rotation.length)];
+      if (pick && pick !== primary && latestPage(pick) < pick.totalPages) {
+        addProgress(pick, key, randInt(rng, 6, 18));
       }
-      b.history = newHist;
     }
+
+    // 6) Optional ongoing book (Ulysses): sometimes read 1–6 pages
+    if (rng() < 0.35) addProgress(optionalOngoing, key, randInt(rng, 1, 6));
+
+    // Ensure "Gedichte" stays not started (no entries)
+    byTitle.get("Gedichte").history.length = 0;
   }
 
-  // Keep "Gedichte" not started; ensure its history is empty
-  const never = catalog.find(b => b.title === neverStartTitle);
-  if (never) never.history = [];
-
-  // Final normalize: sort histories + unique by date (last wins)
-  for (const b of catalog) {
+  // Final normalize: unique by date per book (last wins), sorted
+  for (const b of books) {
     const map = new Map();
     for (const e of b.history) map.set(e.date, clampInt(e.page, 0, b.totalPages));
-    b.history = [...map.entries()].map(([date, page]) => ({ date, page })).sort((a, c) => a.date.localeCompare(c.date));
+    b.history = [...map.entries()]
+      .map(([date, page]) => ({ date, page }))
+      .sort((a, c) => a.date.localeCompare(c.date));
   }
 
-  return { version: 1, books: catalog };
+  return { version: 1, books };
 }
 
 function mkBookShell(title, author, totalPages) {
@@ -737,6 +704,15 @@ function mkBookShell(title, author, totalPages) {
   };
 }
 
+function addProgress(book, date, delta) {
+  if (!book) return;
+  const cur = latestPage(book);
+  if (cur >= book.totalPages) return;
+  const next = Math.min(book.totalPages, cur + clampInt(delta, 0, 1000));
+  // Always record a daily "read up to" entry
+  book.history.push({ date, page: next });
+}
+
 function mulberry32(a) {
   return function () {
     let t = a += 0x6D2B79F5;
@@ -746,12 +722,9 @@ function mulberry32(a) {
   };
 }
 
-function shuffle(arr, rng) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
+function randInt(rng, min, max) {
+  const r = rng();
+  return Math.floor(r * (max - min + 1)) + min;
 }
 
 function escapeHtml(s) {
