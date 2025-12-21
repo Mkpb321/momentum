@@ -12,14 +12,17 @@ let state = loadState();
    Hinweis: Standardmäßig werden Demo-Daten nur geladen, wenn noch keine Bücher existieren.
    Wenn du vorhandene Daten bewusst überschreiben willst: DEMO_OVERWRITE_EXISTING = true.
 ================================================================== */
-const ENABLE_DEMO_DATA = true;
-const DEMO_OVERWRITE_EXISTING = true;
+const ENABLE_DEMO_DATA = false;
+const DEMO_OVERWRITE_EXISTING = false;
 
 if (ENABLE_DEMO_DATA && (DEMO_OVERWRITE_EXISTING || state.books.length === 0)) {
   state = createDemoState();
   saveState(state);
 }
 /* =================== Ende DEMO-DATEN =================== */
+
+let showFinished = false;
+let searchQuery = "";
 
 let activeBookId = null;
 
@@ -47,6 +50,9 @@ const el = {
   bookList: document.getElementById("bookList"),
   emptyState: document.getElementById("emptyState"),
   booksMeta: document.getElementById("booksMeta"),
+
+  bookSearch: document.getElementById("bookSearch"),
+  btnToggleFinished: document.getElementById("btnToggleFinished"),
 
   kpiCurrentStreak: document.getElementById("kpiCurrentStreak"),
   kpiLongestStreak: document.getElementById("kpiLongestStreak"),
@@ -79,6 +85,18 @@ renderAll();
 function wireEvents() {
   el.btnAddBook.addEventListener("click", openAddBook);
   el.btnAddBookEmpty?.addEventListener("click", openAddBook);
+
+  // Books controls
+  el.bookSearch?.addEventListener("input", () => {
+    searchQuery = String(el.bookSearch.value || "").trim().toLowerCase();
+    renderBooks();
+  });
+
+  el.btnToggleFinished?.addEventListener("click", () => {
+    showFinished = !showFinished;
+    renderBooks();
+    updateBooksControls();
+  });
 
   el.btnCloseAddBook?.addEventListener("click", () => el.dlgAddBook.close());
   el.btnCancelAddBook?.addEventListener("click", () => el.dlgAddBook.close());
@@ -243,20 +261,55 @@ function save() {
 /* ------------------ rendering ------------------ */
 
 function renderAll() {
+  updateBooksControls();
   renderBooks();
   renderStatsAndKpis();
   renderCharts();
 }
 
+
+function updateBooksControls() {
+  if (el.btnToggleFinished) {
+    el.btnToggleFinished.textContent = showFinished ? "Fertige ausblenden" : "Fertige anzeigen";
+  }
+}
+
 function renderBooks() {
-  const books = state.books;
+  let books = [...state.books];
+
+  // Sort: zuletzt gelesen zuerst (nach letztem History-Datum), sonst nach Erstellungsdatum
+  books.sort((a, b) => {
+    const ad = lastEntryDateKey(a);
+    const bd = lastEntryDateKey(b);
+    if (ad !== bd) return bd.localeCompare(ad);
+    return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+  });
+
+  const totalCount = books.length;
+  const finishedCount = books.filter(isFinished).length;
+
+  if (!showFinished) {
+    books = books.filter(b => !isFinished(b));
+  }
+
+  if (searchQuery) {
+    books = books.filter(b => {
+      const t = `${b.title || ""} ${b.author || ""}`.toLowerCase();
+      return t.includes(searchQuery);
+    });
+  }
 
   el.booksMeta.textContent = books.length
     ? `${books.length} Buch${books.length === 1 ? "" : "er"}`
     : "—";
 
-  el.emptyState.hidden = books.length !== 0;
+  el.emptyState.hidden = totalCount !== 0;
   el.bookList.innerHTML = "";
+
+  if (totalCount > 0 && books.length === 0) {
+    el.bookList.innerHTML = `<div class="muted" style="padding:6px 4px;">Keine Treffer.</div>`;
+    return;
+  }
 
   for (const book of books) {
     const cur = latestPage(book);
@@ -449,6 +502,16 @@ function computeMonthTotals(dailyMap) {
 }
 
 /* ------------------ book helpers ------------------ */
+
+function isFinished(book) {
+  const cur = latestPage(book);
+  return book.totalPages > 0 && cur >= book.totalPages;
+}
+
+function lastEntryDateKey(book) {
+  if (!book.history?.length) return "0000-00-00";
+  return [...book.history].map(h => h.date).sort().at(-1) || "0000-00-00";
+}
 
 function getActiveBook() {
   return state.books.find(b => b.id === activeBookId) || null;

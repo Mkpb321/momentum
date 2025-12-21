@@ -17,14 +17,13 @@
         <div class="brand__mark" aria-hidden="true"></div>
         <div>
           <div class="brand__title">Troocker</div>
-          <div class="brand__subtitle">Reading, sauber getrackt</div>
-        </div>
+</div>
       </div>
 
       <div class="topbar__actions">
         <button class="btn btn--ghost" id="btnExport" title="Daten exportieren">Export</button>
         <button class="btn btn--ghost" id="btnImport" title="Daten importieren">Import</button>
-        <button class="btn" id="btnAddBook">Buch hinzufügen</button>
+        <button class="btn" id="btnAddBook">+</button>
       </div>
     </div>
   </header>
@@ -36,13 +35,32 @@
         <div class="panel__meta" id="streakMeta">—</div>
       </div>
 
-      <div class="kpis">
-        <div class="kpi">
-          <div class="kpi__label">Aktueller Streak</div>
-          <div class="kpi__value" id="kpiCurrentStreak">0</div>
-          <div class="kpi__hint">Tage in Folge gelesen</div>
+      <div class="hero">
+        <div class="hero__left">
+          <div class="kpi kpi--solo">
+            <div class="kpi__label">Aktueller Streak</div>
+            <div class="kpi__value" id="kpiCurrentStreak">0</div>
+            <div class="kpi__hint">Tage in Folge gelesen</div>
+          </div>
         </div>
 
+        <div class="hero__right">
+          <div class="chart chart--hero">
+            <div class="chart__head">
+              <div>
+                <div class="chart__title">Letzte 12 Tage</div>
+                <div class="chart__sub" id="subDays">—</div>
+              </div>
+              <div class="chip" id="sumDays">0</div>
+            </div>
+            <div class="chart__body" id="chartDays"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="kpis kpis--below">
         <div class="kpi">
           <div class="kpi__label">Längster Streak</div>
           <div class="kpi__value" id="kpiLongestStreak">0</div>
@@ -54,22 +72,17 @@
           <div class="kpi__value" id="kpiTodayPages">0</div>
           <div class="kpi__hint">Seiten (alle Bücher)</div>
         </div>
+
+        <div class="kpi kpi--ghost" aria-hidden="true">
+          <div class="kpi__label">—</div>
+          <div class="kpi__value">—</div>
+          <div class="kpi__hint">—</div>
+        </div>
       </div>
 
       <div class="divider"></div>
 
       <div class="charts">
-        <div class="chart">
-          <div class="chart__head">
-            <div>
-              <div class="chart__title">Letzte 12 Tage</div>
-              <div class="chart__sub" id="subDays">—</div>
-            </div>
-            <div class="chip" id="sumDays">0</div>
-          </div>
-          <div class="chart__body" id="chartDays"></div>
-        </div>
-
         <div class="chart">
           <div class="chart__head">
             <div>
@@ -93,11 +106,16 @@
         </div>
       </div>
     </section>
-
-    <section class="panel">
-      <div class="panel__head">
-        <h2>Bücher</h2>
-        <div class="panel__meta" id="booksMeta">—</div>
+<section class="panel">
+      <div class="panel__head panel__head--books">
+        <div class="panel__headleft">
+          <h2>Bücher</h2>
+          <div class="panel__meta" id="booksMeta">—</div>
+        </div>
+        <div class="panel__headright">
+          <input class="search" id="bookSearch" type="search" placeholder="Suchen…" autocomplete="off" />
+          <button class="btn btn--ghost" id="btnToggleFinished" type="button">Fertige anzeigen</button>
+        </div>
       </div>
 
       <div id="bookList" class="booklist" aria-live="polite"></div>
@@ -107,7 +125,7 @@
         <div class="empty__text">
           Füge ein Buch hinzu und trage deinen Fortschritt ein. Die Grafiken und der Streak bauen sich automatisch auf.
         </div>
-        <button class="btn" id="btnAddBookEmpty">Buch hinzufügen</button>
+        <button class="btn" id="btnAddBookEmpty">+</button>
       </div>
     </section>
   </main>
