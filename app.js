@@ -1,9 +1,26 @@
 // app.js
 import { loadState, saveState, exportState, importState } from "./storage.js";
-import { renderBarChart } from "./charts.js";
+import { renderLineChart } from "./charts.js";
 
 /* ------------------ state ------------------ */
 let state = loadState();
+
+/* ===================== DEMO-DATEN (optional) =====================
+   Für Probe-Daten (mehrere Bücher + Leseverlauf über ~5 Jahre):
+   1) ENABLE_DEMO_DATA auf true setzen und Seite neu laden.
+   2) Danach wieder auf false setzen, damit es nicht jedes Mal überschreibt.
+   Hinweis: Standardmäßig werden Demo-Daten nur geladen, wenn noch keine Bücher existieren.
+   Wenn du vorhandene Daten bewusst überschreiben willst: DEMO_OVERWRITE_EXISTING = true.
+================================================================== */
+const ENABLE_DEMO_DATA = true;
+const DEMO_OVERWRITE_EXISTING = true;
+
+if (ENABLE_DEMO_DATA && (DEMO_OVERWRITE_EXISTING || state.books.length === 0)) {
+  state = createDemoState();
+  saveState(state);
+}
+/* =================== Ende DEMO-DATEN =================== */
+
 let activeBookId = null;
 
 /* ------------------ DOM ------------------ */
@@ -12,6 +29,8 @@ const el = {
   btnAddBookEmpty: document.getElementById("btnAddBookEmpty"),
   dlgAddBook: document.getElementById("dlgAddBook"),
   formAddBook: document.getElementById("formAddBook"),
+  btnCloseAddBook: document.getElementById("btnCloseAddBook"),
+  btnCancelAddBook: document.getElementById("btnCancelAddBook"),
 
   dlgBook: document.getElementById("dlgBook"),
   formBook: document.getElementById("formBook"),
@@ -23,6 +42,8 @@ const el = {
   inpPage: document.getElementById("inpPage"),
   historyList: document.getElementById("historyList"),
   btnDeleteBook: document.getElementById("btnDeleteBook"),
+  btnCloseBookX: document.getElementById("btnCloseBookX"),
+  btnCloseBook: document.getElementById("btnCloseBook"),
 
   bookList: document.getElementById("bookList"),
   emptyState: document.getElementById("emptyState"),
@@ -59,6 +80,12 @@ renderAll();
 function wireEvents() {
   el.btnAddBook.addEventListener("click", openAddBook);
   el.btnAddBookEmpty?.addEventListener("click", openAddBook);
+
+  el.btnCloseAddBook?.addEventListener("click", () => el.dlgAddBook.close());
+  el.btnCancelAddBook?.addEventListener("click", () => el.dlgAddBook.close());
+
+  el.btnCloseBookX?.addEventListener("click", () => el.dlgBook.close());
+  el.btnCloseBook?.addEventListener("click", () => el.dlgBook.close());
 
   el.formAddBook.addEventListener("submit", (ev) => {
     ev.preventDefault();
@@ -335,9 +362,9 @@ function renderCharts() {
   el.sumWeeks.textContent = `${sum(weekValues)} Seiten`;
   el.sumMonths.textContent = `${sum(monthValues)} Seiten`;
 
-  renderBarChart(el.chartDays, days.map(d => d.label), days.map(d => d.val));
-  renderBarChart(el.chartWeeks, weekLabels, weekValues);
-  renderBarChart(el.chartMonths, monthLabels, monthValues);
+  renderLineChart(el.chartDays, days.map(d => d.label), days.map(d => d.val));
+  renderLineChart(el.chartWeeks, weekLabels, weekValues);
+  renderLineChart(el.chartMonths, monthLabels, monthValues);
 }
 
 /* ------------------ computation ------------------ */
@@ -551,6 +578,143 @@ function debounce(fn, wait) {
     clearTimeout(t);
     t = setTimeout(() => fn(...args), wait);
   };
+}
+
+/* ------------------ demo data ------------------ */
+
+function createDemoState() {
+  const now = new Date();
+  const fiveYearsAgo = addDays(now, -Math.round(365.25 * 5));
+
+  const books = [
+    // Finished long ago
+    mkBook("Krieg und Frieden", "Leo Tolstoi", 1400, fiveYearsAgo, addDays(fiveYearsAgo, 210), 1400, 3, 25, 70, 101),
+    // Finished ~3.8 years ago
+    mkBook("Sapiens", "Yuval Noah Harari", 560, addDays(fiveYearsAgo, 330), addDays(fiveYearsAgo, 420), 560, 4, 20, 55, 202),
+    // Ongoing, high volume, recent activity
+    mkBook("Der Mann ohne Eigenschaften", "Robert Musil", 1800, addDays(fiveYearsAgo, 950), now, 920, 5, 15, 60, 303),
+    // Finished within last year
+    mkBook("Atomic Habits", "James Clear", 320, addDays(now, -420), addDays(now, -340), 320, 5, 10, 45, 404),
+    // Started, paused months ago
+    mkBook("Ulysses", "James Joyce", 900, addDays(now, -520), addDays(now, -220), 160, 3, 8, 35, 505),
+    // Ongoing, very recent start
+    mkBook("The Pragmatic Programmer", "Andrew Hunt & David Thomas", 352, addDays(now, -75), now, 210, 6, 8, 40, 606),
+    // Not started
+    { id: crypto.randomUUID(), title: "Gedichte", author: "Rainer Maria Rilke", totalPages: 200, createdAt: new Date().toISOString(), history: [] },
+    // Finished recently, short
+    mkBook("Die Verwandlung", "Franz Kafka", 90, addDays(now, -120), addDays(now, -105), 90, 6, 6, 18, 707),
+  ];
+
+  return { version: 1, books };
+}
+
+function mkBook(title, author, totalPages, startDate, endDate, targetEndPage, sessionsPerWeek, minPages, maxPages, seed) {
+  const history = generateHistory({
+    startDate,
+    endDate,
+    totalPages,
+    targetEndPage,
+    sessionsPerWeek,
+    minPages,
+    maxPages,
+    seed
+  });
+
+  return {
+    id: crypto.randomUUID(),
+    title,
+    author,
+    totalPages,
+    createdAt: new Date().toISOString(),
+    history
+  };
+}
+
+function generateHistory({ startDate, endDate, totalPages, targetEndPage, sessionsPerWeek, minPages, maxPages, seed }) {
+  const rng = mulberry32(seed);
+  const startKey = dateKey(startDate);
+  const endKey = dateKey(endDate);
+
+  // Convert to dates at midnight
+  let cursor = parseDate(startKey);
+  const end = parseDate(endKey);
+
+  let page = 0;
+  const history = [];
+
+  // reading probability per day
+  // sessionsPerWeek ~ 0..7 -> convert to probability
+  const p = Math.min(0.95, Math.max(0.05, sessionsPerWeek / 7));
+
+  // occasional breaks: create "quiet weeks" every few months
+  let quietUntil = null;
+
+  while (cursor <= end && page < Math.min(totalPages, targetEndPage)) {
+    const key = dateKey(cursor);
+
+    // quiet streak logic
+    if (!quietUntil && rng() < 0.003) {
+      // pause 7-21 days
+      quietUntil = addDays(cursor, randInt(rng, 7, 21));
+    }
+    if (quietUntil && cursor <= quietUntil) {
+      cursor = addDays(cursor, 1);
+      continue;
+    }
+    if (quietUntil && cursor > quietUntil) quietUntil = null;
+
+    // read today?
+    const readToday = rng() < p;
+
+    if (readToday) {
+      const delta = randInt(rng, minPages, maxPages);
+      page = Math.min(Math.min(totalPages, targetEndPage), page + delta);
+      history.push({ date: key, page });
+    } else {
+      // sometimes still create an "entry" without progress? no; we keep history sparse.
+    }
+
+    cursor = addDays(cursor, 1);
+  }
+
+  // Guarantee at least one entry close to today for ongoing books
+  // (only if the book is not finished and endDate is ~now)
+  const isOngoing = targetEndPage < totalPages && daysBetween(parseDate(dateKey(endDate)), parseDate(dateKey(new Date()))) <= 2;
+  if (isOngoing) {
+    // ensure at least 4 reading days in last 12 days
+    const today = new Date();
+    let ensured = 0;
+    for (let i = 0; i < 12; i++) {
+      const d = addDays(today, -i);
+      const k = dateKey(d);
+      const already = history.find(h => h.date === k);
+      if (already) continue;
+      if (ensured >= 4) break;
+      if (rng() < 0.6) {
+        const delta = randInt(rng, Math.max(4, Math.floor(minPages / 2)), Math.max(10, Math.floor(maxPages / 2)));
+        page = Math.min(Math.min(totalPages, targetEndPage), page + delta);
+        history.push({ date: k, page });
+        ensured += 1;
+      }
+    }
+    history.sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  return history.sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function mulberry32(a) {
+  return function () {
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function randInt(rng, min, max) {
+  const r = rng();
+  return Math.floor(r * (max - min + 1)) + min;
 }
 
 function escapeHtml(s) {

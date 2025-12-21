@@ -398,3 +398,15 @@ svg.chartsvg{
   fill: var(--muted);
   font-size: 10px;
 }
+
+.chartline{
+  fill: none;
+  stroke: var(--bar);
+  stroke-width: 2;
+}
+.chartdot{
+  fill: var(--bar);
+}
+.chartdot--zero{
+  fill: var(--bar-muted);
+}

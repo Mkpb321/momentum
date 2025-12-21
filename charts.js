@@ -1,61 +1,69 @@
 // charts.js
-export function renderBarChart(containerEl, labels, values, opts = {}) {
+export function renderLineChart(containerEl, labels, values, opts = {}) {
   const height = opts.height ?? 110;
-  const padL = 6, padR = 6, padT = 10, padB = 22;
+  const padL = 6, padR = 6, padT = 12, padB = 24;
+
   const w = containerEl.clientWidth || 640;
   const innerW = Math.max(10, w - padL - padR);
   const innerH = Math.max(10, height - padT - padB);
 
   const maxV = Math.max(1, ...values);
-  const barGap = 3;
-  const barW = Math.max(2, (innerW - barGap * (values.length - 1)) / values.length);
+  const n = Math.max(1, values.length);
+
+  const xFor = (i) => padL + (n === 1 ? innerW / 2 : (i * innerW) / (n - 1));
+  const yFor = (v) => padT + (innerH - (v / maxV) * innerH);
 
   const svgNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNS, "svg");
   svg.setAttribute("class", "chartsvg");
   svg.setAttribute("viewBox", `0 0 ${w} ${height}`);
 
-  // grid line at bottom
-  const grid = document.createElementNS(svgNS, "line");
-  grid.setAttribute("x1", String(padL));
-  grid.setAttribute("x2", String(w - padR));
-  grid.setAttribute("y1", String(padT + innerH));
-  grid.setAttribute("y2", String(padT + innerH));
-  grid.setAttribute("class", "chartgrid");
-  svg.appendChild(grid);
+  // grid lines
+  const yBottom = padT + innerH;
+  const yMid = padT + innerH * 0.5;
 
-  // bars
-  values.forEach((v, i) => {
-    const x = padL + i * (barW + barGap);
-    const h = Math.round((v / maxV) * innerH);
-    const y = padT + (innerH - h);
-
-    const rect = document.createElementNS(svgNS, "rect");
-    rect.setAttribute("x", String(x));
-    rect.setAttribute("y", String(y));
-    rect.setAttribute("width", String(barW));
-    rect.setAttribute("height", String(h));
-    rect.setAttribute("rx", "3");
-    rect.setAttribute("class", v === 0 ? "chartbar chartbar--zero" : "chartbar");
-
-    // tooltip
-    const title = document.createElementNS(svgNS, "title");
-    title.textContent = `${labels[i]}: ${v} Seiten`;
-    rect.appendChild(title);
-
-    svg.appendChild(rect);
+  [yBottom, yMid].forEach((yy) => {
+    const grid = document.createElementNS(svgNS, "line");
+    grid.setAttribute("x1", String(padL));
+    grid.setAttribute("x2", String(w - padR));
+    grid.setAttribute("y1", String(yy));
+    grid.setAttribute("y2", String(yy));
+    grid.setAttribute("class", "chartgrid");
+    svg.appendChild(grid);
   });
 
-  // sparse x labels: show 4-6 labels depending on length
+  // polyline points
+  const pts = values.map((v, i) => `${xFor(i).toFixed(2)},${yFor(v).toFixed(2)}`).join(" ");
+  const pl = document.createElementNS(svgNS, "polyline");
+  pl.setAttribute("points", pts);
+  pl.setAttribute("class", "chartline");
+  pl.setAttribute("stroke-linecap", "round");
+  pl.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(pl);
+
+  // dots + tooltips
+  values.forEach((v, i) => {
+    const c = document.createElementNS(svgNS, "circle");
+    c.setAttribute("cx", String(xFor(i)));
+    c.setAttribute("cy", String(yFor(v)));
+    c.setAttribute("r", "3.2");
+    c.setAttribute("class", v === 0 ? "chartdot chartdot--zero" : "chartdot");
+
+    const title = document.createElementNS(svgNS, "title");
+    title.textContent = `${labels[i]}: ${v} Seiten`;
+    c.appendChild(title);
+
+    svg.appendChild(c);
+  });
+
+  // x labels (sparse)
   const labelEvery = labels.length <= 12 ? 3 : Math.ceil(labels.length / 6);
   labels.forEach((lab, i) => {
     if (i % labelEvery !== 0 && i !== labels.length - 1) return;
-    const x = padL + i * (barW + barGap) + barW / 2;
-    const y = padT + innerH + 14;
 
     const t = document.createElementNS(svgNS, "text");
-    t.setAttribute("x", String(x));
-    t.setAttribute("y", String(y));
+    t.setAttribute("x", String(xFor(i)));
+    t.setAttribute("y", String(padT + innerH + 16));
     t.setAttribute("text-anchor", "middle");
     t.setAttribute("class", "chartlabel");
     t.textContent = lab;
