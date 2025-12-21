@@ -1,4 +1,34 @@
 // charts.js
+// Minimal, dependency-free SVG charts.
+// Smooth line: Catmull–Rom spline converted to cubic Bezier segments.
+
+function catmullRomToBezier(points) {
+  if (points.length < 2) return "";
+  const p = points;
+
+  const d = [];
+  d.push(`M ${p[0].x.toFixed(2)} ${p[0].y.toFixed(2)}`);
+
+  for (let i = 0; i < p.length - 1; i++) {
+    const p0 = p[Math.max(0, i - 1)];
+    const p1 = p[i];
+    const p2 = p[i + 1];
+    const p3 = p[Math.min(p.length - 1, i + 2)];
+
+    // Catmull–Rom to Bezier conversion
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+
+    d.push(
+      `C ${c1x.toFixed(2)} ${c1y.toFixed(2)}, ${c2x.toFixed(2)} ${c2y.toFixed(2)}, ${p2.x.toFixed(2)} ${p2.y.toFixed(2)}`
+    );
+  }
+
+  return d.join(" ");
+}
+
 export function renderLineChart(containerEl, labels, values, opts = {}) {
   const height = opts.height ?? 110;
   const padL = 6, padR = 6, padT = 12, padB = 24;
@@ -18,7 +48,7 @@ export function renderLineChart(containerEl, labels, values, opts = {}) {
   svg.setAttribute("class", "chartsvg");
   svg.setAttribute("viewBox", `0 0 ${w} ${height}`);
 
-  // grid lines
+  // grid lines (subtle)
   const yBottom = padT + innerH;
   const yMid = padT + innerH * 0.5;
 
@@ -32,25 +62,28 @@ export function renderLineChart(containerEl, labels, values, opts = {}) {
     svg.appendChild(grid);
   });
 
-  // polyline points
-  const pts = values.map((v, i) => `${xFor(i).toFixed(2)},${yFor(v).toFixed(2)}`).join(" ");
-  const pl = document.createElementNS(svgNS, "polyline");
-  pl.setAttribute("points", pts);
-  pl.setAttribute("class", "chartline");
-  pl.setAttribute("stroke-linecap", "round");
-  pl.setAttribute("stroke-linejoin", "round");
-  svg.appendChild(pl);
+  // Build points
+  const pts = values.map((v, i) => ({ x: xFor(i), y: yFor(v), v, label: labels[i] }));
+  const pathD = catmullRomToBezier(pts);
 
-  // dots + tooltips
-  values.forEach((v, i) => {
+  // Line path
+  const path = document.createElementNS(svgNS, "path");
+  path.setAttribute("d", pathD || "");
+  path.setAttribute("class", "chartline");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(path);
+
+  // Dots + tooltips
+  pts.forEach((p, i) => {
     const c = document.createElementNS(svgNS, "circle");
-    c.setAttribute("cx", String(xFor(i)));
-    c.setAttribute("cy", String(yFor(v)));
+    c.setAttribute("cx", String(p.x));
+    c.setAttribute("cy", String(p.y));
     c.setAttribute("r", "3.2");
-    c.setAttribute("class", v === 0 ? "chartdot chartdot--zero" : "chartdot");
+    c.setAttribute("class", p.v === 0 ? "chartdot chartdot--zero" : "chartdot");
 
     const title = document.createElementNS(svgNS, "title");
-    title.textContent = `${labels[i]}: ${v} Seiten`;
+    title.textContent = `${p.label}: ${p.v} Seiten`;
     c.appendChild(title);
 
     svg.appendChild(c);
