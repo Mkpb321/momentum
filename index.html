@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Troocker</title>
+  <title>Momentum</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
       <div class="brand">
         <div class="brand__mark" aria-hidden="true"></div>
         <div>
-          <div class="brand__title">Troocker</div>
+          <div class="brand__title">Momentum</div>
 </div>
       </div>
 
@@ -31,30 +31,25 @@
   <main class="wrap grid">
     <section class="panel">
       <div class="panel__head">
-        <h2>Momentum</h2>
+        <h2>Übersicht</h2>
         <div class="panel__meta" id="streakMeta">—</div>
       </div>
 
-      <div class="hero">
-        <div class="hero__left">
-          <div class="kpi kpi--solo">
-            <div class="kpi__label">Aktueller Streak</div>
-            <div class="kpi__value" id="kpiCurrentStreak">0</div>
-            <div class="kpi__hint">Tage in Folge gelesen</div>
-          </div>
+      <div class="heroCombined">
+        <div class="heroCombined__streak">
+          <div class="heroCombined__label">Aktueller Streak</div>
+          <div class="heroCombined__value" id="kpiCurrentStreak">0</div>
         </div>
 
-        <div class="hero__right">
-          <div class="chart chart--hero">
-            <div class="chart__head">
-              <div>
-                <div class="chart__title">Letzte 12 Tage</div>
-                <div class="chart__sub" id="subDays">—</div>
-              </div>
-              <div class="chip" id="sumDays">0</div>
+        <div class="chart chart--hero">
+          <div class="chart__head">
+            <div>
+              <div class="chart__title">Letzte 12 Tage</div>
+              <div class="chart__sub" id="subDays">—</div>
             </div>
-            <div class="chart__body" id="chartDays"></div>
+            <div class="chip" id="sumDays">0</div>
           </div>
+          <div class="chart__body" id="chartDays"></div>
         </div>
       </div>
 
@@ -68,9 +63,9 @@
         </div>
 
         <div class="kpi">
-          <div class="kpi__label">Heute</div>
+          <div class="kpi__label">Seiten Heute</div>
           <div class="kpi__value" id="kpiTodayPages">0</div>
-          <div class="kpi__hint">Seiten (alle Bücher)</div>
+          <div class="kpi__hint">&nbsp;</div>
         </div>
 
         <div class="kpi kpi--ghost" aria-hidden="true">
@@ -83,6 +78,17 @@
       <div class="divider"></div>
 
       <div class="charts">
+        <div class="chart">
+          <div class="chart__head">
+            <div>
+              <div class="chart__title">Letzte 12 Tage</div>
+              <div class="chart__sub" id="subDays2">—</div>
+            </div>
+            <div class="chip" id="sumDays2">0</div>
+          </div>
+          <div class="chart__body" id="chartDays2"></div>
+        </div>
+
         <div class="chart">
           <div class="chart__head">
             <div>
@@ -155,6 +161,11 @@
         <label class="field">
           <span>Gesamtseiten</span>
           <input required name="totalPages" inputmode="numeric" type="number" min="1" step="1" placeholder="z.B. 220" />
+        </label>
+
+        <label class="field">
+          <span>Bereits gelesen (optional)</span>
+          <input name="initialPages" inputmode="numeric" type="number" min="0" step="1" placeholder="z.B. 50" />
         </label>
       </div>
 

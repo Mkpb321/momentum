@@ -48,6 +48,7 @@ function normalizeState(s) {
       title: String(b.title || "Ohne Titel"),
       author: String(b.author || ""),
       totalPages: clampInt(b.totalPages, 1, 100000),
+      initialPage: clampInt(b.initialPage ?? b.initialPages ?? 0, 0, clampInt(b.totalPages, 1, 100000)),
       createdAt: String(b.createdAt || new Date().toISOString()),
       history: normalizeHistory(b.history)
     }));

@@ -61,12 +61,15 @@ const el = {
   streakMeta: document.getElementById("streakMeta"),
 
   chartDays: document.getElementById("chartDays"),
+  chartDays2: document.getElementById("chartDays2"),
   chartWeeks: document.getElementById("chartWeeks"),
   chartMonths: document.getElementById("chartMonths"),
   subDays: document.getElementById("subDays"),
+  subDays2: document.getElementById("subDays2"),
   subWeeks: document.getElementById("subWeeks"),
   subMonths: document.getElementById("subMonths"),
   sumDays: document.getElementById("sumDays"),
+  sumDays2: document.getElementById("sumDays2"),
   sumWeeks: document.getElementById("sumWeeks"),
   sumMonths: document.getElementById("sumMonths"),
 
@@ -108,12 +111,13 @@ function wireEvents() {
     const title = String(fd.get("title") || "").trim();
     const author = String(fd.get("author") || "").trim();
     const totalPages = clampInt(fd.get("totalPages"), 1, 100000);
+    const initialPage = clampInt(fd.get("initialPages"), 0, totalPages);
 
     if (!title) {
       toast("Titel fehlt.");
       return;
     }
-    addBook({ title, author, totalPages });
+    addBook({ title, author, totalPages, initialPage });
     el.formAddBook.reset();
     el.dlgAddBook.close();
   });
@@ -204,12 +208,13 @@ function openAddBook() {
 
 /* ------------------ actions ------------------ */
 
-function addBook({ title, author, totalPages }) {
+function addBook({ title, author, totalPages, initialPage }) {
   state.books.unshift({
     id: crypto.randomUUID(),
     title,
     author,
     totalPages,
+    initialPage: clampInt(initialPage, 0, totalPages),
     createdAt: new Date().toISOString(),
     history: []
   });
@@ -359,10 +364,11 @@ function renderStatsAndKpis() {
   el.kpiCurrentStreak.textContent = String(currentStreak);
   el.kpiLongestStreak.textContent = String(longestStreak);
 
+  // Hint text intentionally minimal.
   el.kpiLongestHint.textContent =
-    currentStreak > 0 && currentStreak === longestStreak
+    (currentStreak > 0 && currentStreak === longestStreak)
       ? "Du bist gerade am längsten Streak."
-      : (longestStreak > 0 ? "Bestleistung bisher." : "Noch keine Serie.");
+      : (longestStreak > 0 ? "" : "Noch keine Serie.");
 
   el.streakMeta.textContent =
     todayPages > 0 ? "Heute: eingetragen." : "Heute: noch nichts eingetragen.";
@@ -403,16 +409,21 @@ function renderCharts() {
   }
 
   // captions and sums
-  el.subDays.textContent = `${formatDateShort(days[0].key)} – ${formatDateShort(days[days.length - 1].key)}`;
+  const daysRange = `${formatDateShort(days[0].key)} – ${formatDateShort(days[days.length - 1].key)}`;
+  el.subDays.textContent = daysRange;
+  if (el.subDays2) el.subDays2.textContent = daysRange;
   el.subWeeks.textContent = `Wochenstart (Mo) – letzte 12`;
   el.subMonths.textContent = `Kalendermonate – letzte 12`;
 
   const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-  el.sumDays.textContent = `${sum(days.map(x => x.val))} Seiten`;
+  const sumDays = `${sum(days.map(x => x.val))} Seiten`;
+  el.sumDays.textContent = sumDays;
+  if (el.sumDays2) el.sumDays2.textContent = sumDays;
   el.sumWeeks.textContent = `${sum(weekValues)} Seiten`;
   el.sumMonths.textContent = `${sum(monthValues)} Seiten`;
 
   renderLineChart(el.chartDays, days.map(d => d.label), days.map(d => d.val));
+  if (el.chartDays2) renderLineChart(el.chartDays2, days.map(d => d.label), days.map(d => d.val));
   renderLineChart(el.chartWeeks, weekLabels, weekValues);
   renderLineChart(el.chartMonths, monthLabels, monthValues);
 }
@@ -425,7 +436,7 @@ function computeDailyPages(books) {
 
   for (const book of books) {
     const hist = [...book.history].sort((a, b) => a.date.localeCompare(b.date));
-    let prev = 0;
+    let prev = clampInt(book.initialPage ?? 0, 0, book.totalPages);
     for (const entry of hist) {
       const page = clampInt(entry.page, 0, book.totalPages);
       const delta = page - prev;
@@ -518,13 +529,15 @@ function getActiveBook() {
 }
 
 function latestPage(book) {
-  if (!book.history?.length) return 0;
-  return Math.max(...book.history.map(h => clampInt(h.page, 0, book.totalPages)));
+  const base = clampInt(book.initialPage ?? 0, 0, book.totalPages);
+  if (!book.history?.length) return base;
+  return Math.max(base, ...book.history.map(h => clampInt(h.page, 0, book.totalPages)));
 }
 
 function latestPageBefore(book, dateKeyStr) {
+  const base = clampInt(book.initialPage ?? 0, 0, book.totalPages);
   const hist = [...book.history].filter(h => h.date < dateKeyStr).sort((a, b) => b.date.localeCompare(a.date));
-  return hist.length ? clampInt(hist[0].page, 0, book.totalPages) : 0;
+  return hist.length ? Math.max(base, clampInt(hist[0].page, 0, book.totalPages)) : base;
 }
 
 function upsertHistory(book, date, page) {
@@ -762,6 +775,7 @@ function mkBookShell(title, author, totalPages) {
     title,
     author,
     totalPages,
+    initialPage: 0,
     createdAt: new Date().toISOString(),
     history: []
   };

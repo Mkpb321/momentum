@@ -412,7 +412,7 @@ svg.chartsvg{
 }
 
 
-/* --- Troocker layout refinements --- */
+/* --- Momentum layout refinements --- */
 .topbar__inner{ padding-top:10px; padding-bottom:10px; }
 .wrap{ padding-top:16px; padding-bottom:16px; }
 .brand__title{ font-size: 14px; }
@@ -424,17 +424,28 @@ svg.chartsvg{
   #btnAddBook{ width: 40px; padding: 10px 0; text-align:center; }
 }
 
-/* Hero row: streak + 12 days chart first */
-.hero{
-  display:grid;
-  grid-template-columns: 220px 1fr;
-  gap:12px;
-  align-items:stretch;
+/* Hero: streak integrated with 12-day chart (single element) */
+.heroCombined{
+  position: relative;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px;
 }
-@media (max-width: 820px){
-  .hero{ grid-template-columns: 1fr; }
+.heroCombined__streak{
+  position: absolute;
+  left: 12px;
+  top: 12px;
+  z-index: 2;
+  background: rgba(255,255,255,.92);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.05);
 }
-.kpi--solo{ height: 100%; display:flex; flex-direction:column; justify-content:center; }
+.heroCombined__label{ color: var(--muted); font-size: 12px; }
+.heroCombined__value{ font-size: 22px; font-weight: 600; margin-top: 4px; }
+
+.chart--hero{ padding-top: 34px; }
 .kpis--below{ grid-template-columns: repeat(2, 1fr); }
 @media (max-width: 680px){
   .kpis--below{ grid-template-columns: 1fr; }
