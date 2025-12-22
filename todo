@@ -37,6 +37,31 @@ wieviel insgesammt bücher (abgeschlossene)
 
 
 
+---------------------------
+
+Ich stelle dir den vollständigen Quellcode der Anwendung zur Verfügung. Bitte nimm ausschließlich die unten beschriebenen Änderungen am bestehenden Code vor und erhalte dabei die vorhandene Struktur und Funktionalität, sofern sie nicht explizit geändert werden soll.
+
+Nach Umsetzung der Änderungen erwarte ich:
+
+Alle geänderten Dateien vollständig, ohne Auslassungen oder Platzhalter, gebündelt als ZIP-Download.
+
+Eine einzeilige Commit-Message, die die Änderungen präzise zusammenfasst.
+
+Eine klare, strukturierte Erklärung, welche Änderungen vorgenommen wurden und warum.
+
+Gib keine zusätzlichen Dateien zurück und nimm keine weiteren Optimierungen oder Refactorings vor, die nicht ausdrücklich gefordert sind.
+
+Änderungen:
+…
+
+
+--------------------------
+Ich möchte, dass du die nachfolgend beschriebenen Änderungen am bestehenden Code vornimmst. Der vollständige Quellcode der Anwendung ist bereits beigefügt. Bitte implementiere alle Änderungen korrekt und konsistent und gib mir anschließend sämtliche geänderten Dateien vollständig als ZIP-Download zurück. Zusätzlich erwarte ich eine prägnante, einzeilige Commit-Message sowie eine nachvollziehbare Erklärung der vorgenommenen Änderungen.
+
+Änderungen:
+…
+
+
 
 
 
