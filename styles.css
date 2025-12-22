@@ -517,3 +517,38 @@ body{ overflow-x:hidden; }
 /* Prevent iOS zoom on focus: keep inputs >= 16px */
 .field input,
 .bookdetail__row input{ font-size: 16px; }
+
+
+/* ------------------ auth (firebase) ------------------ */
+
+.authscreen{
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 20px;
+  background: var(--bg);
+  z-index: 50;
+}
+
+.authpanel{
+  width: min(520px, 100%);
+}
+
+.hint{
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.hint--error{
+  color: var(--danger);
+}
+
+#chipUser{
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

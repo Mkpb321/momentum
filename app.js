@@ -1,7 +1,25 @@
 // app.js
-// Entry point: state + DOM wiring + persistence hooks.
+// Entry point: auth-gated UI + state + Firestore persistence.
 
-import { loadState, saveState, exportState, importState } from "./storage.js";
+import {
+  defaultState,
+  exportState,
+  importState,
+  loadState,
+  upsertBook,
+  deleteBook,
+  replaceAllBooks,
+} from "./storage.js";
+
+import {
+  getServices,
+  getEnv,
+  toggleEnv,
+  watchAuth,
+  loginWithEmailPassword,
+  logout,
+} from "./firebase.js";
+
 import {
   clampInt,
   createDemoState,
@@ -12,6 +30,7 @@ import {
   todayKey,
   upsertHistory,
 } from "./app.logic.js";
+
 import {
   renderAll,
   renderBooks,
@@ -21,32 +40,50 @@ import {
 
 /* ------------------ state ------------------ */
 
-let state = loadState();
+let state = defaultState();
+
+let showFinished = false;
+let searchQuery = "";
+let activeBookId = null;
 
 /* ===================== DEMO-DATEN (optional) =====================
-   Für Probe-Daten (mehrere Bücher + Leseverlauf über ~5 Jahre):
-   1) ENABLE_DEMO_DATA auf true setzen und Seite neu laden.
+   Für Probe-Daten (mehrere Bücher + Leseverlauf):
+   1) ENABLE__DATA auf true setzen und Seite neu laden (in DEV).
    2) Danach wieder auf false setzen, damit es nicht jedes Mal überschreibt.
    Hinweis: Standardmäßig werden Demo-Daten nur geladen, wenn noch keine Bücher existieren.
    Wenn du vorhandene Daten bewusst überschreiben willst: DEMO_OVERWRITE_EXISTING = true.
 ================================================================== */
-const ENABLE_DEMO_DATA = false;
+const ENABLE_DEMO_DATA = true;
 const DEMO_OVERWRITE_EXISTING = false;
-
-if (ENABLE_DEMO_DATA && (DEMO_OVERWRITE_EXISTING || state.books.length === 0)) {
-  state = createDemoState();
-  saveState(state);
-}
+const DEMO_ONLY_IN_DEV = true;
 /* =================== Ende DEMO-DATEN =================== */
 
-let showFinished = false;
-let searchQuery = "";
+/* ------------------ Firebase ctx ------------------ */
 
-let activeBookId = null;
+let ctx = null; // { env, app, auth, db, user }
 
 /* ------------------ DOM ------------------ */
 
 const el = {
+  // auth UI
+  authScreen: document.getElementById("authScreen"),
+  formLogin: document.getElementById("formLogin"),
+  btnLogin: document.getElementById("btnLogin"),
+  authError: document.getElementById("authError"),
+  authEnvMeta: document.getElementById("authEnvMeta"),
+  btnSwitchEnvAuth: document.getElementById("btnSwitchEnvAuth"),
+
+  // topbar
+  signedInActions: document.getElementById("signedInActions"),
+  btnSwitchEnv: document.getElementById("btnSwitchEnv"),
+  envLabel: document.getElementById("envLabel"),
+  chipUser: document.getElementById("chipUser"),
+  btnLogout: document.getElementById("btnLogout"),
+
+  // app shell
+  appMain: document.getElementById("appMain"),
+
+  // existing app elements
   btnAddBook: document.getElementById("btnAddBook"),
   btnAddBookEmpty: document.getElementById("btnAddBookEmpty"),
   dlgAddBook: document.getElementById("dlgAddBook"),
@@ -80,18 +117,8 @@ const el = {
   kpiLongestHint: document.getElementById("kpiLongestHint"),
   kpiWeekPages: document.getElementById("kpiWeekPages"),
   kpiWeekHint: document.getElementById("kpiWeekHint"),
-
-  // KPIs (More)
   kpiTodayPages: document.getElementById("kpiTodayPages"),
   kpiMonthPages: document.getElementById("kpiMonthPages"),
-  kpiYearPages: document.getElementById("kpiYearPages"),
-  kpiAvgPerActiveDay: document.getElementById("kpiAvgPerActiveDay"),
-  kpiAvgPerActiveMonth: document.getElementById("kpiAvgPerActiveMonth"),
-  kpiAvgPerActiveYear: document.getElementById("kpiAvgPerActiveYear"),
-  kpiTotalPages: document.getElementById("kpiTotalPages"),
-  kpiActiveDays: document.getElementById("kpiActiveDays"),
-  kpiBestWeek: document.getElementById("kpiBestWeek"),
-  kpiBestMonth: document.getElementById("kpiBestMonth"),
 
   // Toggles
   toggleMoreStats: document.getElementById("toggleMoreStats"),
@@ -129,17 +156,167 @@ const el = {
 
 /* ------------------ bootstrap ------------------ */
 
-wireEvents();
-rerenderAll();
+bootstrap();
 
-function rerenderAll() {
-  renderAll(el, state, showFinished, searchQuery, openBook);
+/* ------------------ bootstrap helpers ------------------ */
+
+function bootstrap() {
+  try {
+    ctx = { ...getServices(), user: null };
+  } catch (e) {
+    // Config missing => show error on login screen.
+    showAuthOnly();
+    setAuthError(String(e?.message || e));
+    return;
+  }
+
+  updateEnvUi();
+
+  wireAuthEvents();
+  wireAppEvents();
+
+  watchAuth(ctx.auth, async (user) => {
+    if (user) {
+      ctx.user = user;
+      await onSignedIn(user);
+    } else {
+      ctx.user = null;
+      onSignedOut();
+    }
+  });
 }
 
-/* ------------------ events ------------------ */
+function updateEnvUi() {
+  const env = getEnv().toUpperCase();
+  if (el.envLabel) {
+    el.envLabel.hidden = false;
+    el.envLabel.textContent = env;
+  }
+  if (el.btnSwitchEnv) el.btnSwitchEnv.textContent = env;
+  if (el.authEnvMeta) el.authEnvMeta.textContent = `Umgebung: ${env}`;
 
-function wireEvents() {
-  el.btnAddBook.addEventListener("click", openAddBook);
+  if (el.btnSwitchEnvAuth) {
+    const next = getEnv() === "prod" ? "dev" : "prod";
+    el.btnSwitchEnvAuth.textContent = `Zu ${next.toUpperCase()} wechseln`;
+  }
+}
+
+function showAuthOnly() {
+  if (el.authScreen) el.authScreen.hidden = false;
+  if (el.appMain) el.appMain.hidden = true;
+  if (el.signedInActions) el.signedInActions.hidden = true;
+}
+
+function showAppOnly() {
+  if (el.authScreen) el.authScreen.hidden = true;
+  if (el.appMain) el.appMain.hidden = false;
+  if (el.signedInActions) el.signedInActions.hidden = false;
+}
+
+function setAuthError(msg) {
+  if (!el.authError) return;
+  el.authError.hidden = !msg;
+  el.authError.textContent = msg || "";
+}
+
+async function onSignedIn(user) {
+  setAuthError("");
+  showAppOnly();
+
+  if (el.chipUser) {
+    el.chipUser.hidden = false;
+    el.chipUser.textContent = user.email || "angemeldet";
+  }
+  if (el.btnLogout) el.btnLogout.hidden = false;
+
+  // Load state from Firestore
+  try {
+    state = await loadState(ctx.db, user.uid);
+
+    // Optional: Seed demo data only in DEV
+    const isDev = getEnv() === "dev";
+    const allowDemo = ENABLE_DEMO_DATA && (!DEMO_ONLY_IN_DEV || isDev);
+    if (allowDemo && (DEMO_OVERWRITE_EXISTING || state.books.length === 0)) {
+      state = createDemoState();
+      await replaceAllBooks(ctx.db, user.uid, state.books);
+    }
+
+    // Reset UI filters
+    showFinished = false;
+    searchQuery = "";
+    if (el.bookSearch) el.bookSearch.value = "";
+
+    rerenderAll();
+  } catch (e) {
+    toast("Konnte Daten nicht laden.");
+    console.error(e);
+  }
+}
+
+function onSignedOut() {
+  state = defaultState();
+  activeBookId = null;
+  showFinished = false;
+  searchQuery = "";
+
+  showAuthOnly();
+
+  if (el.chipUser) el.chipUser.hidden = true;
+  if (el.btnLogout) el.btnLogout.hidden = true;
+
+  // Keep env UI visible on login screen
+  updateEnvUi();
+}
+
+/* ------------------ events: auth ------------------ */
+
+function wireAuthEvents() {
+  el.formLogin?.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    setAuthError("");
+
+    const fd = new FormData(el.formLogin);
+    const email = String(fd.get("email") || "").trim();
+    const password = String(fd.get("password") || "");
+
+    if (!email || !password) {
+      setAuthError("Email und Passwort erforderlich.");
+      return;
+    }
+
+    try {
+      await loginWithEmailPassword(ctx.auth, email, password);
+      // onAuthStateChanged will take over
+    } catch (e) {
+      const msg = friendlyAuthError(e);
+      setAuthError(msg);
+    }
+  });
+
+  el.btnLogout?.addEventListener("click", async () => {
+    try {
+      await logout(ctx.auth);
+    } catch {
+      toast("Logout fehlgeschlagen.");
+    }
+  });
+
+  const onEnvToggle = () => {
+    if (ctx?.user) {
+      const ok = confirm("Umgebung wechseln? Du wirst neu laden (DEV/PROD) und ggf. neu einloggen müssen.");
+      if (!ok) return;
+    }
+    toggleEnv();
+  };
+
+  el.btnSwitchEnv?.addEventListener("click", onEnvToggle);
+  el.btnSwitchEnvAuth?.addEventListener("click", onEnvToggle);
+}
+
+/* ------------------ events: app ------------------ */
+
+function wireAppEvents() {
+  el.btnAddBook?.addEventListener("click", openAddBook);
   el.btnAddBookEmpty?.addEventListener("click", openAddBook);
 
   // Books controls
@@ -159,8 +336,10 @@ function wireEvents() {
 
   el.btnCloseBookX?.addEventListener("click", () => el.dlgBook.close());
 
-  el.formAddBook.addEventListener("submit", (ev) => {
+  el.formAddBook?.addEventListener("submit", async (ev) => {
     ev.preventDefault();
+    if (!requireAuth()) return;
+
     const fd = new FormData(el.formAddBook);
     const title = String(fd.get("title") || "").trim();
     const author = String(fd.get("author") || "").trim();
@@ -171,14 +350,17 @@ function wireEvents() {
       toast("Titel fehlt.");
       return;
     }
-    addBook({ title, author, totalPages, initialPage });
+
+    await addBook({ title, author, totalPages, initialPage });
     el.formAddBook.reset();
     el.dlgAddBook.close();
   });
 
   // Save page
-  el.formBook.addEventListener("submit", (ev) => {
+  el.formBook?.addEventListener("submit", async (ev) => {
     ev.preventDefault();
+    if (!requireAuth()) return;
+
     const book = getActiveBook();
     if (!book) return;
 
@@ -209,10 +391,16 @@ function wireEvents() {
     }
 
     upsertHistory(book, date, newPage);
-    save();
-    toast("Gespeichert.");
-    rerenderAll();
-    el.dlgBook.close();
+
+    try {
+      await upsertBook(ctx.db, ctx.user.uid, book);
+      toast("Gespeichert.");
+      rerenderAll();
+      el.dlgBook.close();
+    } catch (e) {
+      console.error(e);
+      toast("Speichern fehlgeschlagen.");
+    }
   });
 
   // Update page input when date changes
@@ -221,8 +409,10 @@ function wireEvents() {
   });
 
   // Delete book
-  el.btnDeleteBook.addEventListener("click", (ev) => {
+  el.btnDeleteBook?.addEventListener("click", async (ev) => {
     ev.preventDefault();
+    if (!requireAuth()) return;
+
     const book = getActiveBook();
     if (!book) return;
 
@@ -230,20 +420,29 @@ function wireEvents() {
     if (!ok) return;
 
     state.books = state.books.filter(b => b.id !== book.id);
-    save();
-    el.dlgBook.close();
-    toast("Buch gelöscht.");
-    rerenderAll();
+    try {
+      await deleteBook(ctx.db, ctx.user.uid, book.id);
+      el.dlgBook.close();
+      toast("Buch gelöscht.");
+      rerenderAll();
+    } catch (e) {
+      console.error(e);
+      toast("Löschen fehlgeschlagen.");
+      // Restore in-memory if delete failed
+      state.books.unshift(book);
+      rerenderAll();
+    }
   });
 
   // Export / Import
-  el.btnExport.addEventListener("click", () => {
+  el.btnExport?.addEventListener("click", () => {
     const json = exportState(state);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `reading-tracker-export-${todayKey()}.json`;
+    const env = getEnv();
+    a.download = `momentum-${env}-export-${todayKey()}.json`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -251,8 +450,10 @@ function wireEvents() {
     toast("Export erstellt.");
   });
 
-  el.btnImport.addEventListener("click", () => el.fileImport.click());
-  el.fileImport.addEventListener("change", async () => {
+  el.btnImport?.addEventListener("click", () => el.fileImport.click());
+  el.fileImport?.addEventListener("change", async () => {
+    if (!requireAuth()) return;
+
     const file = el.fileImport.files?.[0];
     if (!file) return;
 
@@ -260,11 +461,14 @@ function wireEvents() {
       const text = await file.text();
       const imported = importState(text);
       state = imported;
-      save();
+
+      await replaceAllBooks(ctx.db, ctx.user.uid, state.books);
+
       rerenderAll();
       toast("Import erfolgreich.");
-    } catch {
-      toast("Import fehlgeschlagen (ungültige JSON-Datei).");
+    } catch (e) {
+      console.error(e);
+      toast("Import fehlgeschlagen (ungültige JSON-Datei oder Schreibfehler).");
     } finally {
       el.fileImport.value = "";
     }
@@ -285,16 +489,17 @@ function wireEvents() {
   window.addEventListener("resize", debounce(() => renderCharts(el, state), 120));
 }
 
-function openAddBook() {
-  el.dlgAddBook.showModal();
-  const first = el.formAddBook.querySelector("input[name='title']");
-  first?.focus();
+/* ------------------ render ------------------ */
+
+function rerenderAll() {
+  if (!ctx?.user) return;
+  renderAll(el, state, showFinished, searchQuery, openBook);
 }
 
 /* ------------------ actions ------------------ */
 
-function addBook({ title, author, totalPages, initialPage }) {
-  state.books.unshift({
+async function addBook({ title, author, totalPages, initialPage }) {
+  const book = {
     id: crypto.randomUUID(),
     title,
     author,
@@ -302,10 +507,20 @@ function addBook({ title, author, totalPages, initialPage }) {
     initialPage: clampInt(initialPage, 0, totalPages),
     createdAt: new Date().toISOString(),
     history: []
-  });
-  save();
-  toast("Buch hinzugefügt.");
-  rerenderAll();
+  };
+
+  state.books.unshift(book);
+
+  try {
+    await upsertBook(ctx.db, ctx.user.uid, book);
+    toast("Buch hinzugefügt.");
+    rerenderAll();
+  } catch (e) {
+    console.error(e);
+    toast("Speichern fehlgeschlagen.");
+    state.books = state.books.filter(b => b.id !== book.id);
+    rerenderAll();
+  }
 }
 
 function openBook(bookId) {
@@ -345,12 +560,22 @@ function openBook(bookId) {
   el.inpPage.select();
 }
 
-function save() {
-  saveState(state);
+function openAddBook() {
+  if (!requireAuth()) {
+    toast("Bitte einloggen.");
+    return;
+  }
+  el.dlgAddBook.showModal();
+  const first = el.formAddBook.querySelector("input[name='title']");
+  first?.focus();
 }
 
 function getActiveBook() {
   return state.books.find(b => b.id === activeBookId) || null;
+}
+
+function requireAuth() {
+  return !!ctx?.user;
 }
 
 /* ------------------ ui helpers ------------------ */
@@ -399,4 +624,13 @@ function syncPageInputForDate() {
   // If there is an entry on that date, show it; otherwise prefill with last known value before that date.
   const base = (date === todayKey()) ? latestPage(book) : latestPageBefore(book, date);
   el.inpPage.value = String(entry?.page ?? base);
+}
+
+function friendlyAuthError(e) {
+  const code = String(e?.code || "");
+  if (code.includes("auth/invalid-credential") || code.includes("auth/wrong-password")) return "Falsche Email oder Passwort.";
+  if (code.includes("auth/user-not-found")) return "User existiert nicht (in Firebase Console anlegen).";
+  if (code.includes("auth/invalid-email")) return "Ungültige Email-Adresse.";
+  if (code.includes("auth/too-many-requests")) return "Zu viele Versuche. Bitte später erneut probieren.";
+  return String(e?.message || "Login fehlgeschlagen.");
 }

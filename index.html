@@ -17,10 +17,14 @@
         <div class="brand__mark" aria-hidden="true"></div>
         <div>
           <div class="brand__title">Momentum</div>
+          <div class="brand__subtitle" id="envLabel" hidden>—</div>
         </div>
       </div>
 
-      <div class="topbar__actions">
+      <div class="topbar__actions" id="signedInActions" hidden>
+        <button class="btn btn--ghost" id="btnSwitchEnv" type="button" title="Umgebung wechseln">PROD</button>
+        <span class="chip" id="chipUser" title="Angemeldet" hidden>—</span>
+        <button class="btn btn--ghost" id="btnLogout" type="button" title="Abmelden" hidden>Logout</button>
         <button class="btn btn--ghost" id="btnExport" title="Daten exportieren">Export</button>
         <button class="btn btn--ghost" id="btnImport" title="Daten importieren">Import</button>
         <button class="btn" id="btnAddBook">+</button>
@@ -28,7 +32,40 @@
     </div>
   </header>
 
-  <main class="wrap grid">
+  <!-- Login Screen (overlay) -->
+  <div class="authscreen" id="authScreen">
+    <div class="panel authpanel">
+      <div class="panel__head">
+        <h2>Login</h2>
+        <div class="panel__meta" id="authEnvMeta">—</div>
+      </div>
+
+      <form class="fields" id="formLogin" autocomplete="on">
+        <label class="field">
+          <span>Email</span>
+          <input required name="email" type="email" autocomplete="username" placeholder="name@domain.com" />
+        </label>
+
+        <label class="field">
+          <span>Passwort</span>
+          <input required name="password" type="password" autocomplete="current-password" placeholder="••••••••" />
+        </label>
+
+        <div class="modal__actions modal__actions--spread">
+          <button class="btn btn--ghost" id="btnSwitchEnvAuth" type="button" title="Zwischen DEV/PROD wechseln">Zu DEV wechseln</button>
+          <button class="btn" id="btnLogin" type="submit">Login</button>
+        </div>
+
+        <div class="hint hint--error" id="authError" hidden></div>
+        <div class="hint">
+          Kein Sign-up in der App. Accounts legst du in der Firebase Console an (Authentication → Users).
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <main class="wrap grid" id="appMain" hidden>
     <section class="panel">
       <div class="panel__head">
         <h2>Übersicht</h2>
