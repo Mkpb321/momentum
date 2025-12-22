@@ -28,24 +28,65 @@
           <button class="iconbtn" id="btnMenu" type="button" aria-label="Menü" aria-expanded="false" aria-controls="menuPanel" title="Menü">☰</button>
 
           <div class="menu__panel" id="menuPanel" hidden>
-            <div class="menu__section">
-              <div class="menu__label">Account</div>
-              <div class="menu__static">
-                <span class="chip" id="chipUser" title="Angemeldet" hidden>—</span>
+            <div class="menu__header">
+              <div class="menu__headerlabel">Account</div>
+              <div class="menu__user">
+                <div class="menu__avatar" id="userAvatar" aria-hidden="true">•</div>
+                <div class="menu__userinfo">
+                  <div class="menu__email" id="chipUser" title="Angemeldet" hidden>—</div>
+                </div>
               </div>
-              <button class="btn btn--ghost" id="btnLogout" type="button" title="Abmelden" hidden>Logout</button>
             </div>
 
-            <div class="menu__section">
-              <div class="menu__label">Daten</div>
-              <button class="btn btn--ghost" id="btnExport" type="button" title="Daten exportieren">Export</button>
-              <button class="btn btn--ghost" id="btnImport" type="button" title="Daten importieren">Import</button>
+            <div class="menu__divider" role="separator" aria-hidden="true"></div>
+
+            <div class="menu__group" aria-label="Daten">
+              <button class="menuitem" id="btnExport" type="button" title="Daten exportieren">
+                <span class="menuitem__left">
+                  <svg class="menuitem__icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 3v10m0 0l4-4m-4 4L8 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 17v3h16v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span class="menuitem__title">Export</span>
+                </span>
+              </button>
+
+              <button class="menuitem" id="btnImport" type="button" title="Daten importieren">
+                <span class="menuitem__left">
+                  <svg class="menuitem__icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 21V11m0 0l4 4m-4-4l-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M4 7V4h16v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  <span class="menuitem__title">Import</span>
+                </span>
+              </button>
             </div>
 
-            <div class="menu__section">
-              <div class="menu__label">Umgebung</div>
-              <button class="btn btn--ghost" id="btnSwitchEnv" type="button" title="Umgebung wechseln">PROD</button>
-            </div>
+            <div class="menu__divider" role="separator" aria-hidden="true"></div>
+
+            <button class="menuitem" id="btnSwitchEnv" type="button" title="Umgebung wechseln">
+              <span class="menuitem__left">
+                <svg class="menuitem__icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 2a7 7 0 00-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 00-7-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M9.5 9.5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span class="menuitem__title">Umgebung</span>
+              </span>
+              <span class="menuitem__meta" id="envPill">PROD</span>
+            </button>
+
+            <div class="menu__divider" role="separator" aria-hidden="true"></div>
+
+            <button class="menuitem menuitem--danger" id="btnLogout" type="button" title="Abmelden" hidden>
+              <span class="menuitem__left">
+                <svg class="menuitem__icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M10 17l-1 0a3 3 0 01-3-3V10a3 3 0 013-3h1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M15 12H21m0 0l-3-3m3 3l-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M10 7V5a2 2 0 012-2h6a2 2 0 012 2v14a2 2 0 01-2 2h-6a2 2 0 01-2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="menuitem__title">Logout</span>
+              </span>
+            </button>
           </div>
         </div>
       </div>

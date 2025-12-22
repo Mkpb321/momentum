@@ -95,8 +95,10 @@ const el = {
   btnMenu: document.getElementById("btnMenu"),
   menuPanel: document.getElementById("menuPanel"),
   btnSwitchEnv: document.getElementById("btnSwitchEnv"),
+  envPill: document.getElementById("envPill"),
   envLabel: document.getElementById("envLabel"),
   chipUser: document.getElementById("chipUser"),
+  userAvatar: document.getElementById("userAvatar"),
   btnLogout: document.getElementById("btnLogout"),
 
   // app shell
@@ -211,7 +213,8 @@ function updateEnvUi() {
     el.envLabel.hidden = false;
     el.envLabel.textContent = env;
   }
-  if (el.btnSwitchEnv) el.btnSwitchEnv.textContent = env;
+  if (el.envPill) el.envPill.textContent = env;
+  else if (el.btnSwitchEnv) el.btnSwitchEnv.textContent = env;
   if (el.authEnvMeta) el.authEnvMeta.textContent = `Umgebung: ${env}`;
 
   if (el.btnSwitchEnvAuth) {
@@ -246,6 +249,12 @@ async function onSignedIn(user) {
   if (el.chipUser) {
     el.chipUser.hidden = false;
     el.chipUser.textContent = user.email || "angemeldet";
+  }
+
+  if (el.userAvatar) {
+    const email = String(user.email || "");
+    const ch = (email.trim()[0] || "•").toUpperCase();
+    el.userAvatar.textContent = ch;
   }
   if (el.btnLogout) el.btnLogout.hidden = false;
 
@@ -282,6 +291,7 @@ function onSignedOut() {
   showAuthOnly();
 
   if (el.chipUser) el.chipUser.hidden = true;
+  if (el.userAvatar) el.userAvatar.textContent = '•';
   if (el.btnLogout) el.btnLogout.hidden = true;
 
   // Keep env UI visible on login screen
