@@ -42,6 +42,7 @@ const el = {
   bookProgBar: document.getElementById("bookProgBar"),
   bookProgText: document.getElementById("bookProgText"),
   bookProgPct: document.getElementById("bookProgPct"),
+  inpDate: document.getElementById("inpDate"),
   inpPage: document.getElementById("inpPage"),
   historyList: document.getElementById("historyList"),
   btnDeleteBook: document.getElementById("btnDeleteBook"),
@@ -132,6 +133,7 @@ function wireEvents() {
   el.btnCancelAddBook?.addEventListener("click", () => el.dlgAddBook.close());
 
   el.btnCloseBookX?.addEventListener("click", () => el.dlgBook.close());
+
   el.formAddBook.addEventListener("submit", (ev) => {
     ev.preventDefault();
     const fd = new FormData(el.formAddBook);
@@ -157,20 +159,40 @@ function wireEvents() {
 
     const raw = el.inpPage.value;
     const newPage = clampInt(raw, 0, book.totalPages);
-    const today = todayKey();
+    const date = selectedLogDate();
 
-    const prev = latestPageBefore(book, today);
+    // Disallow future dates
+    const today = todayKey();
+    if (date > today) {
+      setLogDate(today);
+      toast("Datum darf nicht in der Zukunft liegen.");
+      return;
+    }
+
+    const prev = latestPageBefore(book, date);
+    const next = earliestPageAfter(book, date);
     if (newPage < prev) {
       el.inpPage.value = String(prev);
       toast("Seitenzahl kann nicht kleiner als der letzte Stand sein.");
       return;
     }
 
-    upsertHistory(book, today, newPage);
+    if (next !== null && newPage > next) {
+      el.inpPage.value = String(next);
+      toast("Seitenzahl kann nicht größer als ein späterer Eintrag sein.");
+      return;
+    }
+
+    upsertHistory(book, date, newPage);
     save();
     toast("Gespeichert.");
     renderAll();
     el.dlgBook.close();
+  });
+
+  // Update page input when date changes
+  el.inpDate?.addEventListener("change", () => {
+    syncPageInputForDate();
   });
 
   // Delete book
@@ -275,11 +297,12 @@ function openBook(bookId) {
   el.bookProgText.textContent = `${cur} / ${book.totalPages}`;
   el.bookProgPct.textContent = `${pct}%`;
 
-  // input defaults to today's value if present, else current
+  // Default logging date: today (can be changed to backfill)
   const today = todayKey();
-  const todayEntry = book.history.find(h => h.date === today);
-  el.inpPage.value = String(todayEntry?.page ?? cur);
+  setLogDate(today);
   el.inpPage.max = String(book.totalPages);
+  if (el.inpDate) el.inpDate.max = today;
+  syncPageInputForDate();
 
   // history list (latest first)
   const rows = [...book.history].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12);
@@ -675,6 +698,13 @@ function latestPageBefore(book, dateKeyStr) {
   return hist.length ? Math.max(base, clampInt(hist[0].page, 0, book.totalPages)) : base;
 }
 
+function earliestPageAfter(book, dateKeyStr) {
+  const hist = [...book.history]
+    .filter(h => h.date > dateKeyStr)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  return hist.length ? clampInt(hist[0].page, 0, book.totalPages) : null;
+}
+
 function upsertHistory(book, date, page) {
   const i = book.history.findIndex(h => h.date === date);
   if (i >= 0) {
@@ -817,6 +847,28 @@ function toggleSection(buttonEl, sectionEl, labels = { more: 'Mehr', less: 'Weni
   const expanded = willOpen;
   buttonEl.setAttribute('aria-expanded', expanded ? 'true' : 'false');
   buttonEl.textContent = expanded ? labels.less : labels.more;
+}
+
+function selectedLogDate() {
+  const v = String(el.inpDate?.value || "").trim();
+  return /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : todayKey();
+}
+
+function setLogDate(dateKeyStr) {
+  if (!el.inpDate) return;
+  el.inpDate.value = dateKeyStr;
+}
+
+function syncPageInputForDate() {
+  const book = getActiveBook();
+  if (!book) return;
+
+  const date = selectedLogDate();
+  const entry = book.history.find(h => h.date === date);
+
+  // If there is an entry on that date, show it; otherwise prefill with last known value before that date.
+  const base = (date === todayKey()) ? latestPage(book) : latestPageBefore(book, date);
+  el.inpPage.value = String(entry?.page ?? base);
 }
 
 
