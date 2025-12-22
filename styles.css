@@ -60,6 +60,42 @@ body{
 
 .topbar__actions{ display:flex; gap:10px; align-items:center; }
 
+/* Burger menu (topbar) */
+.menu{ position: relative; }
+.menu__panel{
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 240px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 10px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.menu__section{ display:flex; flex-direction: column; gap:8px; }
+.menu__label{
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 2px 8px;
+}
+.menu__static{ padding: 0 6px; }
+
+/* Menu buttons: make them feel like menu items */
+.menu__panel .btn{
+  width: 100%;
+  border-radius: 12px;
+  justify-content: flex-start;
+}
+.menu__panel .btn--ghost{ border-color: transparent; }
+.menu__panel .btn--ghost:hover{ background: rgba(20,19,18,.05); }
+
 .grid{
   display:grid;
   grid-template-columns: 1fr;

@@ -22,12 +22,32 @@
       </div>
 
       <div class="topbar__actions" id="signedInActions" hidden>
-        <button class="btn btn--ghost" id="btnSwitchEnv" type="button" title="Umgebung wechseln">PROD</button>
-        <span class="chip" id="chipUser" title="Angemeldet" hidden>—</span>
-        <button class="btn btn--ghost" id="btnLogout" type="button" title="Abmelden" hidden>Logout</button>
-        <button class="btn btn--ghost" id="btnExport" title="Daten exportieren">Export</button>
-        <button class="btn btn--ghost" id="btnImport" title="Daten importieren">Import</button>
-        <button class="btn" id="btnAddBook">+</button>
+        <button class="btn" id="btnAddBook" title="Buch hinzufügen">+</button>
+
+        <div class="menu" id="burgerMenu">
+          <button class="iconbtn" id="btnMenu" type="button" aria-label="Menü" aria-expanded="false" aria-controls="menuPanel" title="Menü">☰</button>
+
+          <div class="menu__panel" id="menuPanel" hidden>
+            <div class="menu__section">
+              <div class="menu__label">Account</div>
+              <div class="menu__static">
+                <span class="chip" id="chipUser" title="Angemeldet" hidden>—</span>
+              </div>
+              <button class="btn btn--ghost" id="btnLogout" type="button" title="Abmelden" hidden>Logout</button>
+            </div>
+
+            <div class="menu__section">
+              <div class="menu__label">Daten</div>
+              <button class="btn btn--ghost" id="btnExport" type="button" title="Daten exportieren">Export</button>
+              <button class="btn btn--ghost" id="btnImport" type="button" title="Daten importieren">Import</button>
+            </div>
+
+            <div class="menu__section">
+              <div class="menu__label">Umgebung</div>
+              <button class="btn btn--ghost" id="btnSwitchEnv" type="button" title="Umgebung wechseln">PROD</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </header>

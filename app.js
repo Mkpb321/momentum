@@ -46,14 +46,31 @@ let showFinished = false;
 let searchQuery = "";
 let activeBookId = null;
 
+/* ------------------ topbar menu ------------------ */
+
+function setMenuOpen(open) {
+  if (!el.menuPanel || !el.btnMenu) return;
+  el.menuPanel.hidden = !open;
+  el.btnMenu.setAttribute("aria-expanded", open ? "true" : "false");
+}
+
+function toggleMenu() {
+  if (!el.menuPanel) return;
+  setMenuOpen(el.menuPanel.hidden);
+}
+
+function closeMenu() {
+  setMenuOpen(false);
+}
+
 /* ===================== DEMO-DATEN (optional) =====================
    Für Probe-Daten (mehrere Bücher + Leseverlauf):
-   1) ENABLE__DATA auf true setzen und Seite neu laden (in DEV).
+   1) ENABLE_DEMO_DATA auf true setzen und Seite neu laden (in DEV).
    2) Danach wieder auf false setzen, damit es nicht jedes Mal überschreibt.
    Hinweis: Standardmäßig werden Demo-Daten nur geladen, wenn noch keine Bücher existieren.
    Wenn du vorhandene Daten bewusst überschreiben willst: DEMO_OVERWRITE_EXISTING = true.
 ================================================================== */
-const ENABLE_DEMO_DATA = true;
+const ENABLE_DEMO_DATA = false;
 const DEMO_OVERWRITE_EXISTING = false;
 const DEMO_ONLY_IN_DEV = true;
 /* =================== Ende DEMO-DATEN =================== */
@@ -75,6 +92,8 @@ const el = {
 
   // topbar
   signedInActions: document.getElementById("signedInActions"),
+  btnMenu: document.getElementById("btnMenu"),
+  menuPanel: document.getElementById("menuPanel"),
   btnSwitchEnv: document.getElementById("btnSwitchEnv"),
   envLabel: document.getElementById("envLabel"),
   chipUser: document.getElementById("chipUser"),
@@ -202,6 +221,7 @@ function updateEnvUi() {
 }
 
 function showAuthOnly() {
+  closeMenu();
   if (el.authScreen) el.authScreen.hidden = false;
   if (el.appMain) el.appMain.hidden = true;
   if (el.signedInActions) el.signedInActions.hidden = true;
@@ -316,6 +336,32 @@ function wireAuthEvents() {
 /* ------------------ events: app ------------------ */
 
 function wireAppEvents() {
+  // Burger menu
+  el.btnMenu?.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    toggleMenu();
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener("click", (ev) => {
+    if (!el.menuPanel || el.menuPanel.hidden) return;
+    const path = typeof ev.composedPath === "function" ? ev.composedPath() : [];
+    if (path.includes(el.menuPanel) || path.includes(el.btnMenu)) return;
+    closeMenu();
+  });
+
+  // Close menu on Escape
+  document.addEventListener("keydown", (ev) => {
+    if (ev.key === "Escape") closeMenu();
+  });
+
+  // Close menu after an action inside it
+  const closeAfter = () => closeMenu();
+  el.btnSwitchEnv?.addEventListener("click", closeAfter);
+  el.btnLogout?.addEventListener("click", closeAfter);
+  el.btnExport?.addEventListener("click", closeAfter);
+  el.btnImport?.addEventListener("click", closeAfter);
+
   el.btnAddBook?.addEventListener("click", openAddBook);
   el.btnAddBookEmpty?.addEventListener("click", openAddBook);
 
