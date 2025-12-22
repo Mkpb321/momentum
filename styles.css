@@ -101,11 +101,23 @@ h2{
   margin: 14px 2px;
 }
 
+/* Ensure native [hidden] works even if component classes set display values */
+[hidden]{ display:none !important; }
+
 .kpis{
   display:grid;
   grid-template-columns: repeat(3, 1fr);
   gap:10px;
 }
+
+/* "Mehr"-KPIs: 4 columns on wide screens */
+.kpis--more{ grid-template-columns: repeat(4, 1fr); }
+
+/* Medium widths: keep readable density */
+@media (min-width: 681px) and (max-width: 980px){
+  .kpis--more{ grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 680px){
   .kpis{ grid-template-columns: 1fr; }
 }
