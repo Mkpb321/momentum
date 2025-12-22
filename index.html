@@ -17,7 +17,7 @@
         <div class="brand__mark" aria-hidden="true"></div>
         <div>
           <div class="brand__title">Momentum</div>
-</div>
+        </div>
       </div>
 
       <div class="topbar__actions">
@@ -35,27 +35,13 @@
         <div class="panel__meta" id="streakMeta">—</div>
       </div>
 
-      <div class="heroCombined">
-        <div class="heroCombined__streak">
-          <div class="heroCombined__label">Aktueller Streak</div>
-          <div class="heroCombined__value" id="kpiCurrentStreak">0</div>
+      <div class="kpis kpis--top">
+        <div class="kpi">
+          <div class="kpi__label">Aktueller Streak</div>
+          <div class="kpi__value" id="kpiCurrentStreak">0</div>
+          <div class="kpi__hint">&nbsp;</div>
         </div>
 
-        <div class="chart chart--hero">
-          <div class="chart__head">
-            <div>
-              <div class="chart__title">Letzte 12 Tage</div>
-              <div class="chart__sub" id="subDays">—</div>
-            </div>
-            <div class="chip" id="sumDays">0</div>
-          </div>
-          <div class="chart__body" id="chartDays"></div>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="kpis kpis--below">
         <div class="kpi">
           <div class="kpi__label">Längster Streak</div>
           <div class="kpi__value" id="kpiLongestStreak">0</div>
@@ -63,32 +49,93 @@
         </div>
 
         <div class="kpi">
-          <div class="kpi__label">Seiten Heute</div>
+          <div class="kpi__label">Seiten diese Woche</div>
+          <div class="kpi__value" id="kpiWeekPages">0</div>
+          <div class="kpi__hint" id="kpiWeekHint">—</div>
+        </div>
+      </div>
+
+      <button class="togglelink" id="toggleMoreStats" type="button" aria-expanded="false" aria-controls="moreStats">Mehr</button>
+
+      <div id="moreStats" class="kpis kpis--more" hidden>
+        <div class="kpi">
+          <div class="kpi__label">Seiten heute</div>
           <div class="kpi__value" id="kpiTodayPages">0</div>
           <div class="kpi__hint">&nbsp;</div>
         </div>
 
-        <div class="kpi kpi--ghost" aria-hidden="true">
-          <div class="kpi__label">—</div>
-          <div class="kpi__value">—</div>
-          <div class="kpi__hint">—</div>
+        <div class="kpi">
+          <div class="kpi__label">Seiten diesen Monat</div>
+          <div class="kpi__value" id="kpiMonthPages">0</div>
+          <div class="kpi__hint">&nbsp;</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Seiten dieses Jahr</div>
+          <div class="kpi__value" id="kpiYearPages">0</div>
+          <div class="kpi__hint">&nbsp;</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Ø pro aktivem Tag</div>
+          <div class="kpi__value" id="kpiAvgPerActiveDay">0</div>
+          <div class="kpi__hint">Tage mit &gt; 0 Seiten</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Ø pro aktivem Monat</div>
+          <div class="kpi__value" id="kpiAvgPerActiveMonth">0</div>
+          <div class="kpi__hint">Monate mit &gt; 0 Seiten</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Ø pro aktivem Jahr</div>
+          <div class="kpi__value" id="kpiAvgPerActiveYear">0</div>
+          <div class="kpi__hint">Jahre mit &gt; 1 Seite</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Gesamtseiten</div>
+          <div class="kpi__value" id="kpiTotalPages">0</div>
+          <div class="kpi__hint">über alle Zeit</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Aktive Tage</div>
+          <div class="kpi__value" id="kpiActiveDays">0</div>
+          <div class="kpi__hint">Tage mit &gt; 0 Seiten</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Beste Woche</div>
+          <div class="kpi__value" id="kpiBestWeek">0</div>
+          <div class="kpi__hint">max. Seiten in 1 Woche</div>
+        </div>
+
+        <div class="kpi">
+          <div class="kpi__label">Bester Monat</div>
+          <div class="kpi__value" id="kpiBestMonth">0</div>
+          <div class="kpi__hint">max. Seiten in 1 Monat</div>
         </div>
       </div>
 
       <div class="divider"></div>
 
-      <div class="charts">
-        <div class="chart">
-          <div class="chart__head">
-            <div>
-              <div class="chart__title">Letzte 12 Tage</div>
-              <div class="chart__sub" id="subDays2">—</div>
-            </div>
-            <div class="chip" id="sumDays2">0</div>
+      <div class="chart">
+        <div class="chart__head">
+          <div>
+            <div class="chart__title">Letzte 12 Tage</div>
+            <div class="chart__sub" id="subDays">—</div>
           </div>
-          <div class="chart__body" id="chartDays2"></div>
+          <div class="chart__headright">
+            <button class="togglelink" id="toggleMoreCharts" type="button" aria-expanded="false" aria-controls="moreCharts">Mehr</button>
+            <div class="chip" id="sumDays">0</div>
+          </div>
         </div>
+        <div class="chart__body" id="chartDays"></div>
+      </div>
 
+      <div id="moreCharts" class="charts charts--more" hidden>
         <div class="chart">
           <div class="chart__head">
             <div>
@@ -109,6 +156,28 @@
             <div class="chip" id="sumMonths">0</div>
           </div>
           <div class="chart__body" id="chartMonths"></div>
+        </div>
+
+        <div class="chart">
+          <div class="chart__head">
+            <div>
+              <div class="chart__title">Letzte 30 Tage</div>
+              <div class="chart__sub" id="subDays30">—</div>
+            </div>
+            <div class="chip" id="sumDays30">0</div>
+          </div>
+          <div class="chart__body" id="chartDays30"></div>
+        </div>
+
+        <div class="chart">
+          <div class="chart__head">
+            <div>
+              <div class="chart__title">Wochentage</div>
+              <div class="chart__sub" id="subWeekdays">—</div>
+            </div>
+            <div class="chip" id="sumWeekdays">0</div>
+          </div>
+          <div class="chart__body" id="chartWeekdays"></div>
         </div>
       </div>
     </section>

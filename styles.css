@@ -62,11 +62,10 @@ body{
 
 .grid{
   display:grid;
-  grid-template-columns: 1.2fr .8fr;
+  grid-template-columns: 1fr;
   gap:18px;
 }
 @media (max-width: 980px){
-  .grid{ grid-template-columns: 1fr; }
   .brand{ min-width: 0; }
 }
 
@@ -378,6 +377,31 @@ h2{
   transform: translateX(-50%) translateY(-4px);
 }
 
+
+
+.togglelink{
+  appearance:none;
+  border:none;
+  background: transparent;
+  padding: 6px 2px;
+  margin: 8px 2px 0 2px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor:pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.togglelink:hover{ color: var(--accent); }
+.togglelink:focus-visible{ outline:none; box-shadow: var(--focus); border-radius: 8px; }
+
+.chart__headright{ display:flex; align-items:center; gap:10px; }
+
+/* More-charts: two columns on wide screens */
+.charts--more{ grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 680px){
+  .charts--more{ grid-template-columns: 1fr; }
+}
 /* SVG chart styling */
 svg.chartsvg{
   width: 100%;
@@ -415,44 +439,13 @@ svg.chartsvg{
 /* --- Momentum layout refinements --- */
 .topbar__inner{ padding-top:10px; padding-bottom:10px; }
 .wrap{ padding-top:16px; padding-bottom:16px; }
-.brand__title{ font-size: 14px; }
+.brand__title{ font-size: 16px; }
 
 @media (max-width: 520px){
   .wrap{ padding: 14px 14px; }
   .topbar__inner{ padding-top:8px; padding-bottom:8px; }
   .btn{ padding: 10px 12px; }
   #btnAddBook{ width: 40px; padding: 10px 0; text-align:center; }
-}
-
-/* Hero: streak integrated with 12-day chart (single element) */
-.heroCombined{
-  position: relative;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  padding: 12px;
-}
-.heroCombined__streak{
-  position: absolute;
-  left: 12px;
-  top: 12px;
-  z-index: 2;
-  background: rgba(255,255,255,.92);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 8px 10px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.05);
-}
-.heroCombined__label{ color: var(--muted); font-size: 12px; }
-.heroCombined__value{ font-size: 22px; font-weight: 600; margin-top: 4px; }
-
-.chart--hero{ padding-top: 34px; }
-.kpis--below{ grid-template-columns: repeat(2, 1fr); }
-@media (max-width: 680px){
-  .kpis--below{ grid-template-columns: 1fr; }
-}
-.kpi--ghost{ visibility:hidden; }
-@media (max-width: 980px){
-  .kpi--ghost{ display:none; }
 }
 
 /* Books header: search + toggle */

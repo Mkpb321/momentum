@@ -54,24 +54,51 @@ const el = {
   bookSearch: document.getElementById("bookSearch"),
   btnToggleFinished: document.getElementById("btnToggleFinished"),
 
+  // KPIs (Top)
   kpiCurrentStreak: document.getElementById("kpiCurrentStreak"),
   kpiLongestStreak: document.getElementById("kpiLongestStreak"),
   kpiLongestHint: document.getElementById("kpiLongestHint"),
+  kpiWeekPages: document.getElementById("kpiWeekPages"),
+  kpiWeekHint: document.getElementById("kpiWeekHint"),
+
+  // KPIs (More)
   kpiTodayPages: document.getElementById("kpiTodayPages"),
+  kpiMonthPages: document.getElementById("kpiMonthPages"),
+  kpiYearPages: document.getElementById("kpiYearPages"),
+  kpiAvgPerActiveDay: document.getElementById("kpiAvgPerActiveDay"),
+  kpiAvgPerActiveMonth: document.getElementById("kpiAvgPerActiveMonth"),
+  kpiAvgPerActiveYear: document.getElementById("kpiAvgPerActiveYear"),
+  kpiTotalPages: document.getElementById("kpiTotalPages"),
+  kpiActiveDays: document.getElementById("kpiActiveDays"),
+  kpiBestWeek: document.getElementById("kpiBestWeek"),
+  kpiBestMonth: document.getElementById("kpiBestMonth"),
+
+  // Toggles
+  toggleMoreStats: document.getElementById("toggleMoreStats"),
+  moreStats: document.getElementById("moreStats"),
+  toggleMoreCharts: document.getElementById("toggleMoreCharts"),
+  moreCharts: document.getElementById("moreCharts"),
+
   streakMeta: document.getElementById("streakMeta"),
 
+  // Charts
   chartDays: document.getElementById("chartDays"),
-  chartDays2: document.getElementById("chartDays2"),
   chartWeeks: document.getElementById("chartWeeks"),
   chartMonths: document.getElementById("chartMonths"),
+  chartDays30: document.getElementById("chartDays30"),
+  chartWeekdays: document.getElementById("chartWeekdays"),
+
   subDays: document.getElementById("subDays"),
-  subDays2: document.getElementById("subDays2"),
   subWeeks: document.getElementById("subWeeks"),
   subMonths: document.getElementById("subMonths"),
+  subDays30: document.getElementById("subDays30"),
+  subWeekdays: document.getElementById("subWeekdays"),
+
   sumDays: document.getElementById("sumDays"),
-  sumDays2: document.getElementById("sumDays2"),
   sumWeeks: document.getElementById("sumWeeks"),
   sumMonths: document.getElementById("sumMonths"),
+  sumDays30: document.getElementById("sumDays30"),
+  sumWeekdays: document.getElementById("sumWeekdays"),
 
   toast: document.getElementById("toast"),
 
@@ -194,6 +221,17 @@ function wireEvents() {
     } finally {
       el.fileImport.value = "";
     }
+  });
+
+  // Overview toggles
+  el.toggleMoreStats?.addEventListener("click", () => {
+    toggleSection(el.toggleMoreStats, el.moreStats);
+  });
+
+  el.toggleMoreCharts?.addEventListener("click", () => {
+    const wasHidden = el.moreCharts?.hidden ?? true;
+    toggleSection(el.toggleMoreCharts, el.moreCharts);
+    if (wasHidden) renderCharts();
   });
 
   // Re-render charts on resize
@@ -354,21 +392,68 @@ function renderBooks() {
 
 function renderStatsAndKpis() {
   const daily = computeDailyPages(state.books);
+  const now = new Date();
 
   const today = todayKey();
   const todayPages = daily.get(today) ?? 0;
 
   const { currentStreak, longestStreak } = computeStreaks(daily);
 
-  el.kpiTodayPages.textContent = String(todayPages);
-  el.kpiCurrentStreak.textContent = String(currentStreak);
-  el.kpiLongestStreak.textContent = String(longestStreak);
+  // Top KPIs
+  setText(el.kpiCurrentStreak, String(currentStreak));
+  setText(el.kpiLongestStreak, String(longestStreak));
 
-  // Hint text intentionally minimal.
-  el.kpiLongestHint.textContent =
-    (currentStreak > 0 && currentStreak === longestStreak)
-      ? "Du bist gerade am längsten Streak."
-      : (longestStreak > 0 ? "" : "Noch keine Serie.");
+  if (el.kpiLongestHint) {
+    el.kpiLongestHint.textContent =
+      (currentStreak > 0 && currentStreak === longestStreak)
+        ? "Du bist gerade am längsten Streak."
+        : (longestStreak > 0 ? "" : "Noch keine Serie.");
+  }
+
+  const weekTotals = computeWeekTotals(daily);
+  const wkStart = startOfWeek(now);
+  const wkKey = dateKey(wkStart);
+  const weekPages = weekTotals.get(wkKey) ?? 0;
+  setText(el.kpiWeekPages, String(weekPages));
+  if (el.kpiWeekHint) {
+    const wkEnd = addDays(wkStart, 6);
+    el.kpiWeekHint.textContent = `${formatDateShort(dateKey(wkStart))} – ${formatDateShort(dateKey(wkEnd))}`;
+  }
+
+  // More KPIs
+  const monthTotals = computeMonthTotals(daily);
+  const monthK = monthKey(now);
+  const monthPages = monthTotals.get(monthK) ?? 0;
+
+  const yearTotals = computeYearTotals(daily);
+  const yearK = String(now.getFullYear());
+  const yearPages = yearTotals.get(yearK) ?? 0;
+
+  setText(el.kpiTodayPages, String(todayPages));
+  setText(el.kpiMonthPages, String(monthPages));
+  setText(el.kpiYearPages, String(yearPages));
+
+  const totalPages = sumMapValues(daily);
+  const activeDays = [...daily.values()].filter(v => v > 0).length;
+
+  setText(el.kpiTotalPages, String(totalPages));
+  setText(el.kpiActiveDays, String(activeDays));
+
+  const activeMonths = [...monthTotals.values()].filter(v => v > 0).length;
+  const activeYearsEntries = [...yearTotals.entries()].filter(([, v]) => v > 1);
+  const activeYears = activeYearsEntries.length;
+  const pagesInActiveYears = activeYearsEntries.reduce((a, [, v]) => a + v, 0);
+
+  const avgPerActiveDay = activeDays ? totalPages / activeDays : 0;
+  const avgPerActiveMonth = activeMonths ? totalPages / activeMonths : 0;
+  const avgPerActiveYear = activeYears ? pagesInActiveYears / activeYears : 0;
+
+  setText(el.kpiAvgPerActiveDay, formatNumber(avgPerActiveDay, 1));
+  setText(el.kpiAvgPerActiveMonth, formatNumber(avgPerActiveMonth, 1));
+  setText(el.kpiAvgPerActiveYear, formatNumber(avgPerActiveYear, 1));
+
+  setText(el.kpiBestWeek, String(maxMapValue(weekTotals)));
+  setText(el.kpiBestMonth, String(maxMapValue(monthTotals)));
 
   el.streakMeta.textContent =
     todayPages > 0 ? "Heute: eingetragen." : "Heute: noch nichts eingetragen.";
@@ -378,21 +463,34 @@ function renderCharts() {
   const daily = computeDailyPages(state.books);
   const today = new Date();
 
+  const sum = (arr) => arr.reduce((a, b) => a + b, 0);
+
   // last 12 days (inclusive)
-  const days = [];
+  const days12 = [];
   for (let i = 11; i >= 0; i--) {
     const d = addDays(today, -i);
     const key = dateKey(d);
-    days.push({ key, label: formatDayLabel(d), val: daily.get(key) ?? 0 });
+    days12.push({ key, label: formatDayLabel(d), val: daily.get(key) ?? 0 });
   }
+
+  const days12Range = `${formatDateShort(days12[0].key)} – ${formatDateShort(days12[days12.length - 1].key)}`;
+  setText(el.subDays, days12Range);
+  setText(el.sumDays, `${sum(days12.map(x => x.val))} Seiten`);
+
+  if (el.chartDays) {
+    renderLineChart(el.chartDays, days12.map(d => d.label), days12.map(d => d.val));
+  }
+
+  // Only render the additional charts when the section is visible.
+  if (el.moreCharts?.hidden) return;
 
   // last 12 weeks (inclusive): Monday-start
   const weekTotals = computeWeekTotals(daily);
   const weekLabels = [];
   const weekValues = [];
   for (let i = 11; i >= 0; i--) {
-    const wkStart = startOfWeek(addDays(today, -7 * i)); // Monday
-    const wkKey = dateKey(wkStart); // use start date as key
+    const wkStart = startOfWeek(addDays(today, -7 * i));
+    const wkKey = dateKey(wkStart);
     weekLabels.push(formatWeekLabel(wkStart));
     weekValues.push(weekTotals.get(wkKey) ?? 0);
   }
@@ -408,24 +506,48 @@ function renderCharts() {
     monthValues.push(monthTotals.get(mk) ?? 0);
   }
 
-  // captions and sums
-  const daysRange = `${formatDateShort(days[0].key)} – ${formatDateShort(days[days.length - 1].key)}`;
-  el.subDays.textContent = daysRange;
-  if (el.subDays2) el.subDays2.textContent = daysRange;
-  el.subWeeks.textContent = `Wochenstart (Mo) – letzte 12`;
-  el.subMonths.textContent = `Kalendermonate – letzte 12`;
+  setText(el.subWeeks, "Wochenstart (Mo) – letzte 12");
+  setText(el.subMonths, "Kalendermonate – letzte 12");
 
-  const sum = (arr) => arr.reduce((a, b) => a + b, 0);
-  const sumDays = `${sum(days.map(x => x.val))} Seiten`;
-  el.sumDays.textContent = sumDays;
-  if (el.sumDays2) el.sumDays2.textContent = sumDays;
-  el.sumWeeks.textContent = `${sum(weekValues)} Seiten`;
-  el.sumMonths.textContent = `${sum(monthValues)} Seiten`;
+  setText(el.sumWeeks, `${sum(weekValues)} Seiten`);
+  setText(el.sumMonths, `${sum(monthValues)} Seiten`);
 
-  renderLineChart(el.chartDays, days.map(d => d.label), days.map(d => d.val));
-  if (el.chartDays2) renderLineChart(el.chartDays2, days.map(d => d.label), days.map(d => d.val));
-  renderLineChart(el.chartWeeks, weekLabels, weekValues);
-  renderLineChart(el.chartMonths, monthLabels, monthValues);
+  if (el.chartWeeks) renderLineChart(el.chartWeeks, weekLabels, weekValues);
+  if (el.chartMonths) renderLineChart(el.chartMonths, monthLabels, monthValues);
+
+  // last 30 days
+  const days30 = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = addDays(today, -i);
+    const key = dateKey(d);
+    days30.push({ key, label: formatDayLabel(d), val: daily.get(key) ?? 0 });
+  }
+  const days30Range = `${formatDateShort(days30[0].key)} – ${formatDateShort(days30[days30.length - 1].key)}`;
+  setText(el.subDays30, days30Range);
+  setText(el.sumDays30, `${sum(days30.map(x => x.val))} Seiten`);
+  if (el.chartDays30) renderLineChart(el.chartDays30, days30.map(d => d.label), days30.map(d => d.val));
+
+  // Weekdays (average pages on active days per weekday)
+  const names = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+  const sumsByDay = Array(7).fill(0);
+  const cntByDay = Array(7).fill(0);
+
+  for (const [date, pages] of daily.entries()) {
+    if (pages <= 0) continue;
+    const d = parseDate(date);
+    const idx = (d.getDay() + 6) % 7; // Monday=0
+    sumsByDay[idx] += pages;
+    cntByDay[idx] += 1;
+  }
+
+  const weekdayValues = sumsByDay.map((s, i) => cntByDay[i] ? s / cntByDay[i] : 0);
+  const totalPages = sumMapValues(daily);
+  const activeDays = [...daily.values()].filter(v => v > 0).length;
+  const avgPerActiveDay = activeDays ? totalPages / activeDays : 0;
+
+  setText(el.subWeekdays, "Ø Seiten pro Wochentag (nur aktive Tage)");
+  setText(el.sumWeekdays, `Ø/Tag: ${formatNumber(avgPerActiveDay, 1)}`);
+  if (el.chartWeekdays) renderLineChart(el.chartWeekdays, names, weekdayValues);
 }
 
 /* ------------------ computation ------------------ */
@@ -511,6 +633,19 @@ function computeMonthTotals(dailyMap) {
   }
   return out;
 }
+
+function computeYearTotals(dailyMap) {
+  // key: YYYY
+  const out = new Map();
+  for (const [date, pages] of dailyMap.entries()) {
+    if (pages <= 0) continue;
+    const d = parseDate(date);
+    const k = String(d.getFullYear());
+    out.set(k, (out.get(k) ?? 0) + pages);
+  }
+  return out;
+}
+
 
 /* ------------------ book helpers ------------------ */
 
@@ -631,11 +766,32 @@ function formatMonthLabel(d) {
   return `${months[d.getMonth()]} '${String(d.getFullYear()).slice(-2)}`;
 }
 
+function formatNumber(n, maxFractionDigits = 0) {
+  const val = Number.isFinite(n) ? n : 0;
+  return new Intl.NumberFormat('de-CH', { maximumFractionDigits: maxFractionDigits }).format(val);
+}
+
 function toast(msg) {
   el.toast.textContent = msg;
   el.toast.classList.add("toast--show");
   clearTimeout(toast._t);
   toast._t = setTimeout(() => el.toast.classList.remove("toast--show"), 1800);
+}
+
+function setText(node, text) {
+  if (node) node.textContent = text;
+}
+
+function sumMapValues(map) {
+  let s = 0;
+  for (const v of map.values()) s += v;
+  return s;
+}
+
+function maxMapValue(map) {
+  let m = 0;
+  for (const v of map.values()) m = Math.max(m, v);
+  return m;
 }
 
 /* ------------------ utils ------------------ */
@@ -652,6 +808,15 @@ function debounce(fn, wait) {
     clearTimeout(t);
     t = setTimeout(() => fn(...args), wait);
   };
+}
+
+function toggleSection(buttonEl, sectionEl, labels = { more: 'Mehr', less: 'Weniger' }) {
+  if (!buttonEl || !sectionEl) return;
+  const willOpen = sectionEl.hidden === true;
+  sectionEl.hidden = !willOpen;
+  const expanded = willOpen;
+  buttonEl.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  buttonEl.textContent = expanded ? labels.less : labels.more;
 }
 
 
