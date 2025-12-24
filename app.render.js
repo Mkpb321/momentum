@@ -36,10 +36,10 @@ export function updateBooksControls(el, showFinished) {
     // Compact toggle for mobile: show current filter state.
     // showFinished=true  => all books (incl. finished)
     // showFinished=false => active only
-    el.btnToggleFinished.textContent = showFinished ? "Alle" : "Aktive";
+    el.btnToggleFinished.textContent = showFinished ? "Zeige aktive" : "Zeige alle";
     el.btnToggleFinished.title = showFinished
-      ? "Zeigt alle Bücher (inkl. fertige)"
-      : "Zeigt nur aktive Bücher";
+      ? "Zeige nur aktive Bücher)"
+      : "Zeige alle Bücher (inkl. fertige)";
   }
 }
 
