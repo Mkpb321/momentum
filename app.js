@@ -425,6 +425,14 @@ function wireAppEvents() {
 
   el.btnCloseBookX?.addEventListener("click", () => el.dlgBook.close());
 
+  // Ensure the toast is not trapped in a closed dialog (which would hide it abruptly).
+  const detachToast = () => {
+    if (!el.toast) return;
+    if (el.toast.parentElement !== document.body) document.body.appendChild(el.toast);
+  };
+  el.dlgAddBook?.addEventListener("close", detachToast);
+  el.dlgBook?.addEventListener("close", detachToast);
+
   el.formAddBook?.addEventListener("submit", async (ev) => {
     ev.preventDefault();
     if (!requireAuth()) return;
@@ -670,10 +678,27 @@ function requireAuth() {
 /* ------------------ ui helpers ------------------ */
 
 function toast(msg) {
+  if (!el.toast) return;
+
+  // When a <dialog> is open, its backdrop lives in the top layer and would blur/dim anything behind it.
+  // To keep toasts crisp and readable, temporarily move the toast element into the open dialog.
+  const host = (el.dlgBook?.open ? el.dlgBook : (el.dlgAddBook?.open ? el.dlgAddBook : null));
+  if (host) {
+    if (!host.contains(el.toast)) host.appendChild(el.toast);
+  } else {
+    if (el.toast.parentElement !== document.body) document.body.appendChild(el.toast);
+  }
+
   el.toast.textContent = msg;
   el.toast.classList.add("toast--show");
   clearTimeout(toast._t);
-  toast._t = setTimeout(() => el.toast.classList.remove("toast--show"), 1800);
+  toast._t = setTimeout(() => {
+    el.toast.classList.remove("toast--show");
+    // If no dialog is open anymore, ensure the toast lives in the normal document flow.
+    if (!el.dlgBook?.open && !el.dlgAddBook?.open && el.toast.parentElement !== document.body) {
+      document.body.appendChild(el.toast);
+    }
+  }, 3800);
 }
 
 function debounce(fn, wait) {

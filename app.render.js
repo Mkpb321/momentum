@@ -33,7 +33,13 @@ export function renderAll(el, state, showFinished, searchQuery, onOpenBook) {
 
 export function updateBooksControls(el, showFinished) {
   if (el.btnToggleFinished) {
-    el.btnToggleFinished.textContent = showFinished ? "Fertige ausblenden" : "Fertige anzeigen";
+    // Compact toggle for mobile: show current filter state.
+    // showFinished=true  => all books (incl. finished)
+    // showFinished=false => active only
+    el.btnToggleFinished.textContent = showFinished ? "Alle" : "Aktive";
+    el.btnToggleFinished.title = showFinished
+      ? "Zeigt alle Bücher (inkl. fertige)"
+      : "Zeigt nur aktive Bücher";
   }
 }
 

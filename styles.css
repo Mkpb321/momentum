@@ -484,18 +484,15 @@ h2{
 
 .bookdetail{
   display:grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap:12px;
-}
-@media (max-width: 820px){
-  .bookdetail{ grid-template-columns: 1fr; }
 }
 .bookdetail__label{
   font-size: 12px;
   color: var(--muted);
   margin-bottom: 8px;
 }
-.bookdetail__row{ display:flex; gap:10px; align-items:center; }
+.bookdetail__row{ display:flex; flex-direction: column; gap:10px; align-items: stretch; }
 .bookdetail__row input{
   flex:1;
   padding: 12px 12px;
@@ -503,7 +500,7 @@ h2{
   border: 1px solid var(--line);
   font-size: 14px;
 }
-.bookdetail__row input[type="date"]{ flex: 0 0 170px; }
+.bookdetail__row input[type="date"]{ flex: 1 1 auto; }
 .bookdetail__row input[type="number"]{ min-width: 0; }
 .bookdetail__row input:focus{ outline:none; box-shadow: var(--focus); border-color: #d9d2ca; }
 .hint{ margin-top: 10px; color: var(--muted); font-size: 12px; }
@@ -512,9 +509,6 @@ h2{
   /* Prevent horizontal scroll in modals on iPhone widths */
   .modal__actions{ flex-direction: column; align-items: stretch; }
   .modal__actions .btn{ width: 100%; }
-
-  .bookdetail__row{ flex-direction: column; align-items: stretch; }
-  .bookdetail__row input[type="date"]{ flex: 1 1 auto; }
 }
 
 .history{
@@ -555,6 +549,7 @@ h2{
   padding: 10px 12px;
   border-radius: 999px;
   font-size: 13px;
+  z-index: 2000;
   opacity: 0;
   pointer-events:none;
   transition: opacity .18s ease, transform .18s ease;
@@ -640,9 +635,16 @@ svg.chartsvg{
 .panel__head--books{ align-items:center; }
 .panel__headleft{ display:flex; align-items:baseline; gap:10px; }
 .panel__headright{ display:flex; align-items:center; gap:10px; }
+#btnToggleFinished{
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
 @media (max-width: 520px){
   .panel__head--books{ flex-direction:column; align-items:stretch; }
   .panel__headright{ width:100%; }
+  #btnToggleFinished{ padding: 8px 10px; font-size: 13px; }
 }
 .search{
   width: 220px;
