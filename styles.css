@@ -384,6 +384,19 @@ h2{
   cursor:pointer;
   transition: transform .05s ease, filter .12s ease, background .12s ease;
 }
+
+/* Small circular add buttons (+) */
+#btnAddBook,
+#btnAddBookEmpty{
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+}
 .btn:hover{ filter: brightness(1.02); transform: translateY(-1px); }
 .btn:active{ transform: translateY(0); }
 .btn:focus-visible{ outline:none; box-shadow: var(--focus); }
@@ -619,7 +632,8 @@ svg.chartsvg{
   .wrap{ padding: 14px 14px; }
   .topbar__inner{ padding-top:8px; padding-bottom:8px; }
   .btn{ padding: 10px 12px; }
-  #btnAddBook{ width: 40px; padding: 10px 0; text-align:center; }
+  #btnAddBook,
+  #btnAddBookEmpty{ width: 34px; height: 34px; padding: 0; }
 }
 
 /* Books header: search + toggle */
@@ -739,6 +753,14 @@ body{ overflow-x:hidden; }
 }
 
 .moreitem:last-child{ border-bottom: 0; }
+
+/* In two-column layout, remove the bottom line on the partner item in the last row (even item counts)
+   to avoid a "double line" with the group separator below. */
+@media (min-width: 980px){
+  .moregroup__list .moreitem:nth-last-child(2):nth-child(odd){
+    border-bottom: 0;
+  }
+}
 
 .moreitem__label{
   color: var(--text);

@@ -134,8 +134,8 @@ const el = {
 
   // KPIs (Top)
   kpiCurrentStreak: document.getElementById("kpiCurrentStreak"),
-  kpiLongestStreak: document.getElementById("kpiLongestStreak"),
-  kpiLongestHint: document.getElementById("kpiLongestHint"),
+  kpiCurrentStreakHint: document.getElementById("kpiCurrentStreakHint"),
+  kpiAvgPerActiveDayTop: document.getElementById("kpiAvgPerActiveDayTop"),
   kpiWeekPages: document.getElementById("kpiWeekPages"),
   kpiWeekHint: document.getElementById("kpiWeekHint"),
   kpiTodayPages: document.getElementById("kpiTodayPages"),

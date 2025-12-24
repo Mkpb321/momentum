@@ -123,13 +123,15 @@ export function renderStatsAndKpis(el, state) {
 
   // Top KPIs
   setText(el.kpiCurrentStreak, String(currentStreak));
-  setText(el.kpiLongestStreak, String(longestStreak));
-
-  if (el.kpiLongestHint) {
-    el.kpiLongestHint.textContent =
-      (currentStreak > 0 && currentStreak === longestStreak)
-        ? "Du bist gerade am längsten Streak."
-        : (longestStreak > 0 ? "" : "Noch keine Serie.");
+  if (el.kpiCurrentStreakHint) {
+    if (longestStreak > 0) {
+      el.kpiCurrentStreakHint.textContent =
+        (currentStreak > 0 && currentStreak === longestStreak)
+          ? `Längster Streak: ${longestStreak} (aktuell)`
+          : `Längster Streak: ${longestStreak}`;
+    } else {
+      el.kpiCurrentStreakHint.textContent = "Noch keine Serie.";
+    }
   }
 
   const weekTotals = computeWeekTotals(daily);
@@ -198,6 +200,7 @@ export function renderStatsAndKpis(el, state) {
   const avgPerActiveYear = activeYears ? pagesInActiveYears / activeYears : 0;
 
   setText(el.kpiAvgPerActiveDay, formatNumber(avgPerActiveDay, 1));
+  setText(el.kpiAvgPerActiveDayTop, formatNumber(avgPerActiveDay, 1));
   setText(el.kpiAvgPerActiveMonth, formatNumber(avgPerActiveMonth, 1));
   setText(el.kpiAvgPerActiveYear, formatNumber(avgPerActiveYear, 1));
 
