@@ -155,65 +155,164 @@
 
       <button class="togglelink" id="toggleMoreStats" type="button" aria-expanded="false" aria-controls="moreStats">Mehr</button>
 
-      <div id="moreStats" class="kpis kpis--more" hidden>
-        <div class="kpi">
-          <div class="kpi__label">Seiten heute</div>
-          <div class="kpi__value" id="kpiTodayPages">0</div>
-          <div class="kpi__hint">&nbsp;</div>
+      <div id="moreStats" class="morelist" hidden>
+        <div class="moregroup">
+          <div class="moregroup__title">Zeiträume</div>
+          <ul class="moregroup__list">
+            <li class="moreitem">
+              <span class="moreitem__label">Seiten heute</span>
+              <span class="moreitem__value" id="kpiTodayPages">0</span>
+              <span class="moreitem__meta">Heute</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Seiten gestern</span>
+              <span class="moreitem__value" id="kpiYesterdayPages">0</span>
+              <span class="moreitem__meta">Gestern</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Seiten letzte 7 Tage</span>
+              <span class="moreitem__value" id="kpiLast7DaysPages">0</span>
+              <span class="moreitem__meta">rollierend, inkl. heute</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Seiten letzte 30 Tage</span>
+              <span class="moreitem__value" id="kpiLast30DaysPages">0</span>
+              <span class="moreitem__meta">rollierend, inkl. heute</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Seiten diesen Monat</span>
+              <span class="moreitem__value" id="kpiMonthPages">0</span>
+              <span class="moreitem__meta">Kalendermonat</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Seiten dieses Jahr</span>
+              <span class="moreitem__value" id="kpiYearPages">0</span>
+              <span class="moreitem__meta">Kalenderjahr</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Gesamtseiten</span>
+              <span class="moreitem__value" id="kpiTotalPages">0</span>
+              <span class="moreitem__meta">über alle Zeit</span>
+            </li>
+          </ul>
         </div>
 
-        <div class="kpi">
-          <div class="kpi__label">Seiten diesen Monat</div>
-          <div class="kpi__value" id="kpiMonthPages">0</div>
-          <div class="kpi__hint">&nbsp;</div>
+        <div class="moregroup">
+          <div class="moregroup__title">Aktivität &amp; Durchschnitt</div>
+          <ul class="moregroup__list">
+            <li class="moreitem">
+              <span class="moreitem__label">Aktive Tage</span>
+              <span class="moreitem__value" id="kpiActiveDays">0</span>
+              <span class="moreitem__meta">Tage mit &gt; 0 Seiten</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Aktive Wochen</span>
+              <span class="moreitem__value" id="kpiActiveWeeks">0</span>
+              <span class="moreitem__meta">Wochen mit &gt; 0 Seiten</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Aktive Monate</span>
+              <span class="moreitem__value" id="kpiActiveMonths">0</span>
+              <span class="moreitem__meta">Monate mit &gt; 0 Seiten</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Ø pro aktivem Tag</span>
+              <span class="moreitem__value" id="kpiAvgPerActiveDay">0</span>
+              <span class="moreitem__meta">nur aktive Tage</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Ø pro aktivem Monat</span>
+              <span class="moreitem__value" id="kpiAvgPerActiveMonth">0</span>
+              <span class="moreitem__meta">nur aktive Monate</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Ø pro aktivem Jahr</span>
+              <span class="moreitem__value" id="kpiAvgPerActiveYear">0</span>
+              <span class="moreitem__meta">Jahre mit &gt; 1 Seite</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Ø pro Tag (7 Tage)</span>
+              <span class="moreitem__value" id="kpiAvgLast7Days">0</span>
+              <span class="moreitem__meta">inkl. 0-Tage</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Ø pro Tag (30 Tage)</span>
+              <span class="moreitem__value" id="kpiAvgLast30Days">0</span>
+              <span class="moreitem__meta">inkl. 0-Tage</span>
+            </li>
+          </ul>
         </div>
 
-        <div class="kpi">
-          <div class="kpi__label">Seiten dieses Jahr</div>
-          <div class="kpi__value" id="kpiYearPages">0</div>
-          <div class="kpi__hint">&nbsp;</div>
+        <div class="moregroup">
+          <div class="moregroup__title">Bestwerte</div>
+          <ul class="moregroup__list">
+            <li class="moreitem">
+              <span class="moreitem__label">Bester Tag</span>
+              <span class="moreitem__value" id="kpiBestDay">0</span>
+              <span class="moreitem__meta" id="kpiBestDayDate">—</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Beste Woche</span>
+              <span class="moreitem__value" id="kpiBestWeek">0</span>
+              <span class="moreitem__meta">max. Seiten in 1 Woche</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Bester Monat</span>
+              <span class="moreitem__value" id="kpiBestMonth">0</span>
+              <span class="moreitem__meta">max. Seiten in 1 Monat</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Letzter aktiver Tag</span>
+              <span class="moreitem__value" id="kpiLastActiveDate">—</span>
+              <span class="moreitem__meta" id="kpiLastActivePages">—</span>
+            </li>
+          </ul>
         </div>
 
-        <div class="kpi">
-          <div class="kpi__label">Ø pro aktivem Tag</div>
-          <div class="kpi__value" id="kpiAvgPerActiveDay">0</div>
-          <div class="kpi__hint">Tage mit &gt; 0 Seiten</div>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi__label">Ø pro aktivem Monat</div>
-          <div class="kpi__value" id="kpiAvgPerActiveMonth">0</div>
-          <div class="kpi__hint">Monate mit &gt; 0 Seiten</div>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi__label">Ø pro aktivem Jahr</div>
-          <div class="kpi__value" id="kpiAvgPerActiveYear">0</div>
-          <div class="kpi__hint">Jahre mit &gt; 1 Seite</div>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi__label">Gesamtseiten</div>
-          <div class="kpi__value" id="kpiTotalPages">0</div>
-          <div class="kpi__hint">über alle Zeit</div>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi__label">Aktive Tage</div>
-          <div class="kpi__value" id="kpiActiveDays">0</div>
-          <div class="kpi__hint">Tage mit &gt; 0 Seiten</div>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi__label">Beste Woche</div>
-          <div class="kpi__value" id="kpiBestWeek">0</div>
-          <div class="kpi__hint">max. Seiten in 1 Woche</div>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi__label">Bester Monat</div>
-          <div class="kpi__value" id="kpiBestMonth">0</div>
-          <div class="kpi__hint">max. Seiten in 1 Monat</div>
+        <div class="moregroup">
+          <div class="moregroup__title">Bibliothek</div>
+          <ul class="moregroup__list">
+            <li class="moreitem">
+              <span class="moreitem__label">Bücher gesamt</span>
+              <span class="moreitem__value" id="kpiBooksTotal">0</span>
+              <span class="moreitem__meta">&nbsp;</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Abgeschlossen</span>
+              <span class="moreitem__value" id="kpiBooksFinished">0</span>
+              <span class="moreitem__meta">&nbsp;</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">In Arbeit</span>
+              <span class="moreitem__value" id="kpiBooksInProgress">0</span>
+              <span class="moreitem__meta">&nbsp;</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Nicht gestartet</span>
+              <span class="moreitem__value" id="kpiBooksNotStarted">0</span>
+              <span class="moreitem__meta">ohne Einträge</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Seitenumfang gesamt</span>
+              <span class="moreitem__value" id="kpiLibraryTotalPages">0</span>
+              <span class="moreitem__meta">Summe totalPages</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Seiten aktueller Stand</span>
+              <span class="moreitem__value" id="kpiLibraryCurrentPages">0</span>
+              <span class="moreitem__meta">Summe letzter Stand</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Seiten verbleibend</span>
+              <span class="moreitem__value" id="kpiLibraryRemainingPages">0</span>
+              <span class="moreitem__meta">bis Ende</span>
+            </li>
+            <li class="moreitem">
+              <span class="moreitem__label">Gesamtfortschritt</span>
+              <span class="moreitem__value" id="kpiLibraryProgressPct">0%</span>
+              <span class="moreitem__meta">&nbsp;</span>
+            </li>
+          </ul>
         </div>
       </div>
 

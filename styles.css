@@ -689,3 +689,70 @@ body{ overflow-x:hidden; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+
+/* "Mehr"-Liste: statt KPI-Karten */
+.morelist{
+  display:grid;
+  gap:12px;
+}
+
+.moregroup{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+}
+
+.moregroup__title{
+  font-size: 12px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.moregroup__list{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.moreitem{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+
+.moreitem:first-child{ border-top: 0; }
+
+.moreitem__label{
+  color: var(--text);
+  min-width: 0;
+}
+
+.moreitem__value{
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.moreitem__meta{
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+@media (min-width: 860px){
+  .moreitem{ grid-template-columns: 1fr auto auto; }
+  .moreitem__meta{
+    grid-column: 3;
+    justify-self: end;
+    text-align: right;
+  }
+}

@@ -155,13 +155,40 @@ export function renderStatsAndKpis(el, state) {
   setText(el.kpiMonthPages, String(monthPages));
   setText(el.kpiYearPages, String(yearPages));
 
+  // Additional time windows (rollierend)
+  const yesterdayKey = dateKey(addDays(now, -1));
+  const yesterdayPages = daily.get(yesterdayKey) ?? 0;
+  setText(el.kpiYesterdayPages, String(yesterdayPages));
+
+  const sumLastNDays = (n) => {
+    let s = 0;
+    for (let i = 0; i < n; i++) {
+      const k = dateKey(addDays(now, -i));
+      s += daily.get(k) ?? 0;
+    }
+    return s;
+  };
+
+  const last7DaysPages = sumLastNDays(7);
+  const last30DaysPages = sumLastNDays(30);
+
+  setText(el.kpiLast7DaysPages, String(last7DaysPages));
+  setText(el.kpiLast30DaysPages, String(last30DaysPages));
+
+  setText(el.kpiAvgLast7Days, formatNumber(last7DaysPages / 7, 1));
+  setText(el.kpiAvgLast30Days, formatNumber(last30DaysPages / 30, 1));
+
   const totalPages = sumMapValues(daily);
   const activeDays = [...daily.values()].filter(v => v > 0).length;
 
   setText(el.kpiTotalPages, String(totalPages));
   setText(el.kpiActiveDays, String(activeDays));
 
+  const activeWeeks = [...weekTotals.values()].filter(v => v > 0).length;
+  setText(el.kpiActiveWeeks, String(activeWeeks));
+
   const activeMonths = [...monthTotals.values()].filter(v => v > 0).length;
+  setText(el.kpiActiveMonths, String(activeMonths));
   const activeYearsEntries = [...yearTotals.entries()].filter(([, v]) => v > 1);
   const activeYears = activeYearsEntries.length;
   const pagesInActiveYears = activeYearsEntries.reduce((a, [, v]) => a + v, 0);
@@ -176,6 +203,67 @@ export function renderStatsAndKpis(el, state) {
 
   setText(el.kpiBestWeek, String(maxMapValue(weekTotals)));
   setText(el.kpiBestMonth, String(maxMapValue(monthTotals)));
+
+
+  // Best day + last active day
+  let bestDayPages = 0;
+  let bestDayKey = null;
+  let lastActiveKey = null;
+  let lastActivePages = 0;
+
+  for (const [k, v] of daily.entries()) {
+    if (v <= 0) continue;
+
+    if (!lastActiveKey || k > lastActiveKey) {
+      lastActiveKey = k;
+      lastActivePages = v;
+    }
+
+    if (v > bestDayPages) {
+      bestDayPages = v;
+      bestDayKey = k;
+    } else if (v === bestDayPages) {
+      // Tie-breaker: pick the most recent date
+      if (!bestDayKey || k > bestDayKey) bestDayKey = k;
+    }
+  }
+
+  setText(el.kpiBestDay, String(bestDayPages));
+  setText(el.kpiBestDayDate, bestDayKey ? formatDateShort(bestDayKey) : "—");
+  setText(el.kpiLastActiveDate, lastActiveKey ? formatDateShort(lastActiveKey) : "—");
+  setText(el.kpiLastActivePages, lastActiveKey ? `${lastActivePages} Seiten` : "—");
+
+  // Library metrics
+  const books = state.books || [];
+  const booksTotal = books.length;
+  const booksFinished = books.filter(isFinished).length;
+  const booksInProgress = books.filter(b => !isFinished(b) && (b.history?.length ?? 0) > 0).length;
+  const booksNotStarted = books.filter(b => !isFinished(b) && (b.history?.length ?? 0) === 0).length;
+
+  setText(el.kpiBooksTotal, String(booksTotal));
+  setText(el.kpiBooksFinished, String(booksFinished));
+  setText(el.kpiBooksInProgress, String(booksInProgress));
+  setText(el.kpiBooksNotStarted, String(booksNotStarted));
+
+  const libraryTotalPages = books.reduce((a, b) => a + (Number(b.totalPages) || 0), 0);
+  const libraryCurrentPages = books.reduce((a, b) => {
+    const tp = Number(b.totalPages) || 0;
+    if (tp <= 0) return a;
+    return a + Math.min(latestPage(b), tp);
+  }, 0);
+  const libraryRemainingPages = books.reduce((a, b) => {
+    const tp = Number(b.totalPages) || 0;
+    if (tp <= 0) return a;
+    const cur = Math.min(latestPage(b), tp);
+    return a + Math.max(0, tp - cur);
+  }, 0);
+
+  setText(el.kpiLibraryTotalPages, String(libraryTotalPages));
+  setText(el.kpiLibraryCurrentPages, String(libraryCurrentPages));
+  setText(el.kpiLibraryRemainingPages, String(libraryRemainingPages));
+
+  const libraryProgressPct = libraryTotalPages ? (libraryCurrentPages / libraryTotalPages) * 100 : 0;
+  setText(el.kpiLibraryProgressPct, `${formatNumber(libraryProgressPct, 1)}%`);
 
   el.streakMeta.textContent =
     todayPages > 0 ? "Heute: eingetragen." : "Heute: noch nichts eingetragen.";

@@ -143,14 +143,36 @@ const el = {
 
   // KPIs (Mehr)
   kpiYearPages: document.getElementById("kpiYearPages"),
+  kpiYesterdayPages: document.getElementById("kpiYesterdayPages"),
+  kpiLast7DaysPages: document.getElementById("kpiLast7DaysPages"),
+  kpiLast30DaysPages: document.getElementById("kpiLast30DaysPages"),
+
   kpiAvgPerActiveDay: document.getElementById("kpiAvgPerActiveDay"),
   kpiAvgPerActiveMonth: document.getElementById("kpiAvgPerActiveMonth"),
   kpiAvgPerActiveYear: document.getElementById("kpiAvgPerActiveYear"),
+  kpiAvgLast7Days: document.getElementById("kpiAvgLast7Days"),
+  kpiAvgLast30Days: document.getElementById("kpiAvgLast30Days"),
+
   kpiTotalPages: document.getElementById("kpiTotalPages"),
   kpiActiveDays: document.getElementById("kpiActiveDays"),
+  kpiActiveWeeks: document.getElementById("kpiActiveWeeks"),
+  kpiActiveMonths: document.getElementById("kpiActiveMonths"),
+
+  kpiBestDay: document.getElementById("kpiBestDay"),
+  kpiBestDayDate: document.getElementById("kpiBestDayDate"),
   kpiBestWeek: document.getElementById("kpiBestWeek"),
   kpiBestMonth: document.getElementById("kpiBestMonth"),
+  kpiLastActiveDate: document.getElementById("kpiLastActiveDate"),
+  kpiLastActivePages: document.getElementById("kpiLastActivePages"),
 
+  kpiBooksTotal: document.getElementById("kpiBooksTotal"),
+  kpiBooksFinished: document.getElementById("kpiBooksFinished"),
+  kpiBooksInProgress: document.getElementById("kpiBooksInProgress"),
+  kpiBooksNotStarted: document.getElementById("kpiBooksNotStarted"),
+  kpiLibraryTotalPages: document.getElementById("kpiLibraryTotalPages"),
+  kpiLibraryCurrentPages: document.getElementById("kpiLibraryCurrentPages"),
+  kpiLibraryRemainingPages: document.getElementById("kpiLibraryRemainingPages"),
+  kpiLibraryProgressPct: document.getElementById("kpiLibraryProgressPct"),
 
   // Toggles
   toggleMoreStats: document.getElementById("toggleMoreStats"),
