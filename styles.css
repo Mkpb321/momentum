@@ -722,20 +722,23 @@ body{ overflow-x:hidden; }
   list-style: none;
   padding: 0;
   margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 38px;
 }
 
 .moreitem{
   display: grid;
   /* Label und Wert bewusst nah beieinander (keine "ganz links"/"ganz rechts"-Spannweite) */
-  grid-template-columns: minmax(180px, 420px) auto;
+  grid-template-columns: minmax(180px, 340px) auto;
   justify-content: start;
   gap: 2px 12px;
   align-items: baseline;
-  padding: 9px 0;
-  border-top: 1px solid var(--line);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
 }
 
-.moreitem:first-child{ border-top: 0; }
+.moreitem:last-child{ border-bottom: 0; }
 
 .moreitem__label{
   color: var(--text);
@@ -755,4 +758,9 @@ body{ overflow-x:hidden; }
   line-height: 1.2;
 }
 
-/* Kein 3-Spalten-Layout auf Wide-Screens: Meta bleibt unterhalb, damit es kompakt bleibt. */
+/* Wide screens: zweispaltig innerhalb jeder Gruppe */
+@media (min-width: 980px){
+  .moregroup__list{
+    grid-template-columns: 1fr 1fr;
+  }
+}
