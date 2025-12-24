@@ -693,16 +693,21 @@ body{ overflow-x:hidden; }
 
 /* "Mehr"-Liste: statt KPI-Karten */
 .morelist{
-  display:grid;
-  gap:12px;
+  /* Abstand unterhalb des Toggle-Links ("Mehr"/"Weniger") */
+  margin-top: 14px;
+  display:block;
 }
 
 .moregroup{
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  box-shadow: var(--shadow);
+  /* bewusst KEIN Kartendesign pro Gruppe */
+  padding: 0;
+  margin: 0;
+}
+
+.moregroup + .moregroup{
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
 }
 
 .moregroup__title{
@@ -710,7 +715,7 @@ body{ overflow-x:hidden; }
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--muted);
-  margin: 0 0 6px;
+  margin: 0 0 8px;
 }
 
 .moregroup__list{
@@ -721,7 +726,9 @@ body{ overflow-x:hidden; }
 
 .moreitem{
   display: grid;
-  grid-template-columns: 1fr auto;
+  /* Label und Wert bewusst nah beieinander (keine "ganz links"/"ganz rechts"-Spannweite) */
+  grid-template-columns: minmax(180px, 420px) auto;
+  justify-content: start;
   gap: 2px 12px;
   align-items: baseline;
   padding: 9px 0;
@@ -748,11 +755,4 @@ body{ overflow-x:hidden; }
   line-height: 1.2;
 }
 
-@media (min-width: 860px){
-  .moreitem{ grid-template-columns: 1fr auto auto; }
-  .moreitem__meta{
-    grid-column: 3;
-    justify-self: end;
-    text-align: right;
-  }
-}
+/* Kein 3-Spalten-Layout auf Wide-Screens: Meta bleibt unterhalb, damit es kompakt bleibt. */
