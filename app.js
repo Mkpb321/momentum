@@ -141,6 +141,17 @@ const el = {
   kpiTodayPages: document.getElementById("kpiTodayPages"),
   kpiMonthPages: document.getElementById("kpiMonthPages"),
 
+  // KPIs (Mehr)
+  kpiYearPages: document.getElementById("kpiYearPages"),
+  kpiAvgPerActiveDay: document.getElementById("kpiAvgPerActiveDay"),
+  kpiAvgPerActiveMonth: document.getElementById("kpiAvgPerActiveMonth"),
+  kpiAvgPerActiveYear: document.getElementById("kpiAvgPerActiveYear"),
+  kpiTotalPages: document.getElementById("kpiTotalPages"),
+  kpiActiveDays: document.getElementById("kpiActiveDays"),
+  kpiBestWeek: document.getElementById("kpiBestWeek"),
+  kpiBestMonth: document.getElementById("kpiBestMonth"),
+
+
   // Toggles
   toggleMoreStats: document.getElementById("toggleMoreStats"),
   moreStats: document.getElementById("moreStats"),
