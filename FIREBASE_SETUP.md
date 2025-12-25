@@ -44,7 +44,7 @@ Hinweis: Für Deployments auf eigener Domain musst du ggf. unter
 - `FIREBASE_PROJECTS.prod = { ... }`
 - `FIREBASE_PROJECTS.dev = { ... }`
 
-### 4.2 DEV/PROD umschalten
+### 4.2 DEV/PROD umschalten (Admin-only)
 
 Die App wählt die Umgebung so:
 
@@ -52,7 +52,33 @@ Die App wählt die Umgebung so:
 2. `localStorage["momentum.env"]`
 3. Fallback `DEFAULT_ENV` in `firebase.config.js`
 
-Du kannst in der UI (Login-Screen oder Topbar) zwischen DEV und PROD umschalten.
+**Wichtig:** Das Umschalten über die UI ist **nur für Admins** möglich.
+Der Switch-Button erscheint erst **nach dem Login** und nur, wenn der eingeloggte User als Admin hinterlegt ist
+(siehe nächster Abschnitt).
+
+Wenn ein Nicht-Admin in `DEV` landet (z.B. über einen Link), wird er nach dem Login automatisch zu `PROD` umgeleitet.
+
+
+### 4.3 Admins hinterlegen (für DEV/PROD Switch)
+
+Admins werden pro Firebase-Projekt über ein Firestore-Dokument hinterlegt:
+
+- Collection: `admins`
+- Dokument-ID: **UID** des Users (aus Authentication → Users)
+- Felder (minimal): `{ "isAdmin": true }`
+
+#### Schritt-für-Schritt
+
+1. Firebase Console → **Build → Authentication → Users**
+2. Admin-User anlegen (oder bestehenden öffnen) und die **UID** kopieren
+3. Firebase Console → **Build → Firestore Database**
+4. Collection `admins` anlegen → Document-ID = **UID** → Feld `isAdmin` (boolean) = `true`
+   - optional: `email` (string), `note` (string)
+5. App neu laden und einloggen → der Menüpunkt **„Umgebung“** ist jetzt sichtbar (Admin-only)
+
+Hinweis: Wenn du getrennte Projekte für DEV und PROD nutzt, musst du Admins in **beiden** Projekten hinterlegen,
+da die UID pro Projekt unterschiedlich ist.
+
 
 ## 5) Firestore Datenmodell
 
@@ -120,6 +146,13 @@ service cloud.firestore {
         && data.history.size() <= 5000;
         // Hinweis: Vollständige Validierung jedes history-Items ist in Rules nur eingeschränkt möglich,
         // da es keine Schleifen über Listen gibt.
+    }
+
+    match /admins/{uid} {
+      // Clients dürfen nur ihre eigene Admin-Flag lesen.
+      // Schreiben ist gesperrt (Admins werden über die Console oder Admin SDK gepflegt).
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
     }
 
     match /users/{userId} {

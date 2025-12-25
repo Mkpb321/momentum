@@ -14,7 +14,9 @@ import {
 import {
   getServices,
   getEnv,
+  setEnv,
   toggleEnv,
+  checkIsAdmin,
   watchAuth,
   loginWithEmailPassword,
   logout,
@@ -78,6 +80,8 @@ const DEMO_ONLY_IN_DEV = true;
 /* ------------------ Firebase ctx ------------------ */
 
 let ctx = null; // { env, app, auth, db, user }
+
+let isAdmin = false; // resolved after login via Firestore (/admins/{uid})
 
 /* ------------------ DOM ------------------ */
 
@@ -219,12 +223,17 @@ function bootstrap() {
     ctx = { ...getServices(), user: null };
   } catch (e) {
     // Config missing => show error on login screen.
-    showAuthOnly();
+    isAdmin = false;
+  if (ctx) ctx.isAdmin = false;
+  updateAdminUi();
+
+  showAuthOnly();
     setAuthError(String(e?.message || e));
     return;
   }
 
   updateEnvUi();
+  updateAdminUi();
 
   wireAuthEvents();
   wireAppEvents();
@@ -255,6 +264,25 @@ function updateEnvUi() {
     el.btnSwitchEnvAuth.textContent = `Zu ${next.toUpperCase()} wechseln`;
   }
 }
+
+function updateAdminUi() {
+  // Environment switching is an admin-only capability.
+  const canSwitch = !!isAdmin;
+
+  if (el.btnSwitchEnv) {
+    el.btnSwitchEnv.hidden = !canSwitch;
+    el.btnSwitchEnv.disabled = !canSwitch;
+    el.btnSwitchEnv.title = canSwitch ? "Umgebung wechseln" : "Nur Admins dürfen die Umgebung wechseln.";
+  }
+
+  // On the login screen we never allow switching (no reliable admin check possible before login).
+  if (el.btnSwitchEnvAuth) {
+    el.btnSwitchEnvAuth.hidden = true;
+    el.btnSwitchEnvAuth.disabled = true;
+    el.btnSwitchEnvAuth.title = "Umgebung wechseln ist nur nach Login als Admin möglich.";
+  }
+}
+
 
 function showAuthOnly() {
   closeMenu();
@@ -290,6 +318,23 @@ async function onSignedIn(user) {
     el.userAvatar.textContent = ch;
   }
   if (el.btnLogout) el.btnLogout.hidden = false;
+
+  // Resolve admin flag first (controls DEV/PROD switching)
+  try {
+    isAdmin = await checkIsAdmin(ctx.db, user.uid);
+  } catch {
+    isAdmin = false;
+  }
+  ctx.isAdmin = isAdmin;
+  updateAdminUi();
+
+  // If a non-admin somehow ends up in DEV, force redirect back to PROD.
+  if (!isAdmin && getEnv() === "dev") {
+    alert("DEV ist nur für Admins. Du wirst zu PROD umgeleitet.");
+    setEnv("prod");
+    window.location.reload();
+    return;
+  }
 
   // Load state from Firestore
   try {
@@ -329,6 +374,7 @@ function onSignedOut() {
 
   // Keep env UI visible on login screen
   updateEnvUi();
+  updateAdminUi();
 }
 
 /* ------------------ events: auth ------------------ */
@@ -365,11 +411,16 @@ function wireAuthEvents() {
   });
 
   const onEnvToggle = () => {
+    if (!isAdmin) {
+      toast("Nur Admins dürfen zwischen DEV/PROD wechseln.");
+      return;
+    }
+
     if (ctx?.user) {
       const ok = confirm("Umgebung wechseln? Du wirst neu laden (DEV/PROD) und ggf. neu einloggen müssen.");
       if (!ok) return;
     }
-    toggleEnv();
+    toggleEnv({ isAdmin: true });
   };
 
   el.btnSwitchEnv?.addEventListener("click", onEnvToggle);

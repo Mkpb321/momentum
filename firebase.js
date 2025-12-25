@@ -10,7 +10,7 @@ import {
   signInWithEmailAndPassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 export function getEnv() {
   const url = new URL(window.location.href);
@@ -28,7 +28,12 @@ export function setEnv(env) {
   localStorage.setItem(ENV_STORAGE_KEY, env);
 }
 
-export function toggleEnv() {
+export function toggleEnv(opts = {}) {
+  const isAdmin = opts && opts.isAdmin === true;
+  if (!isAdmin) {
+    throw new Error("Admin only: environment switching is disabled for non-admin users.");
+  }
+
   const cur = getEnv();
   const next = cur === "prod" ? "dev" : "prod";
   setEnv(next);
@@ -51,6 +56,28 @@ export function getServices(env = getEnv()) {
   const db = getFirestore(app);
 
   return { env, app, auth, db };
+}
+
+
+/**
+ * Admin check (Firestore)
+ * Data model: /admins/{uid} => { isAdmin: true, ... }
+ *
+ * Note: The document is created manually in the Firebase Console (or via Admin SDK),
+ * and clients are blocked from writing it via Security Rules.
+ */
+export async function checkIsAdmin(db, uid) {
+  if (!db || !uid) return false;
+  try {
+    const ref = doc(db, "admins", String(uid));
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return false;
+    const data = snap.data() || {};
+    // If the doc exists, treat the user as admin unless explicitly disabled.
+    return data.isAdmin !== false;
+  } catch {
+    return false;
+  }
 }
 
 export function watchAuth(auth, cb) {
