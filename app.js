@@ -198,6 +198,15 @@ const el = {
   chartActiveDaysWk: document.getElementById("chartActiveDaysWk"),
   chartIntensityWk: document.getElementById("chartIntensityWk"),
 
+
+  // Chart info dialog
+  infoDialog: document.getElementById("infoDialog"),
+  infoTitle: document.getElementById("infoTitle"),
+  infoSub: document.getElementById("infoSub"),
+  infoBody: document.getElementById("infoBody"),
+  btnCloseInfo: document.getElementById("btnCloseInfo"),
+  btnInfoOk: document.getElementById("btnInfoOk"),
+
   subDays: document.getElementById("subDays"),
   subWeeks: document.getElementById("subWeeks"),
   subMonths: document.getElementById("subMonths"),
@@ -227,6 +236,154 @@ const el = {
   fileImport: document.getElementById("fileImport"),
 };
 
+/* ------------------ chart info ------------------ */
+/**
+ * For every chart: what it is, how it is calculated, and why it matters.
+ * Keys correspond to data-info-key attributes in index.html.
+ */
+const CHART_INFO = {
+  days12: {
+    title: "Letzte 12 Tage",
+    subtitle: "Tageswerte inkl. 0-Tage",
+    what: "Zeigt, wie viele Seiten du an jedem der letzten 12 Kalendertage erfasst hast.",
+    how: "Pro Datum wird die eingetragene Seitenzahl summiert (wenn kein Eintrag vorhanden ist, zählt 0).",
+    why: "Du erkennst sofort Momentum, Pausen und ob dein aktueller Rhythmus zur Gewohnheit wird.",
+  },
+  weeks12: {
+    title: "Letzte 12 Wochen",
+    subtitle: "Wochenstart Montag",
+    what: "Summiert deine Seiten pro Kalenderwoche (jeweils Montag bis Sonntag) für die letzten 12 Wochen.",
+    how: "Alle Tageswerte werden pro ISO-ähnlicher Woche mit Wochenstart am Montag aggregiert (Tage ohne Eintrag zählen 0).",
+    why: "Ideal, um Schwankungen zu glätten und zu sehen, ob du über Wochen hinweg konstant bleibst.",
+  },
+  months12: {
+    title: "Letzte 12 Monate",
+    subtitle: "Kalendermonate",
+    what: "Summiert deine Seiten pro Kalendermonat für die letzten 12 Monate.",
+    how: "Alle Tageswerte werden nach Jahr/Monat gruppiert und pro Monat addiert (Tage ohne Eintrag zählen 0).",
+    why: "Guter Blick auf langfristige Entwicklung, Saisonalität und ‚starke‘ Monate.",
+  },
+  cumulMonths: {
+    title: "Gesamt (kumuliert)",
+    subtitle: "Kumuliert über die letzten 24 Monate",
+    what: "Zeigt deinen kumulierten Seitenfortschritt als ansteigende Kurve über die letzten 24 Monate.",
+    how: "Wir nehmen die Monatssummen der letzten 24 Monate und addieren sie auf eine Vor-Summe (alles, was davor gelesen wurde). So entspricht der letzte Punkt dem Gesamtstand.",
+    why: "Sehr motivierend, weil Fortschritt als Wachstum sichtbar wird – auch wenn einzelne Monate schwächer sind.",
+  },
+  years5: {
+    title: "Letzte 5 Jahre",
+    subtitle: "Kalenderjahre",
+    what: "Summiert deine Seiten pro Jahr für die letzten 5 Kalenderjahre.",
+    how: "Alle Tageswerte werden nach Jahr gruppiert und pro Jahr addiert.",
+    why: "Perfekt, um ‚große‘ Zeiträume zu vergleichen und deinen langfristigen Trend zu sehen.",
+  },
+  days30: {
+    title: "Letzte 30 Tage",
+    subtitle: "Tageswerte inkl. 0-Tage",
+    what: "Zeigt deine täglichen Seiten über die letzten 30 Kalendertage.",
+    how: "Pro Datum wird die eingetragene Seitenzahl verwendet; fehlt ein Eintrag, zählt 0.",
+    why: "Hilft beim Fein-Tuning: du siehst, ob du gerade in einer guten Phase bist und welche Tage typischerweise ausfallen.",
+  },
+  trend7: {
+    title: "Trend (Ø 7 Tage)",
+    subtitle: "Gleitender 7‑Tage‑Durchschnitt (60 Tage)",
+    what: "Glättet deine Tageswerte mit einem 7‑Tage‑Durchschnitt, um den Trend klarer zu zeigen.",
+    how: "Für jeden Tag wird der Durchschnitt aus den letzten bis zu 7 Tagen berechnet (am Anfang der Periode mit kürzerem Fenster). Basis sind die letzten 60 Tage inkl. 0‑Tage.",
+    why: "Du siehst ‚echtes‘ Momentum ohne Ausreißer – ideal, um Fortschritt realistisch einzuschätzen.",
+  },
+  activeDaysWk: {
+    title: "Aktive Tage pro Woche",
+    subtitle: "Letzte 12 Wochen",
+    what: "Zeigt, an wie vielen Tagen pro Woche du mindestens 1 Seite erfasst hast.",
+    how: "Pro Woche (Mo–So) zählen wir die Anzahl Tage mit Seiten > 0.",
+    why: "Konstanz ist der Hebel für Gewohnheiten. Diese Grafik zeigt, ob du ‚dran bleibst‘ – unabhängig von der Seitenmenge.",
+  },
+  intensityWk: {
+    title: "Ø Seiten pro aktivem Tag",
+    subtitle: "Letzte 12 Wochen",
+    what: "Zeigt pro Woche die durchschnittlichen Seiten pro aktivem Tag (Tage mit Seiten > 0).",
+    how: "Pro Woche berechnen wir: (Seiten in der Woche) / (aktive Tage in der Woche). Wenn es keine aktiven Tage gibt, ist der Wert 0.",
+    why: "Ergänzt die Konstanz: du erkennst, ob du bei wenigen Tagen sehr intensiv liest oder eher konstant kleinere Einheiten machst.",
+  },
+  weekdays: {
+    title: "Wochentage",
+    subtitle: "Ø Seiten pro Wochentag (nur aktive Tage)",
+    what: "Vergleicht deine durchschnittliche Seitenzahl je Wochentag, nur an Tagen, an denen du gelesen hast.",
+    how: "Für jeden Wochentag (Mo–So) summieren wir Seiten an aktiven Tagen (Seiten > 0) und teilen durch die Anzahl aktiver Tage dieses Wochentags.",
+    why: "Du erkennst Muster (z.B. ‚Sonntag ist stark‘) und kannst bewusst Routinen auf deine besten Tage legen.",
+  },
+};
+
+function escapeHtml(s) {
+  return String(s)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function buildInfoHtml(info) {
+  return `
+    <div class="info__section">
+      <div class="info__h">Was ist das?</div>
+      <div class="info__p">${escapeHtml(info.what)}</div>
+    </div>
+    <div class="info__section">
+      <div class="info__h">Wie wird es gerechnet?</div>
+      <div class="info__p">${escapeHtml(info.how)}</div>
+    </div>
+    <div class="info__section">
+      <div class="info__h">Warum ist das interessant?</div>
+      <div class="info__p">${escapeHtml(info.why)}</div>
+    </div>
+  `.trim();
+}
+
+function openChartInfo(key) {
+  const info = CHART_INFO[key];
+  if (!info || !el.infoDialog) return;
+
+  if (el.infoTitle) el.infoTitle.textContent = info.title || "Info";
+  if (el.infoSub) el.infoSub.textContent = info.subtitle || "";
+  if (el.infoBody) el.infoBody.innerHTML = buildInfoHtml(info);
+
+  if (typeof el.infoDialog.showModal === "function") el.infoDialog.showModal();
+  else el.infoDialog.open = true;
+}
+
+function closeChartInfo() {
+  if (!el.infoDialog) return;
+  if (typeof el.infoDialog.close === "function") el.infoDialog.close();
+  else el.infoDialog.open = false;
+}
+
+function wireChartInfoUI() {
+  // Open via event delegation (covers all charts)
+  document.addEventListener("click", (e) => {
+    const btn = e.target?.closest?.(".info-btn[data-info-key]");
+    if (!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openChartInfo(btn.dataset.infoKey);
+  });
+
+  el.btnCloseInfo?.addEventListener("click", closeChartInfo);
+  el.btnInfoOk?.addEventListener("click", closeChartInfo);
+
+  // Close on backdrop click
+  el.infoDialog?.addEventListener("click", (e) => {
+    if (e.target === el.infoDialog) closeChartInfo();
+  });
+
+  // Prevent dialog 'cancel' from throwing in some browsers
+  el.infoDialog?.addEventListener("cancel", (e) => {
+    e.preventDefault();
+    closeChartInfo();
+  });
+}
+
+
 /* ------------------ bootstrap ------------------ */
 
 bootstrap();
@@ -252,6 +409,7 @@ function bootstrap() {
 
   wireAuthEvents();
   wireAppEvents();
+  wireChartInfoUI();
 
   watchAuth(ctx.auth, async (user) => {
     if (user) {

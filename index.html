@@ -332,7 +332,7 @@
       <div class="chart">
         <div class="chart__head">
           <div>
-            <div class="chart__title">Letzte 12 Tage</div>
+            <div class="chart__title">Letzte 12 Tage <button class="info-btn" type="button" data-info-key="days12" aria-label="Info zur Grafik: Letzte 12 Tage">i</button></div>
             <div class="chart__sub" id="subDays">—</div>
           </div>
           <div class="chart__headright">
@@ -351,7 +351,7 @@
             <div class="chart">
               <div class="chart__head">
                 <div>
-                  <div class="chart__title">Gesamt (kumuliert)</div>
+                  <div class="chart__title">Gesamt (kumuliert) <button class="info-btn" type="button" data-info-key="cumulMonths" aria-label="Info zur Grafik: Gesamt (kumuliert)">i</button></div>
                   <div class="chart__sub" id="subCumulMonths">—</div>
                 </div>
                 <div class="chip" id="sumCumulMonths">0</div>
@@ -362,7 +362,7 @@
             <div class="chart">
               <div class="chart__head">
                 <div>
-                  <div class="chart__title">Letzte 5 Jahre</div>
+                  <div class="chart__title">Letzte 5 Jahre <button class="info-btn" type="button" data-info-key="years5" aria-label="Info zur Grafik: Letzte 5 Jahre">i</button></div>
                   <div class="chart__sub" id="subYears5">—</div>
                 </div>
                 <div class="chip" id="sumYears5">0</div>
@@ -373,7 +373,7 @@
             <div class="chart">
               <div class="chart__head">
                 <div>
-                  <div class="chart__title">Letzte 12 Monate</div>
+                  <div class="chart__title">Letzte 12 Monate <button class="info-btn" type="button" data-info-key="months12" aria-label="Info zur Grafik: Letzte 12 Monate">i</button></div>
                   <div class="chart__sub" id="subMonths">—</div>
                 </div>
                 <div class="chip" id="sumMonths">0</div>
@@ -384,7 +384,7 @@
             <div class="chart">
               <div class="chart__head">
                 <div>
-                  <div class="chart__title">Letzte 12 Wochen</div>
+                  <div class="chart__title">Letzte 12 Wochen <button class="info-btn" type="button" data-info-key="weeks12" aria-label="Info zur Grafik: Letzte 12 Wochen">i</button></div>
                   <div class="chart__sub" id="subWeeks">—</div>
                 </div>
                 <div class="chip" id="sumWeeks">0</div>
@@ -400,7 +400,7 @@
             <div class="chart">
               <div class="chart__head">
                 <div>
-                  <div class="chart__title">Letzte 30 Tage</div>
+                  <div class="chart__title">Letzte 30 Tage <button class="info-btn" type="button" data-info-key="days30" aria-label="Info zur Grafik: Letzte 30 Tage">i</button></div>
                   <div class="chart__sub" id="subDays30">—</div>
                 </div>
                 <div class="chip" id="sumDays30">0</div>
@@ -411,7 +411,7 @@
             <div class="chart">
               <div class="chart__head">
                 <div>
-                  <div class="chart__title">Trend (Ø 7 Tage)</div>
+                  <div class="chart__title">Trend (Ø 7 Tage) <button class="info-btn" type="button" data-info-key="trend7" aria-label="Info zur Grafik: Trend (Ø 7 Tage)">i</button></div>
                   <div class="chart__sub" id="subAvg7">—</div>
                 </div>
                 <div class="chip" id="sumAvg7">0</div>
@@ -427,7 +427,7 @@
             <div class="chart">
               <div class="chart__head">
                 <div>
-                  <div class="chart__title">Aktive Tage pro Woche</div>
+                  <div class="chart__title">Aktive Tage pro Woche <button class="info-btn" type="button" data-info-key="activeDaysWk" aria-label="Info zur Grafik: Aktive Tage pro Woche">i</button></div>
                   <div class="chart__sub" id="subActiveDaysWk">—</div>
                 </div>
                 <div class="chip" id="sumActiveDaysWk">0</div>
@@ -438,7 +438,7 @@
             <div class="chart">
               <div class="chart__head">
                 <div>
-                  <div class="chart__title">Ø Seiten pro aktivem Tag</div>
+                  <div class="chart__title">Ø Seiten pro aktivem Tag <button class="info-btn" type="button" data-info-key="intensityWk" aria-label="Info zur Grafik: Ø Seiten pro aktivem Tag">i</button></div>
                   <div class="chart__sub" id="subIntensityWk">—</div>
                 </div>
                 <div class="chip" id="sumIntensityWk">0</div>
@@ -449,7 +449,7 @@
             <div class="chart">
               <div class="chart__head">
                 <div>
-                  <div class="chart__title">Wochentage</div>
+                  <div class="chart__title">Wochentage <button class="info-btn" type="button" data-info-key="weekdays" aria-label="Info zur Grafik: Wochentage">i</button></div>
                   <div class="chart__sub" id="subWeekdays">—</div>
                 </div>
                 <div class="chip" id="sumWeekdays">0</div>
@@ -570,6 +570,26 @@
 
   <!-- Hidden file input for import -->
   <input type="file" id="fileImport" accept="application/json" hidden />
+
+
+  <!-- Info dialog for charts -->
+  <dialog class="modal" id="infoDialog" aria-labelledby="infoTitle">
+    <div class="modal__card">
+      <div class="modal__head">
+        <div>
+          <div class="modal__title" id="infoTitle">—</div>
+          <div class="modal__sub" id="infoSub">—</div>
+        </div>
+        <button class="btn btn--ghost" id="btnCloseInfo" type="button" aria-label="Schliessen">✕</button>
+      </div>
+
+      <div class="info__body" id="infoBody"></div>
+
+      <div class="modal__actions">
+        <button class="btn" id="btnInfoOk" type="button">OK</button>
+      </div>
+    </div>
+  </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
