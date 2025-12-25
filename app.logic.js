@@ -213,6 +213,13 @@ export function formatDateShort(yyyy_mm_dd) {
   return `${dd}.${mm}.${yyyy}`;
 }
 
+export function formatDateCompact(yyyy_mm_dd) {
+  const d = parseDate(yyyy_mm_dd);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}.${mm}`;
+}
+
 export function formatDayLabel(d) {
   // show day of month
   return String(d.getDate());

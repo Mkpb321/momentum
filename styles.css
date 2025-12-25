@@ -579,6 +579,19 @@ h2{
 
 .chart__headright{ display:flex; align-items:center; gap:10px; }
 
+
+
+/* Chart groups ("Mehr" – Grafiken) */
+.chartgroups{ margin-top: 10px; }
+.chartgroup + .chartgroup{ margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.chartgroup__title{
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin: 2px 4px 10px 4px;
+}
 /* More-charts: two columns on wide screens */
 .charts--more{ grid-template-columns: repeat(2, 1fr); }
 @media (max-width: 680px){

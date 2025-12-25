@@ -344,49 +344,119 @@
 
       <button class="togglelink" id="toggleMoreCharts" type="button" aria-expanded="false" aria-controls="moreCharts">Mehr</button>
 
-      <div id="moreCharts" class="charts charts--more" hidden>
-        <div class="chart">
-          <div class="chart__head">
-            <div>
-              <div class="chart__title">Letzte 12 Wochen</div>
-              <div class="chart__sub" id="subWeeks">—</div>
+      <div id="moreCharts" class="chartgroups" hidden>
+        <div class="chartgroup">
+          <div class="chartgroup__title">Fortschritt</div>
+          <div class="charts charts--more">
+            <div class="chart">
+              <div class="chart__head">
+                <div>
+                  <div class="chart__title">Gesamt (kumuliert)</div>
+                  <div class="chart__sub" id="subCumulMonths">—</div>
+                </div>
+                <div class="chip" id="sumCumulMonths">0</div>
+              </div>
+              <div class="chart__body" id="chartCumulMonths"></div>
             </div>
-            <div class="chip" id="sumWeeks">0</div>
+
+            <div class="chart">
+              <div class="chart__head">
+                <div>
+                  <div class="chart__title">Letzte 5 Jahre</div>
+                  <div class="chart__sub" id="subYears5">—</div>
+                </div>
+                <div class="chip" id="sumYears5">0</div>
+              </div>
+              <div class="chart__body" id="chartYears5"></div>
+            </div>
+
+            <div class="chart">
+              <div class="chart__head">
+                <div>
+                  <div class="chart__title">Letzte 12 Monate</div>
+                  <div class="chart__sub" id="subMonths">—</div>
+                </div>
+                <div class="chip" id="sumMonths">0</div>
+              </div>
+              <div class="chart__body" id="chartMonths"></div>
+            </div>
+
+            <div class="chart">
+              <div class="chart__head">
+                <div>
+                  <div class="chart__title">Letzte 12 Wochen</div>
+                  <div class="chart__sub" id="subWeeks">—</div>
+                </div>
+                <div class="chip" id="sumWeeks">0</div>
+              </div>
+              <div class="chart__body" id="chartWeeks"></div>
+            </div>
           </div>
-          <div class="chart__body" id="chartWeeks"></div>
         </div>
 
-        <div class="chart">
-          <div class="chart__head">
-            <div>
-              <div class="chart__title">Letzte 12 Monate</div>
-              <div class="chart__sub" id="subMonths">—</div>
+        <div class="chartgroup">
+          <div class="chartgroup__title">Tempo</div>
+          <div class="charts charts--more">
+            <div class="chart">
+              <div class="chart__head">
+                <div>
+                  <div class="chart__title">Letzte 30 Tage</div>
+                  <div class="chart__sub" id="subDays30">—</div>
+                </div>
+                <div class="chip" id="sumDays30">0</div>
+              </div>
+              <div class="chart__body" id="chartDays30"></div>
             </div>
-            <div class="chip" id="sumMonths">0</div>
+
+            <div class="chart">
+              <div class="chart__head">
+                <div>
+                  <div class="chart__title">Trend (Ø 7 Tage)</div>
+                  <div class="chart__sub" id="subAvg7">—</div>
+                </div>
+                <div class="chip" id="sumAvg7">0</div>
+              </div>
+              <div class="chart__body" id="chartAvg7"></div>
+            </div>
           </div>
-          <div class="chart__body" id="chartMonths"></div>
         </div>
 
-        <div class="chart">
-          <div class="chart__head">
-            <div>
-              <div class="chart__title">Letzte 30 Tage</div>
-              <div class="chart__sub" id="subDays30">—</div>
+        <div class="chartgroup">
+          <div class="chartgroup__title">Konstanz &amp; Muster</div>
+          <div class="charts charts--more">
+            <div class="chart">
+              <div class="chart__head">
+                <div>
+                  <div class="chart__title">Aktive Tage pro Woche</div>
+                  <div class="chart__sub" id="subActiveDaysWk">—</div>
+                </div>
+                <div class="chip" id="sumActiveDaysWk">0</div>
+              </div>
+              <div class="chart__body" id="chartActiveDaysWk"></div>
             </div>
-            <div class="chip" id="sumDays30">0</div>
-          </div>
-          <div class="chart__body" id="chartDays30"></div>
-        </div>
 
-        <div class="chart">
-          <div class="chart__head">
-            <div>
-              <div class="chart__title">Wochentage</div>
-              <div class="chart__sub" id="subWeekdays">—</div>
+            <div class="chart">
+              <div class="chart__head">
+                <div>
+                  <div class="chart__title">Ø Seiten pro aktivem Tag</div>
+                  <div class="chart__sub" id="subIntensityWk">—</div>
+                </div>
+                <div class="chip" id="sumIntensityWk">0</div>
+              </div>
+              <div class="chart__body" id="chartIntensityWk"></div>
             </div>
-            <div class="chip" id="sumWeekdays">0</div>
+
+            <div class="chart">
+              <div class="chart__head">
+                <div>
+                  <div class="chart__title">Wochentage</div>
+                  <div class="chart__sub" id="subWeekdays">—</div>
+                </div>
+                <div class="chip" id="sumWeekdays">0</div>
+              </div>
+              <div class="chart__body" id="chartWeekdays"></div>
+            </div>
           </div>
-          <div class="chart__body" id="chartWeekdays"></div>
         </div>
       </div>
     </section>

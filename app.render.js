@@ -1,7 +1,7 @@
 // app.render.js
 // Rendering + UI composition (no persistence, minimal state).
 
-import { renderLineChart } from "./charts.js";
+import { renderBarChart, renderLineChart } from "./charts.js";
 import {
   addDays,
   addMonths,
@@ -11,6 +11,7 @@ import {
   computeWeekTotals,
   computeYearTotals,
   dateKey,
+  formatDateCompact,
   formatDateShort,
   formatDayLabel,
   formatMonthLabel,
@@ -303,15 +304,31 @@ export function renderCharts(el, state) {
   // Only render the additional charts when the section is visible.
   if (el.moreCharts?.hidden) return;
 
+  const totalPagesAll = sumMapValues(daily);
+
   // last 12 weeks (inclusive): Monday-start
   const weekTotals = computeWeekTotals(daily);
   const weekLabels = [];
   const weekValues = [];
+  const weekActiveDays = [];
+  const weekIntensity = [];
+
   for (let i = 11; i >= 0; i--) {
     const wkStart = startOfWeek(addDays(today, -7 * i));
     const wkKey = dateKey(wkStart);
+
+    const wkPages = weekTotals.get(wkKey) ?? 0;
+
+    let active = 0;
+    for (let d = 0; d < 7; d++) {
+      const k = dateKey(addDays(wkStart, d));
+      if ((daily.get(k) ?? 0) > 0) active += 1;
+    }
+
     weekLabels.push(formatWeekLabel(wkStart));
-    weekValues.push(weekTotals.get(wkKey) ?? 0);
+    weekValues.push(wkPages);
+    weekActiveDays.push(active);
+    weekIntensity.push(active ? wkPages / active : 0);
   }
 
   // last 12 months (inclusive)
@@ -325,26 +342,123 @@ export function renderCharts(el, state) {
     monthValues.push(monthTotals.get(mk) ?? 0);
   }
 
+  // Cumulative progress (last 24 months, incl. earlier total)
+  const cumulLabels = [];
+  const monthVals24 = [];
+  for (let i = 23; i >= 0; i--) {
+    const m = addMonths(today, -i);
+    const mk = monthKey(m);
+    cumulLabels.push(formatMonthLabel(m));
+    monthVals24.push(monthTotals.get(mk) ?? 0);
+  }
+  const pre = Math.max(0, totalPagesAll - sum(monthVals24));
+  const cumulValues = [];
+  let run = pre;
+  for (const v of monthVals24) {
+    run += v;
+    cumulValues.push(run);
+  }
+
+  const cumulRange = `${formatMonthLabel(addMonths(today, -23))} – ${formatMonthLabel(today)} (kumuliert)`;
+  setText(el.subCumulMonths, cumulRange);
+  setText(el.sumCumulMonths, `${formatNumber(totalPagesAll, 0)} Seiten`);
+  if (el.chartCumulMonths) {
+    renderLineChart(el.chartCumulMonths, cumulLabels, cumulValues, {
+      valueFormatter: (v) => formatNumber(v, 0),
+      suffix: " Seiten",
+    });
+  }
+
+  // Last 5 years
+  const yearTotals = computeYearTotals(daily);
+  const yNow = today.getFullYear();
+  const yearLabels = [];
+  const yearValues = [];
+  for (let i = 4; i >= 0; i--) {
+    const y = String(yNow - i);
+    yearLabels.push(y);
+    yearValues.push(yearTotals.get(y) ?? 0);
+  }
+
+  setText(el.subYears5, "Kalenderjahre – letzte 5");
+  setText(el.sumYears5, `${formatNumber(sum(yearValues), 0)} Seiten`);
+  if (el.chartYears5) {
+    renderBarChart(el.chartYears5, yearLabels, yearValues, {
+      valueFormatter: (v) => formatNumber(v, 0),
+      suffix: " Seiten",
+    });
+  }
+
+  // Weeks + months (totals)
   setText(el.subWeeks, "Wochenstart (Mo) – letzte 12");
   setText(el.subMonths, "Kalendermonate – letzte 12");
 
-  setText(el.sumWeeks, `${sum(weekValues)} Seiten`);
-  setText(el.sumMonths, `${sum(monthValues)} Seiten`);
+  setText(el.sumWeeks, `${formatNumber(sum(weekValues), 0)} Seiten`);
+  setText(el.sumMonths, `${formatNumber(sum(monthValues), 0)} Seiten`);
 
-  if (el.chartWeeks) renderLineChart(el.chartWeeks, weekLabels, weekValues);
-  if (el.chartMonths) renderLineChart(el.chartMonths, monthLabels, monthValues);
+  if (el.chartWeeks) renderLineChart(el.chartWeeks, weekLabels, weekValues, { valueFormatter: (v) => formatNumber(v, 0) });
+  if (el.chartMonths) renderLineChart(el.chartMonths, monthLabels, monthValues, { valueFormatter: (v) => formatNumber(v, 0) });
 
   // last 30 days
   const days30 = [];
   for (let i = 29; i >= 0; i--) {
     const d = addDays(today, -i);
     const key = dateKey(d);
-    days30.push({ key, label: formatDayLabel(d), val: daily.get(key) ?? 0 });
+    days30.push({ key, label: formatDateCompact(key), val: daily.get(key) ?? 0 });
   }
   const days30Range = `${formatDateShort(days30[0].key)} – ${formatDateShort(days30[days30.length - 1].key)}`;
   setText(el.subDays30, days30Range);
-  setText(el.sumDays30, `${sum(days30.map(x => x.val))} Seiten`);
-  if (el.chartDays30) renderLineChart(el.chartDays30, days30.map(d => d.label), days30.map(d => d.val));
+  setText(el.sumDays30, `${formatNumber(sum(days30.map(x => x.val)), 0)} Seiten`);
+  if (el.chartDays30) renderLineChart(el.chartDays30, days30.map(d => d.label), days30.map(d => d.val), { valueFormatter: (v) => formatNumber(v, 0) });
+
+  // 7-day moving average (last 60 days, incl. 0-days)
+  const days60 = [];
+  for (let i = 59; i >= 0; i--) {
+    const d = addDays(today, -i);
+    const key = dateKey(d);
+    days60.push({ key, label: formatDateCompact(key), val: daily.get(key) ?? 0 });
+  }
+
+  const avg7 = [];
+  for (let i = 0; i < days60.length; i++) {
+    const from = Math.max(0, i - 6);
+    const window = days60.slice(from, i + 1);
+    avg7.push(sum(window.map(x => x.val)) / window.length);
+  }
+
+  const avg7Range = `${formatDateShort(days60[0].key)} – ${formatDateShort(days60[days60.length - 1].key)} (Ø 7 Tage)`;
+  const avg7Now = avg7.length ? avg7[avg7.length - 1] : 0;
+  setText(el.subAvg7, avg7Range);
+  setText(el.sumAvg7, `Aktuell: ${formatNumber(avg7Now, 1)} Seiten/Tag`);
+  if (el.chartAvg7) {
+    renderLineChart(el.chartAvg7, days60.map(d => d.label), avg7, {
+      valueFormatter: (v) => formatNumber(v, 1),
+      suffix: " Seiten/Tag",
+    });
+  }
+
+  // Active days / week (last 12 weeks)
+  const avgActiveDaysWk = weekActiveDays.length ? (sum(weekActiveDays) / weekActiveDays.length) : 0;
+  setText(el.subActiveDaysWk, "Tage mit Eintrag (>0) – letzte 12 Wochen");
+  setText(el.sumActiveDaysWk, `Ø/Woche: ${formatNumber(avgActiveDaysWk, 1)} Tage`);
+  if (el.chartActiveDaysWk) {
+    renderBarChart(el.chartActiveDaysWk, weekLabels, weekActiveDays, {
+      valueFormatter: (v) => formatNumber(v, 0),
+      suffix: " Tage",
+    });
+  }
+
+  // Intensity / week: pages per active day
+  const intensityActive = weekIntensity.filter(v => v > 0);
+  const avgIntensityWk = intensityActive.length ? (sum(intensityActive) / intensityActive.length) : 0;
+  setText(el.subIntensityWk, "Ø Seiten pro aktivem Tag – letzte 12 Wochen");
+  setText(el.sumIntensityWk, `Ø: ${formatNumber(avgIntensityWk, 1)} Seiten`);
+  if (el.chartIntensityWk) {
+    renderLineChart(el.chartIntensityWk, weekLabels, weekIntensity, {
+      valueFormatter: (v) => formatNumber(v, 1),
+      suffix: " Seiten",
+    });
+  }
 
   // Weekdays (average pages on active days per weekday)
   const names = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
@@ -360,13 +474,17 @@ export function renderCharts(el, state) {
   }
 
   const weekdayValues = sumsByDay.map((s, i) => cntByDay[i] ? s / cntByDay[i] : 0);
-  const totalPages = sumMapValues(daily);
-  const activeDays = [...daily.values()].filter(v => v > 0).length;
-  const avgPerActiveDay = activeDays ? totalPages / activeDays : 0;
+  const activeDaysAll = [...daily.values()].filter(v => v > 0).length;
+  const avgPerActiveDayAll = activeDaysAll ? totalPagesAll / activeDaysAll : 0;
 
   setText(el.subWeekdays, "Ø Seiten pro Wochentag (nur aktive Tage)");
-  setText(el.sumWeekdays, `Ø/Tag: ${formatNumber(avgPerActiveDay, 1)}`);
-  if (el.chartWeekdays) renderLineChart(el.chartWeekdays, names, weekdayValues);
+  setText(el.sumWeekdays, `Ø/Tag: ${formatNumber(avgPerActiveDayAll, 1)}`);
+  if (el.chartWeekdays) {
+    renderBarChart(el.chartWeekdays, names, weekdayValues, {
+      valueFormatter: (v) => formatNumber(v, 1),
+      suffix: " Seiten",
+    });
+  }
 }
 
 /* ------------------ internal render helpers ------------------ */
