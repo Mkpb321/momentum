@@ -136,7 +136,7 @@ function addXAxisLabelsHorizontal(svg, svgNS, labels, xFor, yBottom, every) {
   }
 }
 
-function addXAxisLabelsAuto(svg, svgNS, labels, xFor, yBottom, innerW, modeHint = "auto") {
+function addXAxisLabelsAuto(svg, svgNS, labels, xFor, yAxis, innerW, modeHint = "auto") {
   const n = labels.length;
   if (n <= 0) return;
 
@@ -145,7 +145,10 @@ function addXAxisLabelsAuto(svg, svgNS, labels, xFor, yBottom, innerW, modeHint 
   // With vertical labels, the effective x-width is roughly the font size, so we can allow tighter spacing.
   const everyV = chooseXLabelEvery(n, innerW, 12);
 
-  addXAxisLabelsVertical(svg, svgNS, labels, xFor, yBottom + 18, everyV);
+  // Draw labels BELOW the plot area.
+  // Important: When rotating -90°, using text-anchor="end" makes the label extend DOWNWARDS
+  // from the anchor point (so it never overlaps the plot). This requires enough bottom padding.
+  addXAxisLabelsVertical(svg, svgNS, labels, xFor, yAxis, everyV);
 }
 
 function addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatter) {
@@ -163,7 +166,7 @@ function addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatt
 
     const t = document.createElementNS(svgNS, "text");
     // Place labels clearly left of the y-axis (never overlapping it).
-    t.setAttribute("x", String(padL - 10));
+    t.setAttribute("x", String(padL - 14));
     t.setAttribute("y", String(y));
     t.setAttribute("text-anchor", "end");
     t.setAttribute("dominant-baseline", "middle");
@@ -182,8 +185,10 @@ function addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatt
   svg.appendChild(axis);
 }
 
-function addXAxisLabelsVertical(svg, svgNS, labels, xFor, yBase, every) {
+function addXAxisLabelsVertical(svg, svgNS, labels, xFor, yAxis, every) {
   const n = labels.length;
+  const tickLen = 6;
+  const labelPad = 26;
   for (let i = 0; i < n; i++) {
     if (i !== 0 && i !== n - 1 && (i % every) !== 0) continue;
 
@@ -193,14 +198,15 @@ function addXAxisLabelsVertical(svg, svgNS, labels, xFor, yBase, every) {
     const tick = document.createElementNS(svgNS, "line");
     tick.setAttribute("x1", String(x));
     tick.setAttribute("x2", String(x));
-    tick.setAttribute("y1", String(yBase - 6));
-    tick.setAttribute("y2", String(yBase - 2));
+    tick.setAttribute("y1", String(yAxis));
+    tick.setAttribute("y2", String(yAxis + tickLen));
     tick.setAttribute("class", "chartxtick");
     svg.appendChild(tick);
 
     const t = document.createElementNS(svgNS, "text");
-    t.setAttribute("transform", `translate(${x} ${yBase}) rotate(-90)`);
-    t.setAttribute("text-anchor", "start");
+    // Place the anchor below the axis; with text-anchor="end" and rotate(-90), the text extends downward.
+    t.setAttribute("transform", `translate(${x} ${yAxis + labelPad}) rotate(-90)`);
+    t.setAttribute("text-anchor", "end");
     t.setAttribute("dominant-baseline", "middle");
     t.setAttribute("class", "chartxlabel");
     t.textContent = labels[i];
@@ -213,14 +219,20 @@ export function renderLineChart(containerEl, labels, values, opts = {}) {
   const padLBase = opts.padL ?? 42;
   const padR = opts.padR ?? 8;
   const padT = opts.padT ?? 12;
-  const padB = opts.padB ?? 44;
+  const padBBase = opts.padB ?? 44;
+
+  // Vertical x labels need enough bottom padding to avoid clipping.
+  // With rotate(-90), the needed vertical space roughly equals the max text width.
+  const maxXLabelW = Math.max(1, ...labels.map((l) => estimateTextWidthPx(l, 10)));
+  const xLabelPad = 26;
+  const padB = Math.max(padBBase, xLabelPad + maxXLabelW + 12);
 
   const rawMaxV = Math.max(0, ...values);
   const yLabelFormatter = opts.yLabelFormatter ?? opts.valueFormatter ?? defaultValueFormatter;
   const tickData = buildNiceTicks(0, Math.max(1, rawMaxV), opts.yTickCount ?? 5);
-  const maxYLabelLen = Math.max(1, ...tickData.ticks.map(v => String(yLabelFormatter(v)).length));
-  // Rough text width estimate to prevent y-label clipping.
-  const padL = Math.max(padLBase, 18 + maxYLabelLen * 7);
+  const maxYLabelW = Math.max(1, ...tickData.ticks.map((v) => estimateTextWidthPx(yLabelFormatter(v), 10)));
+  // Ensure y-labels are always outside the plot and never touch the axis.
+  const padL = Math.max(padLBase, Math.ceil(maxYLabelW + 14 + 10));
 
   const { svg, svgNS, w } = makeChartSvg(containerEl, height, padL, padR);
 
@@ -279,13 +291,18 @@ export function renderBarChart(containerEl, labels, values, opts = {}) {
   const padLBase = opts.padL ?? 42;
   const padR = opts.padR ?? 8;
   const padT = opts.padT ?? 12;
-  const padB = opts.padB ?? 44;
+  const padBBase = opts.padB ?? 44;
+
+  // Vertical x labels need enough bottom padding to avoid clipping.
+  const maxXLabelW = Math.max(1, ...labels.map((l) => estimateTextWidthPx(l, 10)));
+  const xLabelPad = 26;
+  const padB = Math.max(padBBase, xLabelPad + maxXLabelW + 12);
 
   const rawMaxV = Math.max(0, ...values);
   const yLabelFormatter = opts.yLabelFormatter ?? opts.valueFormatter ?? defaultValueFormatter;
   const tickData = buildNiceTicks(0, Math.max(1, rawMaxV), opts.yTickCount ?? 5);
-  const maxYLabelLen = Math.max(1, ...tickData.ticks.map(v => String(yLabelFormatter(v)).length));
-  const padL = Math.max(padLBase, 18 + maxYLabelLen * 7);
+  const maxYLabelW = Math.max(1, ...tickData.ticks.map((v) => estimateTextWidthPx(yLabelFormatter(v), 10)));
+  const padL = Math.max(padLBase, Math.ceil(maxYLabelW + 14 + 10));
 
   const { svg, svgNS, w } = makeChartSvg(containerEl, height, padL, padR);
 
