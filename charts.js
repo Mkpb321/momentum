@@ -188,7 +188,8 @@ function addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatt
 function addXAxisLabelsVertical(svg, svgNS, labels, xFor, yAxis, every) {
   const n = labels.length;
   const tickLen = 6;
-  const labelPad = 26;
+  // Distance from axis to the label anchor. Keep it compact but always outside the plot area.
+  const labelPad = 18;
   for (let i = 0; i < n; i++) {
     if (i !== 0 && i !== n - 1 && (i % every) !== 0) continue;
 
@@ -215,7 +216,7 @@ function addXAxisLabelsVertical(svg, svgNS, labels, xFor, yAxis, every) {
 }
 
 export function renderLineChart(containerEl, labels, values, opts = {}) {
-  const height = opts.height ?? 130;
+  const height = opts.height ?? 170;
   const padLBase = opts.padL ?? 42;
   const padR = opts.padR ?? 8;
   const padT = opts.padT ?? 12;
@@ -224,8 +225,8 @@ export function renderLineChart(containerEl, labels, values, opts = {}) {
   // Vertical x labels need enough bottom padding to avoid clipping.
   // With rotate(-90), the needed vertical space roughly equals the max text width.
   const maxXLabelW = Math.max(1, ...labels.map((l) => estimateTextWidthPx(l, 10)));
-  const xLabelPad = 26;
-  const padB = Math.max(padBBase, xLabelPad + maxXLabelW + 12);
+  const xLabelPad = 18;
+  const padB = Math.max(padBBase, xLabelPad + maxXLabelW + 10);
 
   const rawMaxV = Math.max(0, ...values);
   const yLabelFormatter = opts.yLabelFormatter ?? opts.valueFormatter ?? defaultValueFormatter;
@@ -287,7 +288,7 @@ export function renderLineChart(containerEl, labels, values, opts = {}) {
 }
 
 export function renderBarChart(containerEl, labels, values, opts = {}) {
-  const height = opts.height ?? 130;
+  const height = opts.height ?? 170;
   const padLBase = opts.padL ?? 42;
   const padR = opts.padR ?? 8;
   const padT = opts.padT ?? 12;
@@ -295,8 +296,8 @@ export function renderBarChart(containerEl, labels, values, opts = {}) {
 
   // Vertical x labels need enough bottom padding to avoid clipping.
   const maxXLabelW = Math.max(1, ...labels.map((l) => estimateTextWidthPx(l, 10)));
-  const xLabelPad = 26;
-  const padB = Math.max(padBBase, xLabelPad + maxXLabelW + 12);
+  const xLabelPad = 18;
+  const padB = Math.max(padBBase, xLabelPad + maxXLabelW + 10);
 
   const rawMaxV = Math.max(0, ...values);
   const yLabelFormatter = opts.yLabelFormatter ?? opts.valueFormatter ?? defaultValueFormatter;
