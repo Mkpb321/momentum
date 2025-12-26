@@ -1,598 +1,540 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Momentum</title>
-
-  <!-- Favicons / PWA (liegen in /favicon) -->
-  <link rel="apple-touch-icon" sizes="180x180" href="./favicon/apple-touch-icon.png" />
-  <link rel="icon" href="./favicon/favicon.ico" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./favicon/favicon-32x32.png" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./favicon/favicon-16x16.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="./favicon/android-chrome-192x192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="./favicon/android-chrome-512x512.png" />
-  <link rel="manifest" href="./favicon/site.webmanifest" />
-  <meta name="theme-color" content="#f6f5f3" />
-  <meta name="msapplication-TileColor" content="#f6f5f3" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css" />
-</head>
-
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Momentum</title>
+<!-- Favicons / PWA (liegen in /favicon) -->
+<link href="./favicon/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/>
+<link href="./favicon/favicon.ico" rel="icon"/>
+<link href="./favicon/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./favicon/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png"/>
+<link href="./favicon/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png"/>
+<link href="./favicon/android-chrome-512x512.png" rel="icon" sizes="512x512" type="image/png"/>
+<link href="./favicon/site.webmanifest" rel="manifest"/>
+<meta content="#f6f5f3" name="theme-color"/>
+<meta content="#f6f5f3" name="msapplication-TileColor"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="./styles.css" rel="stylesheet">
+</link></head>
 <body>
-  <header class="topbar">
-    <div class="wrap topbar__inner">
-      <div class="brand">
-        <div class="brand__mark" aria-hidden="true"></div>
-        <div>
-          <div class="brand__title">Momentum</div>
-          <div class="brand__subtitle" id="envLabel" hidden>—</div>
-        </div>
-      </div>
-
-      <div class="topbar__actions" id="signedInActions" hidden>
-        <button class="btn" id="btnAddBook" title="Buch hinzufügen">+</button>
-
-        <div class="menu" id="burgerMenu">
-          <button class="iconbtn" id="btnMenu" type="button" aria-label="Menü" aria-expanded="false" aria-controls="menuPanel" title="Menü">☰</button>
-
-          <div class="menu__panel" id="menuPanel" hidden>
-            <div class="menu__header">
-              <div class="menu__headerlabel">Account</div>
-              <div class="menu__user">
-                <div class="menu__avatar" id="userAvatar" aria-hidden="true">•</div>
-                <div class="menu__userinfo">
-                  <div class="menu__email" id="chipUser" title="Angemeldet" hidden>—</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="menu__divider" role="separator" aria-hidden="true"></div>
-
-            <div class="menu__group" aria-label="Daten">
-              <button class="menuitem" id="btnExport" type="button" title="Daten exportieren">
-                <span class="menuitem__left">
-                  <svg class="menuitem__icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 3v10m0 0l4-4m-4 4L8 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M4 17v3h16v-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  <span class="menuitem__title">Export</span>
-                </span>
-              </button>
-
-              <button class="menuitem" id="btnImport" type="button" title="Daten importieren">
-                <span class="menuitem__left">
-                  <svg class="menuitem__icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M12 21V11m0 0l4 4m-4-4l-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M4 7V4h16v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  <span class="menuitem__title">Import</span>
-                </span>
-              </button>
-            </div>
-
-            <div class="menu__divider" role="separator" aria-hidden="true"></div>
-
-            <button class="menuitem" id="btnSwitchEnv" type="button" title="Umgebung wechseln">
-              <span class="menuitem__left">
-                <svg class="menuitem__icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 2a7 7 0 00-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 00-7-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M9.5 9.5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <span class="menuitem__title">Umgebung</span>
-              </span>
-              <span class="menuitem__meta" id="envPill">PROD</span>
-            </button>
-
-            <div class="menu__divider" role="separator" aria-hidden="true"></div>
-
-            <button class="menuitem menuitem--danger" id="btnLogout" type="button" title="Abmelden" hidden>
-              <span class="menuitem__left">
-                <svg class="menuitem__icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M10 17l-1 0a3 3 0 01-3-3V10a3 3 0 013-3h1" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M15 12H21m0 0l-3-3m3 3l-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M10 7V5a2 2 0 012-2h6a2 2 0 012 2v14a2 2 0 01-2 2h-6a2 2 0 01-2-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span class="menuitem__title">Logout</span>
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Login Screen (overlay) -->
-  <div class="authscreen" id="authScreen">
-    <div class="panel authpanel">
-      <div class="panel__head">
-        <h2>Login</h2>
-        <div class="panel__meta" id="authEnvMeta">—</div>
-      </div>
-
-      <form class="fields" id="formLogin" autocomplete="on">
-        <label class="field">
-          <span>Email</span>
-          <input required name="email" type="email" autocomplete="username" placeholder="name@domain.com" />
-        </label>
-
-        <label class="field">
-          <span>Passwort</span>
-          <input required name="password" type="password" autocomplete="current-password" placeholder="••••••••" />
-        </label>
-
-        <div class="modal__actions modal__actions--spread">
-          <button class="btn btn--ghost" id="btnSwitchEnvAuth" type="button" title="Zwischen DEV/PROD wechseln">Zu DEV wechseln</button>
-          <button class="btn" id="btnLogin" type="submit">Login</button>
-        </div>
-
-        <div class="hint hint--error" id="authError" hidden></div>
-        <div class="hint">
+<header class="topbar">
+<div class="wrap topbar__inner">
+<div class="brand">
+<div aria-hidden="true" class="brand__mark"></div>
+<div>
+<div class="brand__title">Momentum</div>
+<div class="brand__subtitle" hidden="" id="envLabel">—</div>
+</div>
+</div>
+<div class="topbar__actions" hidden="" id="signedInActions">
+<button class="btn" id="btnAddBook" title="Buch hinzufügen">+</button>
+<div class="menu" id="burgerMenu">
+<button aria-controls="menuPanel" aria-expanded="false" aria-label="Menü" class="iconbtn" id="btnMenu" title="Menü" type="button">☰</button>
+<div class="menu__panel" hidden="" id="menuPanel">
+<div class="menu__header">
+<div class="menu__headerlabel">Account</div>
+<div class="menu__user">
+<div aria-hidden="true" class="menu__avatar" id="userAvatar">•</div>
+<div class="menu__userinfo">
+<div class="menu__email" hidden="" id="chipUser" title="Angemeldet">—</div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" class="menu__divider" role="separator"></div>
+<div aria-label="Daten" class="menu__group">
+<button class="menuitem" id="btnExport" title="Daten exportieren" type="button">
+<span class="menuitem__left">
+<svg aria-hidden="true" class="menuitem__icon" viewbox="0 0 24 24">
+<path d="M12 3v10m0 0l4-4m-4 4L8 9" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M4 17v3h16v-3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="menuitem__title">Export</span>
+</span>
+</button>
+<button class="menuitem" id="btnImport" title="Daten importieren" type="button">
+<span class="menuitem__left">
+<svg aria-hidden="true" class="menuitem__icon" viewbox="0 0 24 24">
+<path d="M12 21V11m0 0l4 4m-4-4l-4 4" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M4 7V4h16v3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="menuitem__title">Import</span>
+</span>
+</button>
+</div>
+<div aria-hidden="true" class="menu__divider" role="separator"></div>
+<button class="menuitem" id="btnSwitchEnv" title="Umgebung wechseln" type="button">
+<span class="menuitem__left">
+<svg aria-hidden="true" class="menuitem__icon" viewbox="0 0 24 24">
+<path d="M12 2a7 7 0 00-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 00-7-7z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M9.5 9.5h5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+<span class="menuitem__title">Umgebung</span>
+</span>
+<span class="menuitem__meta" id="envPill">PROD</span>
+</button>
+<div aria-hidden="true" class="menu__divider" role="separator"></div>
+<button class="menuitem menuitem--danger" hidden="" id="btnLogout" title="Abmelden" type="button">
+<span class="menuitem__left">
+<svg aria-hidden="true" class="menuitem__icon" viewbox="0 0 24 24">
+<path d="M10 17l-1 0a3 3 0 01-3-3V10a3 3 0 013-3h1" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M15 12H21m0 0l-3-3m3 3l-3 3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+<path d="M10 7V5a2 2 0 012-2h6a2 2 0 012 2v14a2 2 0 01-2 2h-6a2 2 0 01-2-2v-2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<span class="menuitem__title">Logout</span>
+</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- Login Screen (overlay) -->
+<div class="authscreen" id="authScreen">
+<div class="panel authpanel">
+<div class="panel__head">
+<h2>Login</h2>
+<div class="panel__meta" id="authEnvMeta">—</div>
+</div>
+<form autocomplete="on" class="fields" id="formLogin">
+<label class="field">
+<span>Email</span>
+<input autocomplete="username" name="email" placeholder="name@domain.com" required="" type="email"/>
+</label>
+<label class="field">
+<span>Passwort</span>
+<input autocomplete="current-password" name="password" placeholder="••••••••" required="" type="password"/>
+</label>
+<div class="modal__actions modal__actions--spread">
+<button class="btn btn--ghost" id="btnSwitchEnvAuth" title="Zwischen DEV/PROD wechseln" type="button">Zu DEV wechseln</button>
+<button class="btn" id="btnLogin" type="submit">Login</button>
+</div>
+<div class="hint hint--error" hidden="" id="authError"></div>
+<div class="hint">
           Kein Sign-up in der App. Accounts legst du in der Firebase Console an (Authentication → Users).
         </div>
-      </form>
-    </div>
-  </div>
-
-
-  <main class="wrap grid" id="appMain" hidden>
-    <section class="panel">
-      <div class="panel__head">
-        <h2>Übersicht</h2>
-        <div class="panel__meta" id="streakMeta">—</div>
-      </div>
-
-      <div class="kpis kpis--top">
-        <div class="kpi">
-          <div class="kpi__label">Aktueller Streak</div>
-          <div class="kpi__value" id="kpiCurrentStreak">0</div>
-          <div class="kpi__hint" id="kpiCurrentStreakHint">&nbsp;</div>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi__label">Ø pro aktivem Tag</div>
-          <div class="kpi__value" id="kpiAvgPerActiveDayTop">0</div>
-          <div class="kpi__hint">nur aktive Tage</div>
-        </div>
-
-        <div class="kpi">
-          <div class="kpi__label">Seiten diese Woche</div>
-          <div class="kpi__value" id="kpiWeekPages">0</div>
-          <div class="kpi__hint" id="kpiWeekHint">—</div>
-        </div>
-      </div>
-
-      <button class="togglelink" id="toggleMoreStats" type="button" aria-expanded="false" aria-controls="moreStats">Mehr</button>
-
-      <div id="moreStats" class="morelist" hidden>
-        <div class="moregroup">
-          <div class="moregroup__title">Zeiträume</div>
-          <ul class="moregroup__list">
-            <li class="moreitem">
-              <span class="moreitem__label">Seiten heute</span>
-              <span class="moreitem__value" id="kpiTodayPages">0</span>
-              <span class="moreitem__meta">Heute</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Seiten gestern</span>
-              <span class="moreitem__value" id="kpiYesterdayPages">0</span>
-              <span class="moreitem__meta">Gestern</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Seiten letzte 7 Tage</span>
-              <span class="moreitem__value" id="kpiLast7DaysPages">0</span>
-              <span class="moreitem__meta">rollierend, inkl. heute</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Seiten letzte 30 Tage</span>
-              <span class="moreitem__value" id="kpiLast30DaysPages">0</span>
-              <span class="moreitem__meta">rollierend, inkl. heute</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Seiten diesen Monat</span>
-              <span class="moreitem__value" id="kpiMonthPages">0</span>
-              <span class="moreitem__meta">Kalendermonat</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Seiten dieses Jahr</span>
-              <span class="moreitem__value" id="kpiYearPages">0</span>
-              <span class="moreitem__meta">Kalenderjahr</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Gesamtseiten</span>
-              <span class="moreitem__value" id="kpiTotalPages">0</span>
-              <span class="moreitem__meta">über alle Zeit</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="moregroup">
-          <div class="moregroup__title">Aktivität &amp; Durchschnitt</div>
-          <ul class="moregroup__list">
-            <li class="moreitem">
-              <span class="moreitem__label">Aktive Tage</span>
-              <span class="moreitem__value" id="kpiActiveDays">0</span>
-              <span class="moreitem__meta">Tage mit &gt; 0 Seiten</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Aktive Wochen</span>
-              <span class="moreitem__value" id="kpiActiveWeeks">0</span>
-              <span class="moreitem__meta">Wochen mit &gt; 0 Seiten</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Aktive Monate</span>
-              <span class="moreitem__value" id="kpiActiveMonths">0</span>
-              <span class="moreitem__meta">Monate mit &gt; 0 Seiten</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Ø pro aktivem Tag</span>
-              <span class="moreitem__value" id="kpiAvgPerActiveDay">0</span>
-              <span class="moreitem__meta">nur aktive Tage</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Ø pro aktivem Monat</span>
-              <span class="moreitem__value" id="kpiAvgPerActiveMonth">0</span>
-              <span class="moreitem__meta">nur aktive Monate</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Ø pro aktivem Jahr</span>
-              <span class="moreitem__value" id="kpiAvgPerActiveYear">0</span>
-              <span class="moreitem__meta">Jahre mit &gt; 1 Seite</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Ø pro Tag (7 Tage)</span>
-              <span class="moreitem__value" id="kpiAvgLast7Days">0</span>
-              <span class="moreitem__meta">inkl. 0-Tage</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Ø pro Tag (30 Tage)</span>
-              <span class="moreitem__value" id="kpiAvgLast30Days">0</span>
-              <span class="moreitem__meta">inkl. 0-Tage</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="moregroup">
-          <div class="moregroup__title">Bestwerte</div>
-          <ul class="moregroup__list">
-            <li class="moreitem">
-              <span class="moreitem__label">Bester Tag</span>
-              <span class="moreitem__value" id="kpiBestDay">0</span>
-              <span class="moreitem__meta" id="kpiBestDayDate">—</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Beste Woche</span>
-              <span class="moreitem__value" id="kpiBestWeek">0</span>
-              <span class="moreitem__meta">max. Seiten in 1 Woche</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Bester Monat</span>
-              <span class="moreitem__value" id="kpiBestMonth">0</span>
-              <span class="moreitem__meta">max. Seiten in 1 Monat</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Letzter aktiver Tag</span>
-              <span class="moreitem__value" id="kpiLastActiveDate">—</span>
-              <span class="moreitem__meta" id="kpiLastActivePages">—</span>
-            </li>
-          </ul>
-        </div>
-
-        <div class="moregroup">
-          <div class="moregroup__title">Bibliothek</div>
-          <ul class="moregroup__list">
-            <li class="moreitem">
-              <span class="moreitem__label">Bücher gesamt</span>
-              <span class="moreitem__value" id="kpiBooksTotal">0</span>
-              <span class="moreitem__meta">&nbsp;</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Abgeschlossen</span>
-              <span class="moreitem__value" id="kpiBooksFinished">0</span>
-              <span class="moreitem__meta">&nbsp;</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">In Arbeit</span>
-              <span class="moreitem__value" id="kpiBooksInProgress">0</span>
-              <span class="moreitem__meta">&nbsp;</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Nicht gestartet</span>
-              <span class="moreitem__value" id="kpiBooksNotStarted">0</span>
-              <span class="moreitem__meta">ohne Einträge</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Seitenumfang gesamt</span>
-              <span class="moreitem__value" id="kpiLibraryTotalPages">0</span>
-              <span class="moreitem__meta">Summe totalPages</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Seiten aktueller Stand</span>
-              <span class="moreitem__value" id="kpiLibraryCurrentPages">0</span>
-              <span class="moreitem__meta">Summe letzter Stand</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Seiten verbleibend</span>
-              <span class="moreitem__value" id="kpiLibraryRemainingPages">0</span>
-              <span class="moreitem__meta">bis Ende</span>
-            </li>
-            <li class="moreitem">
-              <span class="moreitem__label">Gesamtfortschritt</span>
-              <span class="moreitem__value" id="kpiLibraryProgressPct">0%</span>
-              <span class="moreitem__meta">&nbsp;</span>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="divider"></div>
-
-      <div class="chart">
-        <div class="chart__head">
-          <div>
-            <div class="chart__title">Letzte 12 Tage <button class="info-btn" type="button" data-info-key="days12" aria-label="Info zur Grafik: Letzte 12 Tage">i</button></div>
-            <div class="chart__sub" id="subDays">—</div>
-          </div>
-          <div class="chart__headright">
-            <div class="chip" id="sumDays">0</div>
-          </div>
-        </div>
-        <div class="chart__body" id="chartDays"></div>
-      </div>
-
-      <button class="togglelink" id="toggleMoreCharts" type="button" aria-expanded="false" aria-controls="moreCharts">Mehr</button>
-
-      <div id="moreCharts" class="chartgroups" hidden>
-        <div class="chartgroup">
-          <div class="chartgroup__title">Fortschritt</div>
-          <div class="charts charts--more">
-            <div class="chart">
-              <div class="chart__head">
-                <div>
-                  <div class="chart__title">Gesamt (kumuliert) <button class="info-btn" type="button" data-info-key="cumulMonths" aria-label="Info zur Grafik: Gesamt (kumuliert)">i</button></div>
-                  <div class="chart__sub" id="subCumulMonths">—</div>
-                </div>
-                <div class="chip" id="sumCumulMonths">0</div>
-              </div>
-              <div class="chart__body" id="chartCumulMonths"></div>
-            </div>
-
-            <div class="chart">
-              <div class="chart__head">
-                <div>
-                  <div class="chart__title">Letzte 5 Jahre <button class="info-btn" type="button" data-info-key="years5" aria-label="Info zur Grafik: Letzte 5 Jahre">i</button></div>
-                  <div class="chart__sub" id="subYears5">—</div>
-                </div>
-                <div class="chip" id="sumYears5">0</div>
-              </div>
-              <div class="chart__body" id="chartYears5"></div>
-            </div>
-
-            <div class="chart">
-              <div class="chart__head">
-                <div>
-                  <div class="chart__title">Letzte 12 Monate <button class="info-btn" type="button" data-info-key="months12" aria-label="Info zur Grafik: Letzte 12 Monate">i</button></div>
-                  <div class="chart__sub" id="subMonths">—</div>
-                </div>
-                <div class="chip" id="sumMonths">0</div>
-              </div>
-              <div class="chart__body" id="chartMonths"></div>
-            </div>
-
-            <div class="chart">
-              <div class="chart__head">
-                <div>
-                  <div class="chart__title">Letzte 12 Wochen <button class="info-btn" type="button" data-info-key="weeks12" aria-label="Info zur Grafik: Letzte 12 Wochen">i</button></div>
-                  <div class="chart__sub" id="subWeeks">—</div>
-                </div>
-                <div class="chip" id="sumWeeks">0</div>
-              </div>
-              <div class="chart__body" id="chartWeeks"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="chartgroup">
-          <div class="chartgroup__title">Tempo</div>
-          <div class="charts charts--more">
-            <div class="chart">
-              <div class="chart__head">
-                <div>
-                  <div class="chart__title">Letzte 30 Tage <button class="info-btn" type="button" data-info-key="days30" aria-label="Info zur Grafik: Letzte 30 Tage">i</button></div>
-                  <div class="chart__sub" id="subDays30">—</div>
-                </div>
-                <div class="chip" id="sumDays30">0</div>
-              </div>
-              <div class="chart__body" id="chartDays30"></div>
-            </div>
-
-            <div class="chart">
-              <div class="chart__head">
-                <div>
-                  <div class="chart__title">Trend (Ø 7 Tage) <button class="info-btn" type="button" data-info-key="trend7" aria-label="Info zur Grafik: Trend (Ø 7 Tage)">i</button></div>
-                  <div class="chart__sub" id="subAvg7">—</div>
-                </div>
-                <div class="chip" id="sumAvg7">0</div>
-              </div>
-              <div class="chart__body" id="chartAvg7"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="chartgroup">
-          <div class="chartgroup__title">Konstanz &amp; Muster</div>
-          <div class="charts charts--more">
-            <div class="chart">
-              <div class="chart__head">
-                <div>
-                  <div class="chart__title">Aktive Tage pro Woche <button class="info-btn" type="button" data-info-key="activeDaysWk" aria-label="Info zur Grafik: Aktive Tage pro Woche">i</button></div>
-                  <div class="chart__sub" id="subActiveDaysWk">—</div>
-                </div>
-                <div class="chip" id="sumActiveDaysWk">0</div>
-              </div>
-              <div class="chart__body" id="chartActiveDaysWk"></div>
-            </div>
-
-            <div class="chart">
-              <div class="chart__head">
-                <div>
-                  <div class="chart__title">Ø Seiten pro aktivem Tag <button class="info-btn" type="button" data-info-key="intensityWk" aria-label="Info zur Grafik: Ø Seiten pro aktivem Tag">i</button></div>
-                  <div class="chart__sub" id="subIntensityWk">—</div>
-                </div>
-                <div class="chip" id="sumIntensityWk">0</div>
-              </div>
-              <div class="chart__body" id="chartIntensityWk"></div>
-            </div>
-
-            <div class="chart">
-              <div class="chart__head">
-                <div>
-                  <div class="chart__title">Wochentage <button class="info-btn" type="button" data-info-key="weekdays" aria-label="Info zur Grafik: Wochentage">i</button></div>
-                  <div class="chart__sub" id="subWeekdays">—</div>
-                </div>
-                <div class="chip" id="sumWeekdays">0</div>
-              </div>
-              <div class="chart__body" id="chartWeekdays"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+</form>
+</div>
+</div>
+<main class="wrap grid" hidden="" id="appMain">
 <section class="panel">
-      <div class="panel__head panel__head--books">
-        <div class="panel__headleft">
-          <h2>Bücher</h2>
-          <div class="panel__meta" id="booksMeta">—</div>
-        </div>
-        <div class="panel__headright">
-          <input class="search" id="bookSearch" type="search" placeholder="Suchen…" autocomplete="off" />
-          <button class="btn btn--ghost" id="btnToggleFinished" type="button">Aktive</button>
-        </div>
-      </div>
-
-      <div id="bookList" class="booklist" aria-live="polite"></div>
-
-      <div class="empty" id="emptyState" hidden>
-        <div class="empty__title">Noch keine Bücher</div>
-        <div class="empty__text">
+<div class="panel__head">
+<h2>Übersicht</h2>
+<div class="panel__meta" id="streakMeta">—</div>
+</div>
+<div class="kpis kpis--top">
+<div class="kpi">
+<div class="kpi__label">Aktueller Streak <button aria-label="Info: Aktueller Streak" class="info-btn info-btn--inline" data-info-key="kpiCurrentStreak" type="button">i</button></div>
+<div class="kpi__value" id="kpiCurrentStreak">0</div>
+<div class="kpi__hint" id="kpiCurrentStreakHint"> </div>
+</div>
+<div class="kpi">
+<div class="kpi__label">Ø pro aktivem Tag <button aria-label="Info: Ø pro aktivem Tag" class="info-btn info-btn--inline" data-info-key="kpiAvgPerActiveDayTop" type="button">i</button></div>
+<div class="kpi__value" id="kpiAvgPerActiveDayTop">0</div>
+<div class="kpi__hint">nur aktive Tage</div>
+</div>
+<div class="kpi">
+<div class="kpi__label">Seiten diese Woche <button aria-label="Info: Seiten diese Woche" class="info-btn info-btn--inline" data-info-key="kpiWeekPages" type="button">i</button></div>
+<div class="kpi__value" id="kpiWeekPages">0</div>
+<div class="kpi__hint" id="kpiWeekHint">—</div>
+</div>
+</div>
+<button aria-controls="moreStats" aria-expanded="false" class="togglelink" id="toggleMoreStats" type="button">Mehr</button>
+<div class="morelist" hidden="" id="moreStats">
+<div class="moregroup">
+<div class="moregroup__title">Zeiträume</div>
+<ul class="moregroup__list">
+<li class="moreitem">
+<span class="moreitem__label">Seiten heute <button aria-label="Info: Seiten heute" class="info-btn info-btn--inline" data-info-key="kpiTodayPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiTodayPages">0</span>
+<span class="moreitem__meta">Heute</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Seiten gestern <button aria-label="Info: Seiten gestern" class="info-btn info-btn--inline" data-info-key="kpiYesterdayPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiYesterdayPages">0</span>
+<span class="moreitem__meta">Gestern</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Seiten letzte 7 Tage <button aria-label="Info: Seiten letzte 7 Tage" class="info-btn info-btn--inline" data-info-key="kpiLast7DaysPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiLast7DaysPages">0</span>
+<span class="moreitem__meta">rollierend, inkl. heute</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Seiten letzte 30 Tage <button aria-label="Info: Seiten letzte 30 Tage" class="info-btn info-btn--inline" data-info-key="kpiLast30DaysPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiLast30DaysPages">0</span>
+<span class="moreitem__meta">rollierend, inkl. heute</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Seiten diesen Monat <button aria-label="Info: Seiten diesen Monat" class="info-btn info-btn--inline" data-info-key="kpiMonthPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiMonthPages">0</span>
+<span class="moreitem__meta">Kalendermonat</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Seiten dieses Jahr <button aria-label="Info: Seiten dieses Jahr" class="info-btn info-btn--inline" data-info-key="kpiYearPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiYearPages">0</span>
+<span class="moreitem__meta">Kalenderjahr</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Gesamtseiten <button aria-label="Info: Gesamtseiten" class="info-btn info-btn--inline" data-info-key="kpiTotalPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiTotalPages">0</span>
+<span class="moreitem__meta">über alle Zeit</span>
+</li>
+</ul>
+</div>
+<div class="moregroup">
+<div class="moregroup__title">Aktivität &amp; Durchschnitt</div>
+<ul class="moregroup__list">
+<li class="moreitem">
+<span class="moreitem__label">Aktive Tage <button aria-label="Info: Aktive Tage" class="info-btn info-btn--inline" data-info-key="kpiActiveDays" type="button">i</button></span>
+<span class="moreitem__value" id="kpiActiveDays">0</span>
+<span class="moreitem__meta">Tage mit &gt; 0 Seiten</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Aktive Wochen <button aria-label="Info: Aktive Wochen" class="info-btn info-btn--inline" data-info-key="kpiActiveWeeks" type="button">i</button></span>
+<span class="moreitem__value" id="kpiActiveWeeks">0</span>
+<span class="moreitem__meta">Wochen mit &gt; 0 Seiten</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Aktive Monate <button aria-label="Info: Aktive Monate" class="info-btn info-btn--inline" data-info-key="kpiActiveMonths" type="button">i</button></span>
+<span class="moreitem__value" id="kpiActiveMonths">0</span>
+<span class="moreitem__meta">Monate mit &gt; 0 Seiten</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Ø pro aktivem Tag <button aria-label="Info: Ø pro aktivem Tag" class="info-btn info-btn--inline" data-info-key="kpiAvgPerActiveDay" type="button">i</button></span>
+<span class="moreitem__value" id="kpiAvgPerActiveDay">0</span>
+<span class="moreitem__meta">nur aktive Tage</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Ø pro aktivem Monat <button aria-label="Info: Ø pro aktivem Monat" class="info-btn info-btn--inline" data-info-key="kpiAvgPerActiveMonth" type="button">i</button></span>
+<span class="moreitem__value" id="kpiAvgPerActiveMonth">0</span>
+<span class="moreitem__meta">nur aktive Monate</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Ø pro aktivem Jahr <button aria-label="Info: Ø pro aktivem Jahr" class="info-btn info-btn--inline" data-info-key="kpiAvgPerActiveYear" type="button">i</button></span>
+<span class="moreitem__value" id="kpiAvgPerActiveYear">0</span>
+<span class="moreitem__meta">Jahre mit &gt; 1 Seite</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Ø pro Tag (7 Tage) <button aria-label="Info: Ø pro Tag (7 Tage)" class="info-btn info-btn--inline" data-info-key="kpiAvgLast7Days" type="button">i</button></span>
+<span class="moreitem__value" id="kpiAvgLast7Days">0</span>
+<span class="moreitem__meta">inkl. 0-Tage</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Ø pro Tag (30 Tage) <button aria-label="Info: Ø pro Tag (30 Tage)" class="info-btn info-btn--inline" data-info-key="kpiAvgLast30Days" type="button">i</button></span>
+<span class="moreitem__value" id="kpiAvgLast30Days">0</span>
+<span class="moreitem__meta">inkl. 0-Tage</span>
+</li>
+</ul>
+</div>
+<div class="moregroup">
+<div class="moregroup__title">Bestwerte</div>
+<ul class="moregroup__list">
+<li class="moreitem">
+<span class="moreitem__label">Bester Tag <button aria-label="Info: Bester Tag" class="info-btn info-btn--inline" data-info-key="kpiBestDay" type="button">i</button></span>
+<span class="moreitem__value" id="kpiBestDay">0</span>
+<span class="moreitem__meta" id="kpiBestDayDate">—</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Beste Woche <button aria-label="Info: Beste Woche" class="info-btn info-btn--inline" data-info-key="kpiBestWeek" type="button">i</button></span>
+<span class="moreitem__value" id="kpiBestWeek">0</span>
+<span class="moreitem__meta">max. Seiten in 1 Woche</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Bester Monat <button aria-label="Info: Bester Monat" class="info-btn info-btn--inline" data-info-key="kpiBestMonth" type="button">i</button></span>
+<span class="moreitem__value" id="kpiBestMonth">0</span>
+<span class="moreitem__meta">max. Seiten in 1 Monat</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Letzter aktiver Tag <button aria-label="Info: Letzter aktiver Tag" class="info-btn info-btn--inline" data-info-key="kpiLastActiveDate" type="button">i</button></span>
+<span class="moreitem__value" id="kpiLastActiveDate">—</span>
+<span class="moreitem__meta" id="kpiLastActivePages">—</span>
+</li>
+</ul>
+</div>
+<div class="moregroup">
+<div class="moregroup__title">Bibliothek</div>
+<ul class="moregroup__list">
+<li class="moreitem">
+<span class="moreitem__label">Bücher gesamt <button aria-label="Info: Bücher gesamt" class="info-btn info-btn--inline" data-info-key="kpiBooksTotal" type="button">i</button></span>
+<span class="moreitem__value" id="kpiBooksTotal">0</span>
+<span class="moreitem__meta"> </span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Abgeschlossen <button aria-label="Info: Abgeschlossen" class="info-btn info-btn--inline" data-info-key="kpiBooksFinished" type="button">i</button></span>
+<span class="moreitem__value" id="kpiBooksFinished">0</span>
+<span class="moreitem__meta"> </span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">In Arbeit <button aria-label="Info: In Arbeit" class="info-btn info-btn--inline" data-info-key="kpiBooksInProgress" type="button">i</button></span>
+<span class="moreitem__value" id="kpiBooksInProgress">0</span>
+<span class="moreitem__meta"> </span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Nicht gestartet <button aria-label="Info: Nicht gestartet" class="info-btn info-btn--inline" data-info-key="kpiBooksNotStarted" type="button">i</button></span>
+<span class="moreitem__value" id="kpiBooksNotStarted">0</span>
+<span class="moreitem__meta">ohne Einträge</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Seitenumfang gesamt <button aria-label="Info: Seitenumfang gesamt" class="info-btn info-btn--inline" data-info-key="kpiLibraryTotalPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiLibraryTotalPages">0</span>
+<span class="moreitem__meta">Summe totalPages</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Seiten aktueller Stand <button aria-label="Info: Seiten aktueller Stand" class="info-btn info-btn--inline" data-info-key="kpiLibraryCurrentPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiLibraryCurrentPages">0</span>
+<span class="moreitem__meta">Summe letzter Stand</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Seiten verbleibend <button aria-label="Info: Seiten verbleibend" class="info-btn info-btn--inline" data-info-key="kpiLibraryRemainingPages" type="button">i</button></span>
+<span class="moreitem__value" id="kpiLibraryRemainingPages">0</span>
+<span class="moreitem__meta">bis Ende</span>
+</li>
+<li class="moreitem">
+<span class="moreitem__label">Gesamtfortschritt <button aria-label="Info: Gesamtfortschritt" class="info-btn info-btn--inline" data-info-key="kpiLibraryProgressPct" type="button">i</button></span>
+<span class="moreitem__value" id="kpiLibraryProgressPct">0%</span>
+<span class="moreitem__meta"> </span>
+</li>
+</ul>
+</div>
+</div>
+<div class="divider"></div>
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Letzte 12 Tage <button aria-label="Info zur Grafik: Letzte 12 Tage" class="info-btn" data-info-key="days12" type="button">i</button></div>
+<div class="chart__sub" id="subDays">—</div>
+</div>
+<div class="chart__headright">
+<div class="chip" id="sumDays">0</div>
+</div>
+</div>
+<div class="chart__body" id="chartDays"></div>
+</div>
+<button aria-controls="moreCharts" aria-expanded="false" class="togglelink" id="toggleMoreCharts" type="button">Mehr</button>
+<div class="chartgroups" hidden="" id="moreCharts">
+<div class="chartgroup">
+<div class="chartgroup__title">Fortschritt</div>
+<div class="charts charts--more">
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Gesamt (kumuliert) <button aria-label="Info zur Grafik: Gesamt (kumuliert)" class="info-btn" data-info-key="cumulMonths" type="button">i</button></div>
+<div class="chart__sub" id="subCumulMonths">—</div>
+</div>
+<div class="chip" id="sumCumulMonths">0</div>
+</div>
+<div class="chart__body" id="chartCumulMonths"></div>
+</div>
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Letzte 5 Jahre <button aria-label="Info zur Grafik: Letzte 5 Jahre" class="info-btn" data-info-key="years5" type="button">i</button></div>
+<div class="chart__sub" id="subYears5">—</div>
+</div>
+<div class="chip" id="sumYears5">0</div>
+</div>
+<div class="chart__body" id="chartYears5"></div>
+</div>
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Letzte 12 Monate <button aria-label="Info zur Grafik: Letzte 12 Monate" class="info-btn" data-info-key="months12" type="button">i</button></div>
+<div class="chart__sub" id="subMonths">—</div>
+</div>
+<div class="chip" id="sumMonths">0</div>
+</div>
+<div class="chart__body" id="chartMonths"></div>
+</div>
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Letzte 12 Wochen <button aria-label="Info zur Grafik: Letzte 12 Wochen" class="info-btn" data-info-key="weeks12" type="button">i</button></div>
+<div class="chart__sub" id="subWeeks">—</div>
+</div>
+<div class="chip" id="sumWeeks">0</div>
+</div>
+<div class="chart__body" id="chartWeeks"></div>
+</div>
+</div>
+</div>
+<div class="chartgroup">
+<div class="chartgroup__title">Tempo</div>
+<div class="charts charts--more">
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Letzte 30 Tage <button aria-label="Info zur Grafik: Letzte 30 Tage" class="info-btn" data-info-key="days30" type="button">i</button></div>
+<div class="chart__sub" id="subDays30">—</div>
+</div>
+<div class="chip" id="sumDays30">0</div>
+</div>
+<div class="chart__body" id="chartDays30"></div>
+</div>
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Trend (Ø 7 Tage) <button aria-label="Info zur Grafik: Trend (Ø 7 Tage)" class="info-btn" data-info-key="trend7" type="button">i</button></div>
+<div class="chart__sub" id="subAvg7">—</div>
+</div>
+<div class="chip" id="sumAvg7">0</div>
+</div>
+<div class="chart__body" id="chartAvg7"></div>
+</div>
+</div>
+</div>
+<div class="chartgroup">
+<div class="chartgroup__title">Konstanz &amp; Muster</div>
+<div class="charts charts--more">
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Aktive Tage pro Woche <button aria-label="Info zur Grafik: Aktive Tage pro Woche" class="info-btn" data-info-key="activeDaysWk" type="button">i</button></div>
+<div class="chart__sub" id="subActiveDaysWk">—</div>
+</div>
+<div class="chip" id="sumActiveDaysWk">0</div>
+</div>
+<div class="chart__body" id="chartActiveDaysWk"></div>
+</div>
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Ø Seiten pro aktivem Tag <button aria-label="Info zur Grafik: Ø Seiten pro aktivem Tag" class="info-btn" data-info-key="intensityWk" type="button">i</button></div>
+<div class="chart__sub" id="subIntensityWk">—</div>
+</div>
+<div class="chip" id="sumIntensityWk">0</div>
+</div>
+<div class="chart__body" id="chartIntensityWk"></div>
+</div>
+<div class="chart">
+<div class="chart__head">
+<div>
+<div class="chart__title">Wochentage <button aria-label="Info zur Grafik: Wochentage" class="info-btn" data-info-key="weekdays" type="button">i</button></div>
+<div class="chart__sub" id="subWeekdays">—</div>
+</div>
+<div class="chip" id="sumWeekdays">0</div>
+</div>
+<div class="chart__body" id="chartWeekdays"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="panel">
+<div class="panel__head panel__head--books">
+<div class="panel__headleft">
+<h2>Bücher</h2>
+<div class="panel__meta" id="booksMeta">—</div>
+</div>
+<div class="panel__headright">
+<input autocomplete="off" class="search" id="bookSearch" placeholder="Suchen…" type="search"/>
+<button class="btn btn--ghost" id="btnToggleFinished" type="button">Aktive</button>
+</div>
+</div>
+<div aria-live="polite" class="booklist" id="bookList"></div>
+<div class="empty" hidden="" id="emptyState">
+<div class="empty__title">Noch keine Bücher</div>
+<div class="empty__text">
           Füge ein Buch hinzu und trage deinen Fortschritt ein. Die Grafiken und der Streak bauen sich automatisch auf.
         </div>
-        <button class="btn" id="btnAddBookEmpty">+</button>
-      </div>
-    </section>
-  </main>
-
-  <!-- Add Book Modal -->
-  <dialog class="modal" id="dlgAddBook">
-    <form method="dialog" class="modal__card" id="formAddBook">
-      <div class="modal__head">
-        <div>
-          <div class="modal__title">Buch hinzufügen</div>
-          <div class="modal__sub">Minimal, schnell, ohne Ablenkung</div>
-        </div>
-        <button class="iconbtn" type="button" id="btnCloseAddBook" aria-label="Schließen">×</button>
-      </div>
-
-      <div class="fields">
-        <label class="field">
-          <span>Titel</span>
-          <input required name="title" autocomplete="off" placeholder="z.B. Die Verwandlung" />
-        </label>
-
-        <label class="field">
-          <span>Autor (optional)</span>
-          <input name="author" autocomplete="off" placeholder="z.B. Franz Kafka" />
-        </label>
-
-        <label class="field">
-          <span>Gesamtseiten</span>
-          <input required name="totalPages" inputmode="numeric" type="number" min="1" step="1" placeholder="z.B. 220" />
-        </label>
-
-        <label class="field">
-          <span>Bereits gelesen (optional)</span>
-          <input name="initialPages" inputmode="numeric" type="number" min="0" step="1" placeholder="z.B. 50" />
-        </label>
-      </div>
-
-      <div class="modal__actions">
-        <button class="btn btn--ghost" type="button" id="btnCancelAddBook">Abbrechen</button>
-        <button class="btn" id="btnCreateBook" type="submit">Hinzufügen</button>
-      </div>
-    </form>
-  </dialog>
-
-  <!-- Book Detail Modal -->
-  <dialog class="modal" id="dlgBook">
-    <form method="dialog" class="modal__card modal__card--wide" id="formBook">
-      <div class="modal__head">
-        <div>
-          <div class="modal__title" id="bookTitle">—</div>
-          <div class="modal__sub" id="bookSub">—</div>
-        </div>
-        <button class="iconbtn" type="button" id="btnCloseBookX" aria-label="Schließen">×</button>
-      </div>
-
-      <div class="bookdetail">
-        <div class="bookdetail__progress">
-          <div class="progress">
-            <div class="progress__bar" id="bookProgBar" style="width:0%"></div>
-          </div>
-          <div class="progress__meta">
-            <span id="bookProgText">0 / 0</span>
-            <span class="muted" id="bookProgPct">0%</span>
-          </div>
-        </div>
-
-        <div class="bookdetail__update">
-          <div class="bookdetail__label">Gelesen bis Seite</div>
-          <div class="bookdetail__row">
-            <input id="inpDate" type="date" aria-label="Datum" />
-            <input id="inpPage" type="number" min="0" step="1" inputmode="numeric" placeholder="z.B. 75" aria-label="Seite" />
-            <button class="btn" id="btnSavePage" type="submit">Speichern</button>
-          </div>
-        </div>
-
-        <div class="bookdetail__history">
-          <div class="bookdetail__label">Letzte Einträge</div>
-          <div class="history" id="historyList"></div>
-        </div>
-      </div>
-
-      <div class="modal__actions modal__actions--spread">
-        <button class="btn btn--danger" id="btnDeleteBook" type="button">Buch löschen</button>
-        <div></div>
-      </div>
-    </form>
-  </dialog>
-
-  <!-- Hidden file input for import -->
-  <input type="file" id="fileImport" accept="application/json" hidden />
-
-
-  <!-- Info dialog for charts -->
-  <dialog class="modal" id="infoDialog" aria-labelledby="infoTitle">
-    <div class="modal__card">
-      <div class="modal__head">
-        <div>
-          <div class="modal__title" id="infoTitle">—</div>
-          <div class="modal__sub" id="infoSub">—</div>
-        </div>
-        <button class="btn btn--ghost" id="btnCloseInfo" type="button" aria-label="Schliessen">✕</button>
-      </div>
-
-      <div class="info__body" id="infoBody"></div>
-
-      <div class="modal__actions">
-        <button class="btn" id="btnInfoOk" type="button">OK</button>
-      </div>
-    </div>
-  </dialog>
-
-  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-
-  <script type="module" src="./app.js"></script>
+<button class="btn" id="btnAddBookEmpty">+</button>
+</div>
+</section>
+</main>
+<!-- Add Book Modal -->
+<dialog class="modal" id="dlgAddBook">
+<form class="modal__card" id="formAddBook" method="dialog">
+<div class="modal__head">
+<div>
+<div class="modal__title">Buch hinzufügen</div>
+<div class="modal__sub">Minimal, schnell, ohne Ablenkung</div>
+</div>
+<button aria-label="Schließen" class="iconbtn" id="btnCloseAddBook" type="button">×</button>
+</div>
+<div class="fields">
+<label class="field">
+<span>Titel</span>
+<input autocomplete="off" name="title" placeholder="z.B. Die Verwandlung" required=""/>
+</label>
+<label class="field">
+<span>Autor (optional)</span>
+<input autocomplete="off" name="author" placeholder="z.B. Franz Kafka"/>
+</label>
+<label class="field">
+<span>Gesamtseiten</span>
+<input inputmode="numeric" min="1" name="totalPages" placeholder="z.B. 220" required="" step="1" type="number"/>
+</label>
+<label class="field">
+<span>Bereits gelesen (optional)</span>
+<input inputmode="numeric" min="0" name="initialPages" placeholder="z.B. 50" step="1" type="number"/>
+</label>
+</div>
+<div class="modal__actions">
+<button class="btn btn--ghost" id="btnCancelAddBook" type="button">Abbrechen</button>
+<button class="btn" id="btnCreateBook" type="submit">Hinzufügen</button>
+</div>
+</form>
+</dialog>
+<!-- Book Detail Modal -->
+<dialog class="modal" id="dlgBook">
+<form class="modal__card modal__card--wide" id="formBook" method="dialog">
+<div class="modal__head">
+<div>
+<div class="modal__title" id="bookTitle">—</div>
+<div class="modal__sub" id="bookSub">—</div>
+</div>
+<button aria-label="Schließen" class="iconbtn" id="btnCloseBookX" type="button">×</button>
+</div>
+<div class="bookdetail">
+<div class="bookdetail__progress">
+<div class="progress">
+<div class="progress__bar" id="bookProgBar" style="width:0%"></div>
+</div>
+<div class="progress__meta">
+<span id="bookProgText">0 / 0</span>
+<span class="muted" id="bookProgPct">0%</span>
+</div>
+</div>
+<div class="bookdetail__update">
+<div class="bookdetail__label">Gelesen bis Seite</div>
+<div class="bookdetail__row">
+<input aria-label="Datum" id="inpDate" type="date"/>
+<input aria-label="Seite" id="inpPage" inputmode="numeric" min="0" placeholder="z.B. 75" step="1" type="number"/>
+<button class="btn" id="btnSavePage" type="submit">Speichern</button>
+</div>
+</div>
+<div class="bookdetail__history">
+<div class="bookdetail__label">Letzte Einträge</div>
+<div class="history" id="historyList"></div>
+</div>
+</div>
+<div class="modal__actions modal__actions--spread">
+<button class="btn btn--danger" id="btnDeleteBook" type="button">Buch löschen</button>
+<div></div>
+</div>
+</form>
+</dialog>
+<!-- Hidden file input for import -->
+<input accept="application/json" hidden="" id="fileImport" type="file"/>
+<!-- Info dialog for charts -->
+<dialog aria-labelledby="infoTitle" class="modal" id="infoDialog">
+<div class="modal__card">
+<div class="modal__head">
+<div>
+<div class="modal__title" id="infoTitle">—</div>
+<div class="modal__sub" id="infoSub">—</div>
+</div>
+<button aria-label="Schliessen" class="btn btn--ghost" id="btnCloseInfo" type="button">✕</button>
+</div>
+<div class="info__preview" hidden="" id="infoPreview"></div><div class="info__body" id="infoBody"></div>
+<div class="modal__actions">
+<button class="btn" id="btnInfoOk" type="button">OK</button>
+</div>
+</div>
+</dialog>
+<div aria-atomic="true" aria-live="polite" class="toast" id="toast" role="status"></div>
+<script src="./app.js" type="module"></script>
 </body>
 </html>

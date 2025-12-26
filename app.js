@@ -204,6 +204,7 @@ const el = {
   infoTitle: document.getElementById("infoTitle"),
   infoSub: document.getElementById("infoSub"),
   infoBody: document.getElementById("infoBody"),
+  infoPreview: document.getElementById("infoPreview"),
   btnCloseInfo: document.getElementById("btnCloseInfo"),
   btnInfoOk: document.getElementById("btnInfoOk"),
 
@@ -236,12 +237,12 @@ const el = {
   fileImport: document.getElementById("fileImport"),
 };
 
-/* ------------------ chart info ------------------ */
+/* ------------------ info (charts + numbers) ------------------ */
 /**
- * For every chart: what it is, how it is calculated, and why it matters.
- * Keys correspond to data-info-key attributes in index.html.
+ * For every metric (chart or number): what it is, how it is calculated, and why it matters.
+ * Keys correspond to data-info-key attributes in index.html (charts + numbers).
  */
-const CHART_INFO = {
+const INFO = {
   days12: {
     title: "Letzte 12 Tage",
     subtitle: "Tageswerte inkl. 0-Tage",
@@ -312,7 +313,361 @@ const CHART_INFO = {
     how: "Für jeden Wochentag (Mo–So) summieren wir Seiten an aktiven Tagen (Seiten > 0) und teilen durch die Anzahl aktiver Tage dieses Wochentags.",
     why: "Du erkennst Muster (z.B. ‚Sonntag ist stark‘) und kannst bewusst Routinen auf deine besten Tage legen.",
   },
+
+  /* ------------------ numbers (KPIs) ------------------ */
+  kpiCurrentStreak: {
+    title: "Aktueller Streak",
+    subtitle: "Tage in Folge bis heute",
+    what: "Zählt, wie viele Kalendertage in Folge du bis heute mindestens 1 Seite erfasst hast.",
+    how: "Wir prüfen ab heute rückwärts Tag für Tag: solange die Tages-Summe > 0 ist, läuft die Serie weiter. Der erste 0‑Tag beendet den Streak.",
+    why: "Streaks sind ein Konstanz‑Signal. Du siehst sofort, ob du gerade ‚drin‘ bist – und was es zu schützen gilt.",
+  },
+  kpiAvgPerActiveDayTop: {
+    title: "Ø pro aktivem Tag",
+    subtitle: "nur aktive Tage",
+    what: "Zeigt deine durchschnittlichen Seiten pro Tag – aber nur für Tage, an denen du wirklich gelesen hast.",
+    how: "Gesamtseiten (über alle Zeit) geteilt durch Anzahl aktiver Tage (Tage mit Tages‑Summe > 0).",
+    why: "Gibt ein realistisches Bild deiner ‚typischen‘ Lese-Intensität, ohne dass Pausentage den Schnitt verwässern.",
+  },
+  kpiWeekPages: {
+    title: "Seiten diese Woche",
+    subtitle: "Mo–So (Kalenderwoche)",
+    what: "Summiert deine Seiten in der aktuellen Woche.",
+    how: "Alle Tageswerte werden pro Woche (Wochenstart Montag) aggregiert. Angezeigt wird die Summe für die Woche, in der heute liegt.",
+    why: "Sehr motivierend als Wochenziel: du siehst schnell, ob du ‚on track‘ bist – und ob am Wochenende noch ein Push möglich ist.",
+  },
+
+  kpiTodayPages: {
+    title: "Seiten heute",
+    subtitle: "Heute",
+    what: "Zeigt, wie viele Seiten du heute erfasst hast.",
+    how: "Aus den Einträgen aller Bücher wird pro Datum die gelesene Seitenzahl berechnet (positive Seiten‑Deltas). Für heute wird die Tages‑Summe angezeigt.",
+    why: "Das ist dein Tages‑Check‑in: klein anfangen reicht – ein Eintrag hält die Gewohnheit aktiv.",
+  },
+  kpiYesterdayPages: {
+    title: "Seiten gestern",
+    subtitle: "Gestern",
+    what: "Zeigt, wie viele Seiten du gestern erfasst hast.",
+    how: "Wie ‚Seiten heute‘, aber für das gestrige Datum (Kalendertag).",
+    why: "Hilft beim Rückblick: du siehst, ob du gerade eine Serie aufbaust oder wo Pausen entstehen.",
+  },
+  kpiLast7DaysPages: {
+    title: "Seiten letzte 7 Tage",
+    subtitle: "rollierend, inkl. heute",
+    what: "Summiert deine Seiten über die letzten 7 Kalendertage (inklusive heute).",
+    how: "Wir addieren die Tageswerte der letzten 7 Tage; Tage ohne Eintrag zählen als 0.",
+    why: "Guter ‚Kurzfrist‑KPI‘: stabiler als ein einzelner Tag und schnell genug, um Veränderungen zu merken.",
+  },
+  kpiLast30DaysPages: {
+    title: "Seiten letzte 30 Tage",
+    subtitle: "rollierend, inkl. heute",
+    what: "Summiert deine Seiten über die letzten 30 Kalendertage (inklusive heute).",
+    how: "Wir addieren die Tageswerte der letzten 30 Tage; Tage ohne Eintrag zählen als 0.",
+    why: "Zeigt, ob dein Monats‑Rhythmus stimmt – und ob du über mehrere Wochen dranbleibst.",
+  },
+  kpiMonthPages: {
+    title: "Seiten diesen Monat",
+    subtitle: "Kalendermonat",
+    what: "Summiert deine Seiten im aktuellen Kalendermonat.",
+    how: "Alle Tageswerte werden nach Monat gruppiert und aufsummiert; angezeigt wird der aktuelle Monat.",
+    why: "Perfekt als Monatsziel: du siehst deinen Fortschritt im laufenden Monat auf einen Blick.",
+  },
+  kpiYearPages: {
+    title: "Seiten dieses Jahr",
+    subtitle: "Kalenderjahr",
+    what: "Summiert deine Seiten im aktuellen Kalenderjahr.",
+    how: "Alle Tageswerte werden nach Jahr gruppiert und aufsummiert; angezeigt wird das aktuelle Jahr.",
+    why: "Hilft beim Jahresziel: du siehst deinen langfristigen Pace und ob du im Plan bist.",
+  },
+  kpiTotalPages: {
+    title: "Gesamtseiten",
+    subtitle: "über alle Zeit",
+    what: "Zeigt die Summe aller erfassten gelesenen Seiten seit Beginn deiner Einträge.",
+    how: "Summe aller Tageswerte über alle Bücher und alle Daten (berechnet aus positiven Seiten‑Deltas pro Buch).",
+    why: "Der ‚Lifetime‑Counter‘: maximal motivierend, weil er deinen gesamten Fortschritt sichtbar macht.",
+  },
+
+  kpiActiveDays: {
+    title: "Aktive Tage",
+    subtitle: "Tage mit > 0 Seiten",
+    what: "Zählt, an wie vielen Kalendertagen du mindestens 1 Seite erfasst hast.",
+    how: "Wir zählen alle Daten, deren Tages‑Summe > 0 ist.",
+    why: "Konstanz schlägt Spitzen. Viele aktive Tage bedeuten eine starke, stabile Gewohnheit.",
+  },
+  kpiActiveWeeks: {
+    title: "Aktive Wochen",
+    subtitle: "Wochen mit > 0 Seiten",
+    what: "Zählt, in wie vielen Wochen du mindestens 1 Seite erfasst hast.",
+    how: "Wir aggregieren Tageswerte zu Wochen (Mo–So) und zählen Wochen mit Wochen‑Summe > 0.",
+    why: "Zeigt, ob du über längere Zeiträume regelmäßig liest – unabhängig davon, wie stark einzelne Wochen waren.",
+  },
+  kpiActiveMonths: {
+    title: "Aktive Monate",
+    subtitle: "Monate mit > 0 Seiten",
+    what: "Zählt, in wie vielen Monaten du mindestens 1 Seite erfasst hast.",
+    how: "Wir aggregieren Tageswerte zu Monaten und zählen Monate mit Monats‑Summe > 0.",
+    why: "Gute Langzeit‑Konstanz‑Metrik: zeigt, ob Lesen über Monate hinweg ‚Teil deines Lebens‘ ist.",
+  },
+
+  kpiAvgPerActiveDay: {
+    title: "Ø pro aktivem Tag",
+    subtitle: "nur aktive Tage",
+    what: "Durchschnittliche Seiten pro aktivem Tag (nur Tage mit Eintrag).",
+    how: "Gesamtseiten geteilt durch Anzahl aktiver Tage (Tages‑Summe > 0).",
+    why: "Hilft dir, realistische Ziele abzuleiten (z.B. ‚wenn ich an 4 Tagen lese, komme ich auf ~X Seiten/Woche‘).",
+  },
+  kpiAvgPerActiveMonth: {
+    title: "Ø pro aktivem Monat",
+    subtitle: "nur aktive Monate",
+    what: "Durchschnittliche Seiten pro aktivem Monat.",
+    how: "Gesamtseiten geteilt durch Anzahl aktiver Monate (Monats‑Summe > 0).",
+    why: "Gibt dir eine ‚Monats‑Pace‘, die nicht durch komplett leere Monate verzerrt wird.",
+  },
+  kpiAvgPerActiveYear: {
+    title: "Ø pro aktivem Jahr",
+    subtitle: "Jahre mit > 1 Seite",
+    what: "Durchschnittliche Seiten pro aktivem Jahr.",
+    how: "Wir zählen Jahre als ‚aktiv‘, wenn die Jahres‑Summe > 1 ist, und bilden dann: Summe der Seiten in aktiven Jahren geteilt durch Anzahl aktiver Jahre.",
+    why: "Zeigt deine langfristige Jahres‑Pace (und ignoriert Jahre mit nur minimalen Test-/Einträge).",
+  },
+
+  kpiAvgLast7Days: {
+    title: "Ø pro Tag (7 Tage)",
+    subtitle: "inkl. 0‑Tage",
+    what: "Durchschnittliche Seiten pro Tag über die letzten 7 Tage.",
+    how: "Seiten der letzten 7 Tage geteilt durch 7 (Tage ohne Eintrag zählen als 0).",
+    why: "Sehr gut als Tempo‑Indikator: du siehst schnell, ob du gerade beschleunigst oder nachlässt.",
+  },
+  kpiAvgLast30Days: {
+    title: "Ø pro Tag (30 Tage)",
+    subtitle: "inkl. 0‑Tage",
+    what: "Durchschnittliche Seiten pro Tag über die letzten 30 Tage.",
+    how: "Seiten der letzten 30 Tage geteilt durch 30 (Tage ohne Eintrag zählen als 0).",
+    why: "Robuster als 7 Tage: zeigt dein ‚Basis‑Tempo‘ und glättet einzelne Ausreißer.",
+  },
+
+  kpiBestDay: {
+    title: "Bester Tag",
+    subtitle: "max. Seiten an einem Tag",
+    what: "Der höchste Tageswert, den du je erreicht hast.",
+    how: "Wir suchen das Maximum der Tageswerte. Bei Gleichstand wird der jüngere Tag angezeigt (Datum in der Zeile daneben).",
+    why: "Ein Motivationsanker: du siehst, wozu du fähig bist – und kannst versuchen, neue Bestwerte zu setzen.",
+  },
+  kpiBestWeek: {
+    title: "Beste Woche",
+    subtitle: "max. Seiten in 1 Woche",
+    what: "Die Woche (Mo–So) mit den meisten erfassten Seiten.",
+    how: "Wir aggregieren alle Tageswerte zu Wochen und nehmen die maximale Wochen‑Summe.",
+    why: "Wiederholbare Performance: Wochen sind realistische Einheiten für Ziele und Routinen.",
+  },
+  kpiBestMonth: {
+    title: "Bester Monat",
+    subtitle: "max. Seiten in 1 Monat",
+    what: "Der Monat mit den meisten erfassten Seiten.",
+    how: "Wir aggregieren alle Tageswerte zu Monaten und nehmen die maximale Monats‑Summe.",
+    why: "Zeigt, was möglich ist, wenn du einen Monat richtig gut triffst – ideal als Benchmark für deine nächsten Monate.",
+  },
+
+  kpiLastActiveDate: {
+    title: "Letzter aktiver Tag",
+    subtitle: "letztes Datum mit Seiten > 0",
+    what: "Das letzte Datum, an dem du mindestens 1 Seite erfasst hast.",
+    how: "Wir suchen das jüngste Datum mit Tages‑Summe > 0. In der Zeile daneben steht die Seitenzahl dieses Tages.",
+    why: "Ein schneller Reality‑Check: wie frisch ist deine Gewohnheit gerade?",
+  },
+
+  kpiBooksTotal: {
+    title: "Bücher gesamt",
+    subtitle: "Bibliothek",
+    what: "Anzahl Bücher in deiner Bibliothek.",
+    how: "Zählt alle Bücher im aktuellen Account.",
+    why: "Gibt Kontext: Fortschritt macht mehr Sinn, wenn du auch die Größe deiner ‚Pipeline‘ kennst.",
+  },
+  kpiBooksFinished: {
+    title: "Abgeschlossen",
+    subtitle: "fertig gelesen",
+    what: "Anzahl Bücher, die als abgeschlossen gelten.",
+    how: "Ein Buch gilt als abgeschlossen, wenn totalPages > 0 und der aktuelle Stand (letzte Seite) ≥ totalPages ist.",
+    why: "Abschlüsse sind starke Motivationspunkte – du siehst, wie oft du wirklich ‚durchgezogen‘ hast.",
+  },
+  kpiBooksInProgress: {
+    title: "In Arbeit",
+    subtitle: "mit Einträgen",
+    what: "Anzahl Bücher, die begonnen wurden, aber noch nicht abgeschlossen sind.",
+    how: "Zählt Bücher, die nicht abgeschlossen sind und mindestens einen Verlaufseintrag haben.",
+    why: "Zeigt deinen aktuellen ‚Work‑in‑Progress‘ – gut, um Fokus zu halten statt zu viel parallel zu starten.",
+  },
+  kpiBooksNotStarted: {
+    title: "Nicht gestartet",
+    subtitle: "ohne Einträge",
+    what: "Anzahl Bücher, die (noch) nicht begonnen wurden.",
+    how: "Zählt Bücher, die nicht abgeschlossen sind und keinen Verlaufseintrag haben.",
+    why: "Hilft beim Priorisieren: welche Bücher warten – und welche willst du als nächstes starten?",
+  },
+
+  kpiLibraryTotalPages: {
+    title: "Seitenumfang gesamt",
+    subtitle: "Summe totalPages",
+    what: "Gesamter Seitenumfang deiner Bibliothek (Summe der totalPages‑Werte).",
+    how: "Summe aller totalPages über alle Bücher (fehlende/0‑Werte zählen als 0).",
+    why: "Gibt eine greifbare ‚Gesamtstrecke‘ – damit fühlt sich Fortschritt messbar an.",
+  },
+  kpiLibraryCurrentPages: {
+    title: "Seiten aktueller Stand",
+    subtitle: "Summe letzter Stand",
+    what: "Summe deiner aktuellen Stände über alle Bücher.",
+    how: "Für jedes Buch (mit totalPages > 0) nehmen wir den aktuellen Stand (min. letzter Stand, totalPages) und summieren.",
+    why: "Das ist dein kumulierter Fortschritt über die gesamte Bibliothek – sehr motivierend.",
+  },
+  kpiLibraryRemainingPages: {
+    title: "Seiten verbleibend",
+    subtitle: "bis Ende",
+    what: "Wie viele Seiten in deiner Bibliothek noch bis zum Ende offen sind.",
+    how: "Für jedes Buch: max(0, totalPages − aktueller Stand). Dann Summe über alle Bücher.",
+    why: "Hilft beim Planen: du siehst, wie groß die Reststrecke ist und kannst realistische Ziele setzen.",
+  },
+  kpiLibraryProgressPct: {
+    title: "Gesamtfortschritt",
+    subtitle: "in Prozent",
+    what: "Prozentualer Fortschritt über die gesamte Bibliothek.",
+    how: "Seiten aktueller Stand / Seitenumfang gesamt × 100 (falls Gesamtumfang 0 ist, dann 0%).",
+    why: "Eine einzige, intuitive Zahl für den Gesamtfortschritt – perfekt, um Fortschritt schnell zu verstehen.",
+  },
+
 };
+
+/* ------------------ previews for info dialog ------------------ */
+const CHART_PREVIEW = {
+  days12: { sourceId: "chartDays", summaryId: "sumDays" },
+  weeks12: { sourceId: "chartWeeks", summaryId: "sumWeeks" },
+  months12: { sourceId: "chartMonths", summaryId: "sumMonths" },
+  cumulMonths: { sourceId: "chartCumulMonths", summaryId: "sumCumulMonths" },
+  years5: { sourceId: "chartYears5", summaryId: "sumYears5" },
+  days30: { sourceId: "chartDays30", summaryId: "sumDays30" },
+  trend7: { sourceId: "chartAvg7" },
+  activeDaysWk: { sourceId: "chartActiveDaysWk", summaryId: "sumActiveDaysWk" },
+  intensityWk: { sourceId: "chartIntensityWk", summaryId: "sumIntensityWk" },
+  weekdays: { sourceId: "chartWeekdays", summaryId: "sumWeekdays" },
+};
+
+function cleanText(s) {
+  const t = String(s ?? "").replace(/\s+/g, " ").trim();
+  return t === "—" ? "" : t;
+}
+
+function parsePercent(text) {
+  const m = String(text ?? "").match(/(-?\d+(?:[\.,]\d+)?)\s*%/);
+  if (!m) return null;
+  const n = Number(m[1].replace(",", "."));
+  if (!Number.isFinite(n)) return null;
+  return Math.max(0, Math.min(100, n));
+}
+
+function nearbyMetaText(valueEl) {
+  if (!valueEl) return "";
+  const li = valueEl.closest?.(".moreitem");
+  if (li) return cleanText(li.querySelector(".moreitem__meta")?.textContent);
+  const kpi = valueEl.closest?.(".kpi");
+  if (kpi) return cleanText(kpi.querySelector(".kpi__hint")?.textContent);
+  return "";
+}
+
+function buildNumberPreview(key) {
+  const valueEl = document.getElementById(key);
+  const valueText = cleanText(valueEl?.textContent) || "—";
+  const metaText = nearbyMetaText(valueEl);
+
+  const card = document.createElement("div");
+  card.className = "info__previewcard";
+
+  const metric = document.createElement("div");
+  metric.className = "info__metric";
+
+  const row = document.createElement("div");
+  row.className = "info__metricrow";
+
+  const label = document.createElement("div");
+  label.className = "info__metriclabel";
+  label.textContent = "Aktuell";
+
+  const value = document.createElement("div");
+  value.className = "info__metricvalue";
+  value.textContent = valueText;
+
+  row.appendChild(label);
+  row.appendChild(value);
+  metric.appendChild(row);
+
+  if (metaText) {
+    const meta = document.createElement("div");
+    meta.className = "info__metricmeta";
+    meta.textContent = metaText;
+    metric.appendChild(meta);
+  }
+
+  const pct = parsePercent(valueText);
+  if (pct !== null) {
+    const bar = document.createElement("div");
+    bar.className = "progressbar";
+    const fill = document.createElement("div");
+    fill.className = "progressbar__fill";
+    fill.style.width = `${pct}%`;
+    bar.appendChild(fill);
+    metric.appendChild(bar);
+  }
+
+  card.appendChild(metric);
+  return card;
+}
+
+function buildChartPreview(chartSpec) {
+  const card = document.createElement("div");
+  card.className = "info__previewcard";
+
+  const src = document.getElementById(chartSpec.sourceId);
+  const svg = src?.querySelector?.("svg");
+  if (svg) {
+    const clone = svg.cloneNode(true);
+    clone.setAttribute("aria-hidden", "true");
+    card.appendChild(clone);
+  } else {
+    const fallback = document.createElement("div");
+    fallback.className = "info__metricmeta";
+    fallback.textContent = "Grafik ist noch nicht gerendert.";
+    card.appendChild(fallback);
+  }
+
+  if (chartSpec.summaryId) {
+    const sumEl = document.getElementById(chartSpec.summaryId);
+    const sumText = cleanText(sumEl?.textContent);
+    if (sumText) {
+      const meta = document.createElement("div");
+      meta.className = "info__metricmeta";
+      meta.textContent = `Summe: ${sumText}`;
+      card.appendChild(meta);
+    }
+  }
+
+  return card;
+}
+
+function buildPreviewNode(key, info) {
+  // explicit preview config wins
+  if (info?.preview?.kind === "chart" && info.preview.sourceId) {
+    return buildChartPreview(info.preview);
+  }
+  if (info?.preview?.kind === "number") {
+    return buildNumberPreview(info.preview.valueId || key);
+  }
+
+  // known chart keys
+  if (CHART_PREVIEW[key]) return buildChartPreview(CHART_PREVIEW[key]);
+
+  // fall back to number if element exists
+  if (document.getElementById(key)) return buildNumberPreview(key);
+
+  return null;
+}
 
 function escapeHtml(s) {
   return String(s)
@@ -340,46 +695,59 @@ function buildInfoHtml(info) {
   `.trim();
 }
 
-function openChartInfo(key) {
-  const info = CHART_INFO[key];
+function openInfo(key) {
+  const info = INFO[key];
   if (!info || !el.infoDialog) return;
 
   if (el.infoTitle) el.infoTitle.textContent = info.title || "Info";
   if (el.infoSub) el.infoSub.textContent = info.subtitle || "";
   if (el.infoBody) el.infoBody.innerHTML = buildInfoHtml(info);
 
+  // preview (chart or number)
+  if (el.infoPreview) {
+    el.infoPreview.innerHTML = "";
+    const preview = buildPreviewNode(key, info);
+    if (preview) {
+      el.infoPreview.hidden = false;
+      el.infoPreview.appendChild(preview);
+    } else {
+      el.infoPreview.hidden = true;
+    }
+  }
+
+
   if (typeof el.infoDialog.showModal === "function") el.infoDialog.showModal();
   else el.infoDialog.open = true;
 }
 
-function closeChartInfo() {
+function closeInfo() {
   if (!el.infoDialog) return;
   if (typeof el.infoDialog.close === "function") el.infoDialog.close();
   else el.infoDialog.open = false;
 }
 
-function wireChartInfoUI() {
+function wireInfoUI() {
   // Open via event delegation (covers all charts)
   document.addEventListener("click", (e) => {
     const btn = e.target?.closest?.(".info-btn[data-info-key]");
     if (!btn) return;
     e.preventDefault();
     e.stopPropagation();
-    openChartInfo(btn.dataset.infoKey);
+    openInfo(btn.dataset.infoKey);
   });
 
-  el.btnCloseInfo?.addEventListener("click", closeChartInfo);
-  el.btnInfoOk?.addEventListener("click", closeChartInfo);
+  el.btnCloseInfo?.addEventListener("click", closeInfo);
+  el.btnInfoOk?.addEventListener("click", closeInfo);
 
   // Close on backdrop click
   el.infoDialog?.addEventListener("click", (e) => {
-    if (e.target === el.infoDialog) closeChartInfo();
+    if (e.target === el.infoDialog) closeInfo();
   });
 
   // Prevent dialog 'cancel' from throwing in some browsers
   el.infoDialog?.addEventListener("cancel", (e) => {
     e.preventDefault();
-    closeChartInfo();
+    closeInfo();
   });
 }
 
@@ -409,7 +777,7 @@ function bootstrap() {
 
   wireAuthEvents();
   wireAppEvents();
-  wireChartInfoUI();
+  wireInfoUI();
 
   watchAuth(ctx.auth, async (user) => {
     if (user) {
