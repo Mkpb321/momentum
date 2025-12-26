@@ -1,7 +1,7 @@
 // app.render.js
 // Rendering + UI composition (no persistence, minimal state).
 
-import { renderBarChart, renderLineChart } from "./charts.js";
+import { renderBarChart, renderLineChart, renderMonthDayHeatmap } from "./charts.js";
 import {
   addDays,
   addMonths,
@@ -484,6 +484,37 @@ export function renderCharts(el, state) {
       valueFormatter: (v) => formatNumber(v, 1),
       suffix: " Seiten",
     });
+  }
+
+  // Heatmap: last 36 months (each month per row, day-of-month per column)
+  const heatRows = [];
+  for (let i = 35; i >= 0; i--) {
+    const m = addMonths(today, -i);
+    const y = m.getFullYear();
+    const mi = m.getMonth();
+    const label = formatMonthLabel(m);
+    const vals = [];
+    for (let day = 1; day <= 31; day++) {
+      const d = new Date(y, mi, day);
+      if (d.getMonth() !== mi) {
+        vals.push(0);
+        continue;
+      }
+      const k = dateKey(d);
+      vals.push(daily.get(k) ?? 0);
+    }
+    heatRows.push({ label, values: vals });
+  }
+
+  setText(el.subHeatmap36, "Letzte 36 Monate – pro Tag (1–31)");
+  // show the maximum daily pages within the shown range
+  let maxDay = 0;
+  for (const r of heatRows) {
+    for (const v of r.values) maxDay = Math.max(maxDay, v);
+  }
+  setText(el.sumHeatmap36, `Max/Tag: ${formatNumber(maxDay, 0)} Seiten`);
+  if (el.chartHeatmap36) {
+    renderMonthDayHeatmap(el.chartHeatmap36, heatRows, { padL: 68 });
   }
 }
 

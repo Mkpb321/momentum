@@ -352,3 +352,90 @@ export function renderBarChart(containerEl, labels, values, opts = {}) {
   containerEl.innerHTML = "";
   containerEl.appendChild(svg);
 }
+
+export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
+  // rows: [{ label: string, values: number[] (len 31) }], oldest -> newest
+  const svgNS = "http://www.w3.org/2000/svg";
+  const cell = opts.cellSize ?? 12;
+  const gap = opts.gap ?? 2;
+  const padT = 18;
+  const padL = opts.padL ?? 64;
+  const padR = 10;
+  const padB = 10;
+
+  const cols = 31;
+  const w = padL + cols * (cell + gap) - gap + padR;
+  const h = padT + rows.length * (cell + gap) - gap + padB;
+
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("class", "heatmapsvg");
+  svg.setAttribute("viewBox", `0 0 ${w} ${h}`);
+
+  let max = 0;
+  for (const r of rows) {
+    for (const v of (r.values || [])) {
+      if (Number.isFinite(v)) max = Math.max(max, v);
+    }
+  }
+
+  const fillFor = (v) => {
+    const val = Number.isFinite(v) ? v : 0;
+    if (max <= 0 || val <= 0) return "rgb(255,255,255)";
+    const t = Math.max(0, Math.min(1, val / max));
+    const g = Math.round(255 * (1 - t));
+    return `rgb(${g},${g},${g})`;
+  };
+
+  // Column labels: 1..31
+  for (let c = 1; c <= cols; c++) {
+    const tx = padL + (c - 1) * (cell + gap) + cell / 2;
+    const t = document.createElementNS(svgNS, "text");
+    t.setAttribute("x", String(tx));
+    t.setAttribute("y", String(12));
+    t.setAttribute("text-anchor", "middle");
+    t.setAttribute("dominant-baseline", "middle");
+    t.setAttribute("class", "heatmaplabel");
+    t.textContent = String(c);
+    svg.appendChild(t);
+  }
+
+  // Rows
+  rows.forEach((row, r) => {
+    const y = padT + r * (cell + gap);
+
+    const lt = document.createElementNS(svgNS, "text");
+    lt.setAttribute("x", String(padL - 8));
+    lt.setAttribute("y", String(y + cell / 2));
+    lt.setAttribute("text-anchor", "end");
+    lt.setAttribute("dominant-baseline", "middle");
+    lt.setAttribute("class", "heatmaplabel");
+    lt.textContent = row.label;
+    svg.appendChild(lt);
+
+    for (let c = 0; c < cols; c++) {
+      const v = row.values[c] ?? 0;
+      const x = padL + c * (cell + gap);
+
+      const rect = document.createElementNS(svgNS, "rect");
+      rect.setAttribute("x", String(x));
+      rect.setAttribute("y", String(y));
+      rect.setAttribute("width", String(cell));
+      rect.setAttribute("height", String(cell));
+      rect.setAttribute("rx", "2");
+      rect.setAttribute("ry", "2");
+      rect.setAttribute("class", "heatmapcell");
+      rect.setAttribute("fill", fillFor(v));
+      rect.setAttribute("stroke", "#e8e2db");
+      rect.setAttribute("stroke-width", "1");
+
+      const title = document.createElementNS(svgNS, "title");
+      title.textContent = `${Math.round(v)} Seiten`;
+      rect.appendChild(title);
+
+      svg.appendChild(rect);
+    }
+  });
+
+  containerEl.innerHTML = "";
+  containerEl.appendChild(svg);
+}

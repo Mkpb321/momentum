@@ -307,6 +307,11 @@ h2{
 .chart__sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
 .chart__body{ width:100%; }
 
+.chart__body--heatmap{ overflow:auto; max-height:520px; padding-right:4px; }
+.heatmapsvg{ display:block; }
+.heatmapcell{ shape-rendering: crispEdges; }
+.heatmaplabel{ font-size:10px; fill:#7a756f; }
+
 .info-btn{
   display:inline-flex;
   align-items:center;

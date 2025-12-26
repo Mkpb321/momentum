@@ -197,6 +197,7 @@ const el = {
   chartAvg7: document.getElementById("chartAvg7"),
   chartActiveDaysWk: document.getElementById("chartActiveDaysWk"),
   chartIntensityWk: document.getElementById("chartIntensityWk"),
+  chartHeatmap36: document.getElementById("chartHeatmap36"),
 
 
   // Chart info dialog
@@ -218,6 +219,8 @@ const el = {
   subAvg7: document.getElementById("subAvg7"),
   subActiveDaysWk: document.getElementById("subActiveDaysWk"),
   subIntensityWk: document.getElementById("subIntensityWk"),
+  subHeatmap36: document.getElementById("subHeatmap36"),
+  subHeatmap36: document.getElementById("subHeatmap36"),
 
   sumDays: document.getElementById("sumDays"),
   sumWeeks: document.getElementById("sumWeeks"),
@@ -229,6 +232,9 @@ const el = {
   sumAvg7: document.getElementById("sumAvg7"),
   sumActiveDaysWk: document.getElementById("sumActiveDaysWk"),
   sumIntensityWk: document.getElementById("sumIntensityWk"),
+  sumHeatmap36: document.getElementById("sumHeatmap36"),
+  sumHeatmap36: document.getElementById("sumHeatmap36"),
+  sumHeatmap36: document.getElementById("sumHeatmap36"),
 
   toast: document.getElementById("toast"),
 
@@ -312,6 +318,14 @@ const INFO = {
     what: "Vergleicht deine durchschnittliche Seitenzahl je Wochentag, nur an Tagen, an denen du gelesen hast.",
     how: "Für jeden Wochentag (Mo–So) summieren wir Seiten an aktiven Tagen (Seiten > 0) und teilen durch die Anzahl aktiver Tage dieses Wochentags.",
     why: "Du erkennst Muster (z.B. ‚Sonntag ist stark‘) und kannst bewusst Routinen auf deine besten Tage legen.",
+  },
+
+  heatmap36: {
+    title: "Heatmap (36 Monate)",
+    subtitle: "Monat (Zeile) × Tag (Spalte)",
+    what: "Zeigt für die letzten 36 Monate jeden Kalendertag als Feld: je mehr Seiten, desto dunkler.",
+    how: "Für jeden Tag wird die Tages-Summe über alle Bücher berechnet. Das dunkelste Feld entspricht dem höchsten Tageswert innerhalb der gesamten Heatmap (über alle 36 Monate). Nicht existierende Tage (z.B. 31. im April) werden als 0 dargestellt.",
+    why: "Du siehst sofort Muster, Routinen und ‚Peak-Tage‘. Gerade über 36 Monate erkennt man Gewohnheiten, Saisonalität und wie konstant du wirklich bist.",
   },
 
   /* ------------------ numbers (KPIs) ------------------ */
@@ -548,6 +562,7 @@ const CHART_PREVIEW = {
   activeDaysWk: { sourceId: "chartActiveDaysWk", summaryId: "sumActiveDaysWk" },
   intensityWk: { sourceId: "chartIntensityWk", summaryId: "sumIntensityWk" },
   weekdays: { sourceId: "chartWeekdays", summaryId: "sumWeekdays" },
+  heatmap36: { sourceId: "chartHeatmap36", summaryId: "sumHeatmap36" },
 };
 
 function cleanText(s) {
