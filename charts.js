@@ -106,7 +106,7 @@ function addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatt
     const t = document.createElementNS(svgNS, "text");
     t.setAttribute("x", String(padL - 8));
     t.setAttribute("y", String(y));
-    t.setAttribute("text-anchor", "end");
+    t.setAttribute("text-anchor", "start");
     t.setAttribute("dominant-baseline", "middle");
     t.setAttribute("class", "chartylabel");
     t.textContent = yLabelFormatter(v);
@@ -141,7 +141,7 @@ function addXAxisLabelsVertical(svg, svgNS, labels, xFor, yBase, every) {
 
     const t = document.createElementNS(svgNS, "text");
     t.setAttribute("transform", `translate(${x} ${yBase}) rotate(-90)`);
-    t.setAttribute("text-anchor", "end");
+    t.setAttribute("text-anchor", "start");
     t.setAttribute("dominant-baseline", "middle");
     t.setAttribute("class", "chartxlabel");
     t.textContent = labels[i];

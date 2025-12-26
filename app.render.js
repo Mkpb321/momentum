@@ -290,7 +290,7 @@ export function renderCharts(el, state) {
   for (let i = 11; i >= 0; i--) {
     const d = addDays(today, -i);
     const key = dateKey(d);
-    days12.push({ key, label: formatDayLabel(d), val: daily.get(key) ?? 0 });
+    days12.push({ key, label: formatDateCompact(key), val: daily.get(key) ?? 0 });
   }
 
   const days12Range = `${formatDateShort(days12[0].key)} – ${formatDateShort(days12[days12.length - 1].key)}`;
