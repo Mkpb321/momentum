@@ -657,7 +657,7 @@ h2{
 /* SVG chart styling */
 svg.chartsvg{
   width: 100%;
-  height: 110px;
+  height: 130px;
   display:block;
 }
 .chartbar{
@@ -670,9 +670,22 @@ svg.chartsvg{
   stroke: var(--line);
   stroke-width: 1;
 }
+
+.chartxlabel,
+.chartylabel,
 .chartlabel{
   fill: var(--muted);
   font-size: 10px;
+}
+
+.chartxtick{
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+.chartyaxis{
+  stroke: var(--line);
+  stroke-width: 1;
 }
 
 .chartline{
@@ -924,7 +937,7 @@ body{ overflow-x:hidden; }
 }
 
 .info__preview .chartsvg{
-  height: 140px;
+  height: 160px;
 }
 
 .progressbar{

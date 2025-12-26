@@ -46,44 +46,137 @@ function makeChartSvg(containerEl, height, padL, padR) {
   return { svg, svgNS, w };
 }
 
-function addGridLines(svg, svgNS, padL, w, yBottom, yMid) {
-  [yBottom, yMid].forEach((yy) => {
+function niceNum(range, round) {
+  if (range <= 0) return 1;
+  const exponent = Math.floor(Math.log10(range));
+  const fraction = range / Math.pow(10, exponent);
+
+  let niceFraction;
+  if (round) {
+    if (fraction < 1.5) niceFraction = 1;
+    else if (fraction < 3) niceFraction = 2;
+    else if (fraction < 7) niceFraction = 5;
+    else niceFraction = 10;
+  } else {
+    if (fraction <= 1) niceFraction = 1;
+    else if (fraction <= 2) niceFraction = 2;
+    else if (fraction <= 5) niceFraction = 5;
+    else niceFraction = 10;
+  }
+  return niceFraction * Math.pow(10, exponent);
+}
+
+function buildNiceTicks(minV, maxV, tickCount = 5) {
+  const min = Number.isFinite(minV) ? minV : 0;
+  const max = Number.isFinite(maxV) ? maxV : 1;
+  const range = niceNum(max - min, false);
+  const step = niceNum(range / Math.max(1, tickCount - 1), true);
+  const niceMin = Math.floor(min / step) * step;
+  const niceMax = Math.ceil(max / step) * step;
+
+  const out = [];
+  // Include end with small epsilon to avoid floating issues.
+  for (let v = niceMin; v <= niceMax + step * 0.5; v += step) {
+    // Avoid -0
+    out.push(Object.is(v, -0) ? 0 : v);
+  }
+  return { ticks: out, niceMin, niceMax, step };
+}
+
+function chooseXLabelEvery(n, innerW, minPx = 18) {
+  if (n <= 1) return 1;
+  const maxTicks = Math.max(2, Math.floor(innerW / minPx));
+  if (n <= maxTicks) return 1;
+  return Math.ceil(n / maxTicks);
+}
+
+function addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatter) {
+  // Grid lines + labels
+  for (const v of ticks) {
+    const y = yFor(v);
+
     const grid = document.createElementNS(svgNS, "line");
     grid.setAttribute("x1", String(padL));
     grid.setAttribute("x2", String(w - 6));
-    grid.setAttribute("y1", String(yy));
-    grid.setAttribute("y2", String(yy));
+    grid.setAttribute("y1", String(y));
+    grid.setAttribute("y2", String(y));
     grid.setAttribute("class", "chartgrid");
     svg.appendChild(grid);
-  });
+
+    const t = document.createElementNS(svgNS, "text");
+    t.setAttribute("x", String(padL - 8));
+    t.setAttribute("y", String(y));
+    t.setAttribute("text-anchor", "end");
+    t.setAttribute("dominant-baseline", "middle");
+    t.setAttribute("class", "chartylabel");
+    t.textContent = yLabelFormatter(v);
+    svg.appendChild(t);
+  }
+
+  // y-axis line (subtle)
+  const axis = document.createElementNS(svgNS, "line");
+  axis.setAttribute("x1", String(padL));
+  axis.setAttribute("x2", String(padL));
+  axis.setAttribute("y1", String(padT));
+  axis.setAttribute("y2", String(yBottom));
+  axis.setAttribute("class", "chartyaxis");
+  svg.appendChild(axis);
 }
 
-function labelEveryFor(n) {
-  if (n <= 8) return 1;
-  if (n <= 12) return 2;
-  if (n <= 16) return 3;
-  return Math.ceil(n / 6);
+function addXAxisLabelsVertical(svg, svgNS, labels, xFor, yBase, every) {
+  const n = labels.length;
+  for (let i = 0; i < n; i++) {
+    if (i !== 0 && i !== n - 1 && (i % every) !== 0) continue;
+
+    const x = xFor(i);
+
+    // small tick
+    const tick = document.createElementNS(svgNS, "line");
+    tick.setAttribute("x1", String(x));
+    tick.setAttribute("x2", String(x));
+    tick.setAttribute("y1", String(yBase - 6));
+    tick.setAttribute("y2", String(yBase - 2));
+    tick.setAttribute("class", "chartxtick");
+    svg.appendChild(tick);
+
+    const t = document.createElementNS(svgNS, "text");
+    t.setAttribute("transform", `translate(${x} ${yBase}) rotate(-90)`);
+    t.setAttribute("text-anchor", "end");
+    t.setAttribute("dominant-baseline", "middle");
+    t.setAttribute("class", "chartxlabel");
+    t.textContent = labels[i];
+    svg.appendChild(t);
+  }
 }
 
 export function renderLineChart(containerEl, labels, values, opts = {}) {
-  const height = opts.height ?? 110;
-  const padL = 6, padR = 6, padT = 12, padB = 24;
+  const height = opts.height ?? 130;
+  const padLBase = opts.padL ?? 42;
+  const padR = opts.padR ?? 8;
+  const padT = opts.padT ?? 12;
+  const padB = opts.padB ?? 44;
+
+  const rawMaxV = Math.max(0, ...values);
+  const yLabelFormatter = opts.yLabelFormatter ?? opts.valueFormatter ?? defaultValueFormatter;
+  const tickData = buildNiceTicks(0, Math.max(1, rawMaxV), opts.yTickCount ?? 5);
+  const maxYLabelLen = Math.max(1, ...tickData.ticks.map(v => String(yLabelFormatter(v)).length));
+  // Rough text width estimate to prevent y-label clipping.
+  const padL = Math.max(padLBase, 16 + maxYLabelLen * 6);
 
   const { svg, svgNS, w } = makeChartSvg(containerEl, height, padL, padR);
 
   const innerW = Math.max(10, w - padL - padR);
   const innerH = Math.max(10, height - padT - padB);
 
-  const maxV = Math.max(1, ...values);
   const n = Math.max(1, values.length);
 
   const xFor = (i) => padL + (n === 1 ? innerW / 2 : (i * innerW) / (n - 1));
-  const yFor = (v) => padT + (innerH - (v / maxV) * innerH);
+  const { ticks, niceMax } = tickData;
+  const yFor = (v) => padT + (innerH - (Math.max(0, v) / Math.max(1e-9, niceMax)) * innerH);
 
-  // grid lines (subtle)
+  // y-axis gridlines + tick labels
   const yBottom = padT + innerH;
-  const yMid = padT + innerH * 0.5;
-  addGridLines(svg, svgNS, padL, w, yBottom, yMid);
+  addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatter);
 
   const valueFormatter = opts.valueFormatter ?? defaultValueFormatter;
   const suffix = opts.suffix ?? " Seiten";
@@ -115,41 +208,38 @@ export function renderLineChart(containerEl, labels, values, opts = {}) {
     svg.appendChild(c);
   });
 
-  // x labels (sparse)
-  const labelEvery = labelEveryFor(labels.length);
-  labels.forEach((lab, i) => {
-    if (i % labelEvery !== 0 && i !== labels.length - 1) return;
-
-    const t = document.createElementNS(svgNS, "text");
-    t.setAttribute("x", String(xFor(i)));
-    t.setAttribute("y", String(padT + innerH + 16));
-    t.setAttribute("text-anchor", "middle");
-    t.setAttribute("class", "chartlabel");
-    t.textContent = lab;
-    svg.appendChild(t);
-  });
+  // x labels (try each point; reduce only if too dense)
+  const every = chooseXLabelEvery(labels.length, innerW, opts.minXLabelPx ?? 18);
+  addXAxisLabelsVertical(svg, svgNS, labels, xFor, height - 6, every);
 
   containerEl.innerHTML = "";
   containerEl.appendChild(svg);
 }
 
 export function renderBarChart(containerEl, labels, values, opts = {}) {
-  const height = opts.height ?? 110;
-  const padL = 6, padR = 6, padT = 12, padB = 24;
+  const height = opts.height ?? 130;
+  const padLBase = opts.padL ?? 42;
+  const padR = opts.padR ?? 8;
+  const padT = opts.padT ?? 12;
+  const padB = opts.padB ?? 44;
+
+  const rawMaxV = Math.max(0, ...values);
+  const yLabelFormatter = opts.yLabelFormatter ?? opts.valueFormatter ?? defaultValueFormatter;
+  const tickData = buildNiceTicks(0, Math.max(1, rawMaxV), opts.yTickCount ?? 5);
+  const maxYLabelLen = Math.max(1, ...tickData.ticks.map(v => String(yLabelFormatter(v)).length));
+  const padL = Math.max(padLBase, 16 + maxYLabelLen * 6);
 
   const { svg, svgNS, w } = makeChartSvg(containerEl, height, padL, padR);
 
   const innerW = Math.max(10, w - padL - padR);
   const innerH = Math.max(10, height - padT - padB);
 
-  const maxV = Math.max(1, ...values);
   const n = Math.max(1, values.length);
 
-  const yFor = (v) => padT + (innerH - (v / maxV) * innerH);
+  const { ticks, niceMax } = tickData;
+  const yFor = (v) => padT + (innerH - (Math.max(0, v) / Math.max(1e-9, niceMax)) * innerH);
   const yBottom = padT + innerH;
-  const yMid = padT + innerH * 0.5;
-
-  addGridLines(svg, svgNS, padL, w, yBottom, yMid);
+  addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatter);
 
   const valueFormatter = opts.valueFormatter ?? defaultValueFormatter;
   const suffix = opts.suffix ?? " Seiten";
@@ -179,19 +269,10 @@ export function renderBarChart(containerEl, labels, values, opts = {}) {
     svg.appendChild(rect);
   }
 
-  // x labels (sparse)
-  const labelEvery = labelEveryFor(labels.length);
-  labels.forEach((lab, i) => {
-    if (i % labelEvery !== 0 && i !== labels.length - 1) return;
-
-    const t = document.createElementNS(svgNS, "text");
-    t.setAttribute("x", String(padL + i * step + step / 2));
-    t.setAttribute("y", String(padT + innerH + 16));
-    t.setAttribute("text-anchor", "middle");
-    t.setAttribute("class", "chartlabel");
-    t.textContent = lab;
-    svg.appendChild(t);
-  });
+  // x labels (try each bar; reduce only if too dense)
+  const xFor = (i) => padL + i * step + step / 2;
+  const every = chooseXLabelEvery(labels.length, innerW, opts.minXLabelPx ?? 18);
+  addXAxisLabelsVertical(svg, svgNS, labels, xFor, height - 6, every);
 
   containerEl.innerHTML = "";
   containerEl.appendChild(svg);
