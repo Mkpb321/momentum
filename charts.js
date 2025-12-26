@@ -90,6 +90,64 @@ function chooseXLabelEvery(n, innerW, minPx = 18) {
   return Math.ceil(n / maxTicks);
 }
 
+function estimateTextWidthPx(text, fontPx = 10) {
+  // Heuristic: average glyph width ~0.62em for common UI fonts.
+  const s = String(text ?? "");
+  return s.length * fontPx * 0.62;
+}
+
+function computeEveryForHorizontalLabels(labels, innerW, stepPx, fontPx = 10) {
+  const n = labels.length;
+  if (n <= 1) return 1;
+
+  // For line charts, the distance is (innerW/(n-1)); for bars it's (innerW/n).
+  const perPoint = stepPx;
+  const maxLabelW = Math.max(
+    1,
+    ...labels.map((l) => estimateTextWidthPx(l, fontPx))
+  );
+  const needed = Math.ceil((maxLabelW + 10) / Math.max(1, perPoint));
+  return Math.max(1, needed);
+}
+
+function addXAxisLabelsHorizontal(svg, svgNS, labels, xFor, yBottom, every) {
+  const n = labels.length;
+  for (let i = 0; i < n; i++) {
+    if (i !== 0 && i !== n - 1 && (i % every) !== 0) continue;
+
+    const x = xFor(i);
+
+    const tick = document.createElementNS(svgNS, "line");
+    tick.setAttribute("x1", String(x));
+    tick.setAttribute("x2", String(x));
+    tick.setAttribute("y1", String(yBottom));
+    tick.setAttribute("y2", String(yBottom + 4));
+    tick.setAttribute("class", "chartxtick");
+    svg.appendChild(tick);
+
+    const t = document.createElementNS(svgNS, "text");
+    t.setAttribute("x", String(x));
+    t.setAttribute("y", String(yBottom + 14));
+    t.setAttribute("text-anchor", "middle");
+    t.setAttribute("dominant-baseline", "middle");
+    t.setAttribute("class", "chartxlabel");
+    t.textContent = labels[i];
+    svg.appendChild(t);
+  }
+}
+
+function addXAxisLabelsAuto(svg, svgNS, labels, xFor, yBottom, innerW, modeHint = "auto") {
+  const n = labels.length;
+  if (n <= 0) return;
+
+  // Always render vertical x-axis labels.
+  // Label every point when possible; reduce density only when the chart is too crowded to avoid overlap.
+  // With vertical labels, the effective x-width is roughly the font size, so we can allow tighter spacing.
+  const everyV = chooseXLabelEvery(n, innerW, 12);
+
+  addXAxisLabelsVertical(svg, svgNS, labels, xFor, yBottom + 18, everyV);
+}
+
 function addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatter) {
   // Grid lines + labels
   for (const v of ticks) {
@@ -104,9 +162,10 @@ function addYAxis(svg, svgNS, padL, padT, w, yBottom, ticks, yFor, yLabelFormatt
     svg.appendChild(grid);
 
     const t = document.createElementNS(svgNS, "text");
-    t.setAttribute("x", String(padL - 8));
+    // Place labels clearly left of the y-axis (never overlapping it).
+    t.setAttribute("x", String(padL - 10));
     t.setAttribute("y", String(y));
-    t.setAttribute("text-anchor", "start");
+    t.setAttribute("text-anchor", "end");
     t.setAttribute("dominant-baseline", "middle");
     t.setAttribute("class", "chartylabel");
     t.textContent = yLabelFormatter(v);
@@ -161,7 +220,7 @@ export function renderLineChart(containerEl, labels, values, opts = {}) {
   const tickData = buildNiceTicks(0, Math.max(1, rawMaxV), opts.yTickCount ?? 5);
   const maxYLabelLen = Math.max(1, ...tickData.ticks.map(v => String(yLabelFormatter(v)).length));
   // Rough text width estimate to prevent y-label clipping.
-  const padL = Math.max(padLBase, 16 + maxYLabelLen * 6);
+  const padL = Math.max(padLBase, 18 + maxYLabelLen * 7);
 
   const { svg, svgNS, w } = makeChartSvg(containerEl, height, padL, padR);
 
@@ -208,9 +267,8 @@ export function renderLineChart(containerEl, labels, values, opts = {}) {
     svg.appendChild(c);
   });
 
-  // x labels (try each point; reduce only if too dense)
-  const every = chooseXLabelEvery(labels.length, innerW, opts.minXLabelPx ?? 18);
-  addXAxisLabelsVertical(svg, svgNS, labels, xFor, height - 6, every);
+  // x labels: vertical; label every point when possible, thin out when crowded (never overlap)
+  addXAxisLabelsAuto(svg, svgNS, labels, xFor, yBottom, innerW, opts.xLabelMode ?? "auto");
 
   containerEl.innerHTML = "";
   containerEl.appendChild(svg);
@@ -227,7 +285,7 @@ export function renderBarChart(containerEl, labels, values, opts = {}) {
   const yLabelFormatter = opts.yLabelFormatter ?? opts.valueFormatter ?? defaultValueFormatter;
   const tickData = buildNiceTicks(0, Math.max(1, rawMaxV), opts.yTickCount ?? 5);
   const maxYLabelLen = Math.max(1, ...tickData.ticks.map(v => String(yLabelFormatter(v)).length));
-  const padL = Math.max(padLBase, 16 + maxYLabelLen * 6);
+  const padL = Math.max(padLBase, 18 + maxYLabelLen * 7);
 
   const { svg, svgNS, w } = makeChartSvg(containerEl, height, padL, padR);
 
@@ -269,10 +327,9 @@ export function renderBarChart(containerEl, labels, values, opts = {}) {
     svg.appendChild(rect);
   }
 
-  // x labels (try each bar; reduce only if too dense)
+  // x labels: vertical; label every point when possible, thin out when crowded (never overlap)
   const xFor = (i) => padL + i * step + step / 2;
-  const every = chooseXLabelEvery(labels.length, innerW, opts.minXLabelPx ?? 18);
-  addXAxisLabelsVertical(svg, svgNS, labels, xFor, height - 6, every);
+  addXAxisLabelsAuto(svg, svgNS, labels, xFor, yBottom, innerW, opts.xLabelMode ?? "auto");
 
   containerEl.innerHTML = "";
   containerEl.appendChild(svg);

@@ -1033,7 +1033,16 @@ function wireAppEvents() {
     const title = String(fd.get("title") || "").trim();
     const author = String(fd.get("author") || "").trim();
     const totalPages = clampInt(fd.get("totalPages"), 1, 100000);
-    const initialPage = clampInt(fd.get("initialPages"), 0, totalPages);
+    const initialRaw = clampInt(fd.get("initialPages"), 0, 100000);
+
+    if (initialRaw > totalPages) {
+      toast("Bereits gelesen darf nicht höher sein als die Gesamtseiten.");
+      const inp = el.formAddBook.querySelector("input[name='initialPages']");
+      inp?.focus();
+      return;
+    }
+
+    const initialPage = initialRaw;
 
     if (!title) {
       toast("Titel fehlt.");

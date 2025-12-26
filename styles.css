@@ -445,8 +445,8 @@ h2{
 /* Small circular add buttons (+) */
 #btnAddBook,
 #btnAddBookEmpty{
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -504,7 +504,8 @@ h2{
   padding: 14px;
 }
 .modal__card--wide{
-  width: min(820px, calc(100vw - 24px));
+  /* Buchdetails / Seiten-Eintrag: auf großen Screens bewusst kompakter */
+  width: min(640px, calc(100vw - 24px));
 }
 .modal__head{
   display:flex;
@@ -711,7 +712,7 @@ svg.chartsvg{
   .topbar__inner{ padding-top:8px; padding-bottom:8px; }
   .btn{ padding: 10px 12px; }
   #btnAddBook,
-  #btnAddBookEmpty{ width: 34px; height: 34px; padding: 0; }
+  #btnAddBookEmpty{ width: 30px; height: 30px; padding: 0; }
 }
 
 /* Books header: search + toggle */
@@ -828,9 +829,9 @@ body{ overflow-x:hidden; }
 
 .moreitem{
   display: grid;
-  /* Label und Wert bewusst nah beieinander (keine "ganz links"/"ganz rechts"-Spannweite) */
-  grid-template-columns: minmax(180px, 340px) auto;
-  justify-content: start;
+  /* In einspaltiger Darstellung: Wert immer ganz rechts (klarer Scan). */
+  grid-template-columns: 1fr auto;
+  justify-content: stretch;
   gap: 2px 12px;
   align-items: baseline;
   padding: 10px 0;
