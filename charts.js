@@ -439,35 +439,43 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
       rect.setAttribute("stroke", cellData.valid ? "#e8e2db" : "none");
       rect.setAttribute("stroke-width", cellData.valid ? "1" : "0");
 
-      // Tooltip: per-book breakdown + total.
-      const title = document.createElementNS(svgNS, "title");
-      if (!cellData.valid) {
-        title.textContent = "";
-      } else {
+      // Tooltip: date, total, blank line, per-book breakdown.
+      let tooltipText = "";
+      if (cellData.valid) {
         const lines = [];
         const dateStr = cellData.date ? formatDateKey(cellData.date) : "";
         if (dateStr) lines.push(dateStr);
+
         const totalRounded = Math.round(v);
         lines.push(`${totalRounded} S.`);
 
         const byBook = Array.isArray(cellData.byBook) ? cellData.byBook : [];
         const bookLines = [];
-        if (byBook.length) {
-          for (const b of byBook) {
-            const name = String(b.title ?? "").trim() || "(Ohne Titel)";
-            const p = Number.isFinite(b.pages) ? Math.round(b.pages) : 0;
-            if (p > 0) bookLines.push(`${name}: ${p} S.`);
-          }
+        for (const b of byBook) {
+          const name = String(b.title ?? "").trim() || "(Ohne Titel)";
+          const p = Number.isFinite(b.pages) ? Math.round(b.pages) : 0;
+          if (p > 0) bookLines.push(`${name}: ${p} S.`);
         }
         if (bookLines.length) {
           lines.push(""); // Leerzeile zwischen Total und Büchern
           lines.push(...bookLines);
         }
-        // Use newline-separated text for native SVG tooltips.
-        title.textContent = lines.join("\n");
-}
-      // Only append a title when there is content (avoids stray empty tooltips).
-      if (title.textContent) rect.appendChild(title);
+        tooltipText = lines.join("\n");
+      }
+
+      if (tooltipText) {
+        const title = document.createElementNS(svgNS, "title");
+        title.textContent = tooltipText;
+        rect.appendChild(title);
+
+        // Click: also show as pinned toast (top-left) with a close button.
+        rect.style.cursor = "pointer";
+        rect.addEventListener("click", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          if (typeof window?.showHeatmapToast === "function") window.showHeatmapToast(tooltipText);
+        });
+      }
 
       svg.appendChild(rect);
     }

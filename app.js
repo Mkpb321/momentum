@@ -238,6 +238,11 @@ const el = {
 
   toast: document.getElementById("toast"),
 
+  // Pinned toast (Heatmap)
+  toastPinned: document.getElementById("toastPinned"),
+  toastPinnedClose: document.getElementById("toastPinnedClose"),
+  toastPinnedText: document.getElementById("toastPinnedText"),
+
   btnExport: document.getElementById("btnExport"),
   btnImport: document.getElementById("btnImport"),
   fileImport: document.getElementById("fileImport"),
@@ -1033,12 +1038,16 @@ function wireAppEvents() {
   el.btnCloseBookX?.addEventListener("click", () => el.dlgBook.close());
 
   // Ensure the toast is not trapped in a closed dialog (which would hide it abruptly).
-  const detachToast = () => {
-    if (!el.toast) return;
-    if (el.toast.parentElement !== document.body) document.body.appendChild(el.toast);
+  const detachToasts = () => {
+    if (el.toast && el.toast.parentElement !== document.body) document.body.appendChild(el.toast);
+    if (el.toastPinned && el.toastPinned.parentElement !== document.body) document.body.appendChild(el.toastPinned);
   };
-  el.dlgAddBook?.addEventListener("close", detachToast);
-  el.dlgBook?.addEventListener("close", detachToast);
+  el.dlgAddBook?.addEventListener("close", detachToasts);
+  el.dlgBook?.addEventListener("close", detachToasts);
+  el.infoDialog?.addEventListener("close", detachToasts);
+
+  // Heatmap toast close
+  el.toastPinnedClose?.addEventListener("click", hideHeatmapToast);
 
   el.formAddBook?.addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -1315,6 +1324,38 @@ function toast(msg) {
       document.body.appendChild(el.toast);
     }
   }, 3800);
+}
+
+function showHeatmapToast(text) {
+  if (!el.toastPinned || !el.toastPinnedText) return;
+
+  // Keep it visible even when a <dialog> is open by temporarily moving it into that dialog.
+  const host = (el.infoDialog?.open ? el.infoDialog : (el.dlgBook?.open ? el.dlgBook : (el.dlgAddBook?.open ? el.dlgAddBook : null)));
+  if (host) {
+    if (!host.contains(el.toastPinned)) host.appendChild(el.toastPinned);
+  } else {
+    if (el.toastPinned.parentElement !== document.body) document.body.appendChild(el.toastPinned);
+  }
+
+  el.toastPinnedText.textContent = String(text ?? "");
+  el.toastPinned.hidden = false;
+}
+
+function hideHeatmapToast() {
+  if (!el.toastPinned) return;
+  el.toastPinned.hidden = true;
+  // If no dialog is open anymore, ensure it lives in the normal document flow.
+  if (!el.infoDialog?.open && !el.dlgBook?.open && !el.dlgAddBook?.open && el.toastPinned.parentElement !== document.body) {
+    document.body.appendChild(el.toastPinned);
+  }
+}
+
+// Allow charts.js (SVG click handlers) to trigger the toast without tight coupling.
+try {
+  window.showHeatmapToast = showHeatmapToast;
+  window.hideHeatmapToast = hideHeatmapToast;
+} catch (_) {
+  // ignore (non-browser env)
 }
 
 function debounce(fn, wait) {

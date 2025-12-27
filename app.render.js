@@ -491,6 +491,8 @@ export function renderCharts(el, state) {
   }
 
   // Heatmap: last 36 months (each month per row, day-of-month per column)
+  // Future days (tomorrow, etc.) should be shown as empty cells without a border.
+  const now = today;
   const heatRows = [];
   for (let i = 35; i >= 0; i--) {
     const m = addMonths(today, -i);
@@ -502,6 +504,13 @@ export function renderCharts(el, state) {
       const d = new Date(y, mi, day);
       if (d.getMonth() !== mi) {
         // Month doesn't have this day (e.g. Feb 30/31). Render as white without border.
+        cells.push({ valid: false, total: 0, byBook: [] });
+        continue;
+      }
+
+      // Days that are in the future (tomorrow and beyond) should also be rendered as empty
+      // cells without a border, to clearly separate them from "0-page" days in the past.
+      if (d.getTime() > now.getTime()) {
         cells.push({ valid: false, total: 0, byBook: [] });
         continue;
       }

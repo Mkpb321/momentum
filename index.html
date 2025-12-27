@@ -546,6 +546,12 @@
 </div>
 </dialog>
 <div aria-atomic="true" aria-live="polite" class="toast" id="toast" role="status"></div>
+
+<!-- Pinned toast for Heatmap cell details (top-left, dismissible) -->
+<div aria-atomic="true" aria-live="polite" class="toastpinned" hidden="" id="toastPinned" role="status">
+  <button aria-label="Schliessen" class="toastpinned__close" id="toastPinnedClose" type="button">✕</button>
+  <pre class="toastpinned__text" id="toastPinnedText"></pre>
+</div>
 <script src="./app.js" type="module"></script>
 </body>
 </html>
