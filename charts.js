@@ -354,7 +354,7 @@ export function renderBarChart(containerEl, labels, values, opts = {}) {
 }
 
 export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
-  // rows: [{ label: string, values: number[] (len 31) }], oldest -> newest
+  // rows: [{ label: string, cells: Array<{valid:boolean,total:number,byBook:Array<{title:string,pages:number}>}> }], oldest -> newest
   const svgNS = "http://www.w3.org/2000/svg";
   const cell = opts.cellSize ?? 12;
   const gap = opts.gap ?? 2;
@@ -373,8 +373,9 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
 
   let max = 0;
   for (const r of rows) {
-    for (const v of (r.values || [])) {
-      if (Number.isFinite(v)) max = Math.max(max, v);
+    for (const c of (r.cells || [])) {
+      const v = Number.isFinite(c?.total) ? c.total : 0;
+      if (c?.valid) max = Math.max(max, v);
     }
   }
 
@@ -413,7 +414,8 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
     svg.appendChild(lt);
 
     for (let c = 0; c < cols; c++) {
-      const v = row.values[c] ?? 0;
+      const cellData = row.cells?.[c] ?? { valid: true, total: 0, byBook: [] };
+      const v = Number.isFinite(cellData.total) ? cellData.total : 0;
       const x = padL + c * (cell + gap);
 
       const rect = document.createElementNS(svgNS, "rect");
@@ -423,14 +425,33 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
       rect.setAttribute("height", String(cell));
       rect.setAttribute("rx", "2");
       rect.setAttribute("ry", "2");
-      rect.setAttribute("class", "heatmapcell");
-      rect.setAttribute("fill", fillFor(v));
-      rect.setAttribute("stroke", "#e8e2db");
-      rect.setAttribute("stroke-width", "1");
+      rect.setAttribute("class", cellData.valid ? "heatmapcell" : "heatmapcell heatmapcell--invalid");
+      rect.setAttribute("fill", cellData.valid ? fillFor(v) : "rgb(255,255,255)");
+      // Days that don't exist in the month should not have a border.
+      rect.setAttribute("stroke", cellData.valid ? "#e8e2db" : "none");
+      rect.setAttribute("stroke-width", cellData.valid ? "1" : "0");
 
+      // Tooltip: per-book breakdown + total.
       const title = document.createElementNS(svgNS, "title");
-      title.textContent = `${Math.round(v)} Seiten`;
-      rect.appendChild(title);
+      if (!cellData.valid) {
+        title.textContent = "";
+      } else {
+        const lines = [];
+        const byBook = Array.isArray(cellData.byBook) ? cellData.byBook : [];
+        if (byBook.length) {
+          for (const b of byBook) {
+            const name = String(b.title ?? "").trim() || "(Ohne Titel)";
+            const p = Number.isFinite(b.pages) ? Math.round(b.pages) : 0;
+            if (p > 0) lines.push(`${name}: ${p} Seiten`);
+          }
+        }
+        const totalRounded = Math.round(v);
+        lines.push(`Gesamt: ${totalRounded} Seiten`);
+        // Use newline-separated text for native SVG tooltips.
+        title.textContent = lines.join("\n");
+      }
+      // Only append a title when there is content (avoids stray empty tooltips).
+      if (title.textContent) rect.appendChild(title);
 
       svg.appendChild(rect);
     }

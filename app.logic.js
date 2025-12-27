@@ -30,6 +30,31 @@ export function computeDailyPages(books) {
   return daily;
 }
 
+export function computeDailyPagesByBook(books) {
+  // Map dateKey -> Map bookTitle -> pagesReadDelta
+  // Uses the same delta logic as computeDailyPages, but keeps a per-book breakdown.
+  const out = new Map();
+
+  for (const book of books) {
+    const title = String(book.title || "(Ohne Titel)");
+    const hist = [...(book.history || [])].sort((a, b) => a.date.localeCompare(b.date));
+    let prev = clampInt(book.initialPage ?? 0, 0, book.totalPages);
+
+    for (const entry of hist) {
+      const page = clampInt(entry.page, 0, book.totalPages);
+      const delta = page - prev;
+      if (delta > 0) {
+        if (!out.has(entry.date)) out.set(entry.date, new Map());
+        const m = out.get(entry.date);
+        m.set(title, (m.get(title) ?? 0) + delta);
+      }
+      prev = Math.max(prev, page);
+    }
+  }
+
+  return out;
+}
+
 export function computeStreaks(dailyMap) {
   // Current streak ends today and counts days with pages>0.
   const today = todayKey();

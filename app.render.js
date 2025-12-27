@@ -6,6 +6,7 @@ import {
   addDays,
   addMonths,
   computeDailyPages,
+  computeDailyPagesByBook,
   computeMonthTotals,
   computeStreaks,
   computeWeekTotals,
@@ -304,6 +305,9 @@ export function renderCharts(el, state) {
   // Only render the additional charts when the section is visible.
   if (el.moreCharts?.hidden) return;
 
+  // For the heatmap tooltip breakdown.
+  const dailyByBook = computeDailyPagesByBook(state.books);
+
   const totalPagesAll = sumMapValues(daily);
 
   // last 12 weeks (inclusive): Monday-start
@@ -493,24 +497,36 @@ export function renderCharts(el, state) {
     const y = m.getFullYear();
     const mi = m.getMonth();
     const label = formatMonthLabel(m);
-    const vals = [];
+    const cells = [];
     for (let day = 1; day <= 31; day++) {
       const d = new Date(y, mi, day);
       if (d.getMonth() !== mi) {
-        vals.push(0);
+        // Month doesn't have this day (e.g. Feb 30/31). Render as white without border.
+        cells.push({ valid: false, total: 0, byBook: [] });
         continue;
       }
       const k = dateKey(d);
-      vals.push(daily.get(k) ?? 0);
+
+      const total = daily.get(k) ?? 0;
+      const bm = dailyByBook.get(k);
+      const byBook = [];
+      if (bm) {
+        for (const [title, pages] of bm.entries()) {
+          if ((pages ?? 0) > 0) byBook.push({ title, pages });
+        }
+        byBook.sort((a, b) => (b.pages - a.pages) || a.title.localeCompare(b.title));
+      }
+
+      cells.push({ valid: true, total, byBook });
     }
-    heatRows.push({ label, values: vals });
+    heatRows.push({ label, cells });
   }
 
   setText(el.subHeatmap36, "Letzte 36 Monate – pro Tag (1–31)");
   // show the maximum daily pages within the shown range
   let maxDay = 0;
   for (const r of heatRows) {
-    for (const v of r.values) maxDay = Math.max(maxDay, v);
+    for (const c of r.cells) maxDay = Math.max(maxDay, c?.total ?? 0);
   }
   setText(el.sumHeatmap36, `Max/Tag: ${formatNumber(maxDay, 0)} Seiten`);
   if (el.chartHeatmap36) {
