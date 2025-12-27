@@ -517,7 +517,7 @@ export function renderCharts(el, state) {
         byBook.sort((a, b) => (b.pages - a.pages) || a.title.localeCompare(b.title));
       }
 
-      cells.push({ valid: true, total, byBook });
+      cells.push({ valid: true, date: k, total, byBook });
     }
     heatRows.push({ label, cells });
   }

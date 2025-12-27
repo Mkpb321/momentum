@@ -29,6 +29,14 @@ function catmullRomToBezier(points) {
   return d.join(" ");
 }
 
+function formatDateKey(yyyy_mm_dd) {
+  // yyyy-mm-dd -> dd.mm.yyyy
+  const s = String(yyyy_mm_dd || "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  const [y, m, d] = s.split("-");
+  return `${d}.${m}.${y}`;
+}
+
 function defaultValueFormatter(v) {
   const n = Number.isFinite(v) ? v : 0;
   if (Number.isInteger(n)) return String(n);
@@ -437,19 +445,27 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
         title.textContent = "";
       } else {
         const lines = [];
+        const dateStr = cellData.date ? formatDateKey(cellData.date) : "";
+        if (dateStr) lines.push(dateStr);
+        const totalRounded = Math.round(v);
+        lines.push(`${totalRounded} S.`);
+
         const byBook = Array.isArray(cellData.byBook) ? cellData.byBook : [];
+        const bookLines = [];
         if (byBook.length) {
           for (const b of byBook) {
             const name = String(b.title ?? "").trim() || "(Ohne Titel)";
             const p = Number.isFinite(b.pages) ? Math.round(b.pages) : 0;
-            if (p > 0) lines.push(`${name}: ${p} Seiten`);
+            if (p > 0) bookLines.push(`${name}: ${p} S.`);
           }
         }
-        const totalRounded = Math.round(v);
-        lines.push(`Gesamt: ${totalRounded} Seiten`);
+        if (bookLines.length) {
+          lines.push(""); // Leerzeile zwischen Total und Büchern
+          lines.push(...bookLines);
+        }
         // Use newline-separated text for native SVG tooltips.
         title.textContent = lines.join("\n");
-      }
+}
       // Only append a title when there is content (avoids stray empty tooltips).
       if (title.textContent) rect.appendChild(title);
 
