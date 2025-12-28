@@ -539,6 +539,8 @@ export function renderCharts(el, state) {
   }
   setText(el.sumHeatmap36, `Max/Tag: ${formatNumber(maxDay, 0)} Seiten`);
   if (el.chartHeatmap36) {
+    // If a cell was selected, close the inline detail field before rerendering the SVG to avoid stale selections.
+    if (typeof window?.hideHeatmapInfoPanel === "function") window.hideHeatmapInfoPanel();
     renderMonthDayHeatmap(el.chartHeatmap36, heatRows, { padL: 68 });
   }
 }

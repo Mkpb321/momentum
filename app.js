@@ -238,10 +238,10 @@ const el = {
 
   toast: document.getElementById("toast"),
 
-  // Pinned toast (Heatmap)
-  toastPinned: document.getElementById("toastPinned"),
-  toastPinnedClose: document.getElementById("toastPinnedClose"),
-  toastPinnedText: document.getElementById("toastPinnedText"),
+  // Heatmap inline info (above heatmap)
+  heatmapInfoPanel: document.getElementById("heatmapInfoPanel"),
+  heatmapInfoClose: document.getElementById("heatmapInfoClose"),
+  heatmapInfoText: document.getElementById("heatmapInfoText"),
 
   btnExport: document.getElementById("btnExport"),
   btnImport: document.getElementById("btnImport"),
@@ -1040,14 +1040,13 @@ function wireAppEvents() {
   // Ensure the toast is not trapped in a closed dialog (which would hide it abruptly).
   const detachToasts = () => {
     if (el.toast && el.toast.parentElement !== document.body) document.body.appendChild(el.toast);
-    if (el.toastPinned && el.toastPinned.parentElement !== document.body) document.body.appendChild(el.toastPinned);
   };
   el.dlgAddBook?.addEventListener("close", detachToasts);
   el.dlgBook?.addEventListener("close", detachToasts);
   el.infoDialog?.addEventListener("close", detachToasts);
 
-  // Heatmap toast close
-  el.toastPinnedClose?.addEventListener("click", hideHeatmapToast);
+  // Heatmap inline info close
+  el.heatmapInfoClose?.addEventListener("click", hideHeatmapInfoPanel);
 
   el.formAddBook?.addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -1326,34 +1325,34 @@ function toast(msg) {
   }, 3800);
 }
 
-function showHeatmapToast(text) {
-  if (!el.toastPinned || !el.toastPinnedText) return;
-
-  // Keep it visible even when a <dialog> is open by temporarily moving it into that dialog.
-  const host = (el.infoDialog?.open ? el.infoDialog : (el.dlgBook?.open ? el.dlgBook : (el.dlgAddBook?.open ? el.dlgAddBook : null)));
-  if (host) {
-    if (!host.contains(el.toastPinned)) host.appendChild(el.toastPinned);
-  } else {
-    if (el.toastPinned.parentElement !== document.body) document.body.appendChild(el.toastPinned);
+// Heatmap: inline detail field (above the heatmap) + selection highlighting
+let _selectedHeatmapRect = null;
+function setHeatmapSelection(rect) {
+  if (_selectedHeatmapRect && _selectedHeatmapRect !== rect) {
+    _selectedHeatmapRect.classList.remove("heatmapcell--selected");
   }
-
-  el.toastPinnedText.textContent = String(text ?? "");
-  el.toastPinned.hidden = false;
+  _selectedHeatmapRect = rect || null;
+  if (_selectedHeatmapRect) _selectedHeatmapRect.classList.add("heatmapcell--selected");
 }
 
-function hideHeatmapToast() {
-  if (!el.toastPinned) return;
-  el.toastPinned.hidden = true;
-  // If no dialog is open anymore, ensure it lives in the normal document flow.
-  if (!el.infoDialog?.open && !el.dlgBook?.open && !el.dlgAddBook?.open && el.toastPinned.parentElement !== document.body) {
-    document.body.appendChild(el.toastPinned);
-  }
+function showHeatmapInfoPanel(text, rect) {
+  if (!el.heatmapInfoPanel || !el.heatmapInfoText) return;
+  el.heatmapInfoText.textContent = String(text ?? "");
+  el.heatmapInfoPanel.hidden = false;
+  setHeatmapSelection(rect);
 }
 
-// Allow charts.js (SVG click handlers) to trigger the toast without tight coupling.
+function hideHeatmapInfoPanel() {
+  if (!el.heatmapInfoPanel || !el.heatmapInfoText) return;
+  el.heatmapInfoPanel.hidden = true;
+  el.heatmapInfoText.textContent = "";
+  setHeatmapSelection(null);
+}
+
+// Allow charts.js (SVG click handlers) to trigger the heatmap panel without tight coupling.
 try {
-  window.showHeatmapToast = showHeatmapToast;
-  window.hideHeatmapToast = hideHeatmapToast;
+  window.showHeatmapInfoPanel = showHeatmapInfoPanel;
+  window.hideHeatmapInfoPanel = hideHeatmapInfoPanel;
 } catch (_) {
   // ignore (non-browser env)
 }

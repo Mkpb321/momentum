@@ -468,12 +468,12 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
         title.textContent = tooltipText;
         rect.appendChild(title);
 
-        // Click: also show as pinned toast (top-left) with a close button.
+        // Click: show details in the inline heatmap info panel (above the heatmap).
         rect.style.cursor = "pointer";
         rect.addEventListener("click", (ev) => {
           ev.preventDefault();
           ev.stopPropagation();
-          if (typeof window?.showHeatmapToast === "function") window.showHeatmapToast(tooltipText);
+          if (typeof window?.showHeatmapInfoPanel === "function") window.showHeatmapInfoPanel(tooltipText, rect);
         });
       }
 

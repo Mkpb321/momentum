@@ -427,7 +427,16 @@
 </div>
 <div class="chip" id="sumHeatmap36">0</div>
 </div>
-<div class="chart__body chart__body--heatmap" id="chartHeatmap36"></div>
+<div class="chart__body">
+  <div class="heatmapinfo" hidden id="heatmapInfoPanel">
+    <div class="heatmapinfo__head">
+      <div class="heatmapinfo__title">Auswahl</div>
+      <button aria-label="Schliessen" class="heatmapinfo__close" id="heatmapInfoClose" type="button">✕</button>
+    </div>
+    <pre class="heatmapinfo__text" id="heatmapInfoText"></pre>
+  </div>
+  <div class="chart__body--heatmap" id="chartHeatmap36"></div>
+</div>
 </div>
 </div>
 </div>
@@ -546,12 +555,6 @@
 </div>
 </dialog>
 <div aria-atomic="true" aria-live="polite" class="toast" id="toast" role="status"></div>
-
-<!-- Pinned toast for Heatmap cell details (top-left, dismissible) -->
-<div aria-atomic="true" aria-live="polite" class="toastpinned" hidden="" id="toastPinned" role="status">
-  <button aria-label="Schliessen" class="toastpinned__close" id="toastPinnedClose" type="button">✕</button>
-  <pre class="toastpinned__text" id="toastPinnedText"></pre>
-</div>
 <script src="./app.js" type="module"></script>
 </body>
 </html>
