@@ -490,29 +490,30 @@ export function renderCharts(el, state) {
     });
   }
 
-    // Werktage vs Wochenende (average pages on active days)
-  let wdSum = 0, wdCnt = 0, weSum = 0, weCnt = 0;
-  for (const [date, pages] of daily.entries()) {
-    if (pages <= 0) continue;
-    const d = parseDate(date);
-    const dow = d.getDay(); // 0=So ... 6=Sa
-    const weekend = dow === 0 || dow === 6;
-    if (weekend) {
-      weSum += pages;
-      weCnt += 1;
-    } else {
-      wdSum += pages;
-      wdCnt += 1;
-    }
-  }
-  const avgWd = wdCnt ? wdSum / wdCnt : 0;
-  const avgWe = weCnt ? weSum / weCnt : 0;
+      // Ø Seiten pro Monat (Saisonalität): Durchschnittliche Monatsseiten nach Kalendermonat (Jan–Dez)
+  // Basis: letzte 36 Monate (inkl. aktuellem Monat bis heute)
+  const monthTotalsAll = computeMonthTotals(daily);
+  const monthSums = Array(12).fill(0);
+  const monthCnts = Array(12).fill(0);
 
-  setText(el.subWeekparts, "Ø Seiten pro Tag (nur aktive Tage)");
-  setText(el.sumWeekparts, `WT: ${formatNumber(avgWd, 1)} · WE: ${formatNumber(avgWe, 1)}`);
-  if (el.chartWeekparts) {
-    renderBarChart(el.chartWeekparts, ["Werktage", "Wochenende"], [avgWd, avgWe], {
-      valueFormatter: (v) => formatNumber(v, 1),
+  for (let i = 35; i >= 0; i--) {
+    const m = addMonths(today, -i);
+    const mk = monthKey(m);
+    const total = monthTotalsAll.get(mk) ?? 0;
+    const mi = m.getMonth(); // 0..11
+    monthSums[mi] += total;
+    monthCnts[mi] += 1;
+  }
+
+  const monthNames = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
+  const monthAvg = monthSums.map((s, i) => monthCnts[i] ? (s / monthCnts[i]) : 0);
+  const avgPerMonthAll = monthSums.reduce((a, b) => a + b, 0) / Math.max(1, monthCnts.reduce((a, b) => a + b, 0));
+
+  setText(el.subAvgMonth, "Kalendermonate (Jan–Dez) – Ø der letzten 36 Monate");
+  setText(el.sumAvgMonth, `Ø/Monat: ${formatNumber(avgPerMonthAll, 0)} Seiten`);
+  if (el.chartAvgMonth) {
+    renderBarChart(el.chartAvgMonth, monthNames, monthAvg, {
+      valueFormatter: (v) => formatNumber(v, 0),
       suffix: " Seiten",
     });
   }

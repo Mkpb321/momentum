@@ -192,7 +192,7 @@ const el = {
   chartMonths: document.getElementById("chartMonths"),
   chartDays30: document.getElementById("chartDays30"),
   chartWeekdays: document.getElementById("chartWeekdays"),
-  chartWeekparts: document.getElementById("chartWeekparts"),
+  chartAvgMonth: document.getElementById("chartAvgMonth"),
   chartCumulMonths: document.getElementById("chartCumulMonths"),
   chartYears5: document.getElementById("chartYears5"),
   chartAvg7: document.getElementById("chartAvg7"),
@@ -215,7 +215,7 @@ const el = {
   subMonths: document.getElementById("subMonths"),
   subDays30: document.getElementById("subDays30"),
   subWeekdays: document.getElementById("subWeekdays"),
-  subWeekparts: document.getElementById("subWeekparts"),
+  subAvgMonth: document.getElementById("subAvgMonth"),
   subCumulMonths: document.getElementById("subCumulMonths"),
   subYears5: document.getElementById("subYears5"),
   subAvg7: document.getElementById("subAvg7"),
@@ -229,7 +229,7 @@ const el = {
   sumMonths: document.getElementById("sumMonths"),
   sumDays30: document.getElementById("sumDays30"),
   sumWeekdays: document.getElementById("sumWeekdays"),
-  sumWeekparts: document.getElementById("sumWeekparts"),
+  sumAvgMonth: document.getElementById("sumAvgMonth"),
   sumCumulMonths: document.getElementById("sumCumulMonths"),
   sumYears5: document.getElementById("sumYears5"),
   sumAvg7: document.getElementById("sumAvg7"),
@@ -378,12 +378,12 @@ const INFO = {
     why: "Du erkennst Muster (z.B. ‚Sonntag ist stark‘) und kannst bewusst Routinen auf deine besten Tage legen.",
   },
 
-  weekparts: {
-    title: "Werktage vs Wochenende",
-    subtitle: "Ø Seiten pro Tag (nur aktive Tage)",
-    what: "Vergleicht dein durchschnittliches Lesepensum an Werktagen (Mo–Fr) mit dem am Wochenende (Sa/So).",
-    how: "Für jeden Tag mit >0 Seiten wird der Tageswert nach Werktag oder Wochenende gruppiert. Anschließend wird der Durchschnitt pro Gruppe berechnet (Summe ÷ Anzahl aktiver Tage).",
-    why: "Du erkennst auf einen Blick, ob dein Lesen eher im Alltag oder am Wochenende stattfindet – hilfreich, um bewusst Zeitfenster zu stärken.",
+  avgMonth: {
+    title: "Ø Seiten pro Monat",
+    subtitle: "Kalendermonate (Jan–Dez) – Ø der letzten 36 Monate",
+    what: "Zeigt, wie viele Seiten du im Durchschnitt pro Kalendermonat liest – getrennt nach Jan bis Dez (über die letzten 36 Monate).",
+    how: "Wir summieren für jeden Kalendermonat (z.B. alle Januare innerhalb der letzten 36 Monate) die Monatsseiten und teilen durch die Anzahl vorkommender Monate dieser Kategorie.",
+    why: "So erkennst du Saisonalität und Muster: in welchen Monaten du typischerweise mehr oder weniger liest – unabhängig vom konkreten Jahr.",
   },
 
   heatmap36: {
@@ -628,7 +628,7 @@ const CHART_PREVIEW = {
   activeDaysWk: { sourceId: "chartActiveDaysWk", summaryId: "sumActiveDaysWk" },
   intensityWk: { sourceId: "chartIntensityWk", summaryId: "sumIntensityWk" },
   weekdays: { sourceId: "chartWeekdays", summaryId: "sumWeekdays" },
-  weekparts: { sourceId: "chartWeekparts", summaryId: "sumWeekparts" },
+  avgMonth: { sourceId: "chartAvgMonth", summaryId: "sumAvgMonth" },
   heatmap36: { sourceId: "chartHeatmap36", summaryId: "sumHeatmap36" },
 };
 

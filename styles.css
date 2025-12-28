@@ -754,6 +754,44 @@ h2{
 }
 
 .chartstack{ display:flex; flex-direction:column; gap:12px; }
+/* Chart row helper: used to align left stack and heatmap to the same height */
+.chartrow{
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 681px){
+  .chartrow{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  /* Make the stacked charts fill exactly the same height as the heatmap card */
+  .chartrow--heatmap .chartstack{
+    height: 100%;
+  }
+  .chartrow--heatmap .chartstack .chart{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .chartrow--heatmap .chartstack .chart__body{
+    flex: 1;
+    min-height: 0;
+  }
+  .chartrow--heatmap .chartstack svg.chartsvg{
+    height: 100% !important;
+  }
+}
+
+@media (max-width: 680px){
+  .chartrow{
+    display: block;
+    grid-column: auto;
+  }
+}
 
 /* SVG chart styling */
 svg.chartsvg{
