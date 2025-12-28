@@ -307,7 +307,14 @@ h2{
 .chart__sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
 .chart__body{ width:100%; }
 
-.chart__body--heatmap{ overflow:auto; max-height:520px; padding-right:4px; }
+.chart__body--heatmap{
+  /* Avoid two vertical scrollbars (page + inner container). Let the page handle vertical scrolling.
+     Keep horizontal scrolling available if the heatmap becomes wider than its container. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-height: none;
+  padding-right: 0;
+}
 .heatmapsvg{ display:block; }
 .heatmapcell{ shape-rendering: crispEdges; }
 .heatmaplabel{ font-size:10px; fill:#7a756f; }
@@ -359,15 +366,15 @@ h2{
 .heatmapselect{ pointer-events:none; }
 .heatmapselect__outer{
   fill:none;
-  stroke:#000000;
-  stroke-width: 2;
+  stroke:#ffffff;
+  stroke-width: 3;
   vector-effect: non-scaling-stroke;
   shape-rendering: crispEdges;
 }
 .heatmapselect__inner{
   fill:none;
-  stroke: #ffffff;
-  stroke-width: 1;
+  stroke: #141312;
+  stroke-width: 1.5;
   vector-effect: non-scaling-stroke;
   shape-rendering: crispEdges;
 }
