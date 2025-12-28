@@ -748,10 +748,13 @@ h2{
   margin: 2px 4px 10px 4px;
 }
 /* More-charts: two columns on wide screens */
-.charts--more{ grid-template-columns: repeat(2, 1fr); }
+.charts--more{ grid-template-columns: repeat(2, 1fr); align-items: start; }
 @media (max-width: 680px){
   .charts--more{ grid-template-columns: 1fr; }
 }
+
+.chartstack{ display:flex; flex-direction:column; gap:12px; }
+
 /* SVG chart styling */
 svg.chartsvg{
   width: 100%;

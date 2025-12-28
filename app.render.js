@@ -490,7 +490,34 @@ export function renderCharts(el, state) {
     });
   }
 
-  // Heatmap: last 36 months (each month per row, day-of-month per column)
+    // Werktage vs Wochenende (average pages on active days)
+  let wdSum = 0, wdCnt = 0, weSum = 0, weCnt = 0;
+  for (const [date, pages] of daily.entries()) {
+    if (pages <= 0) continue;
+    const d = parseDate(date);
+    const dow = d.getDay(); // 0=So ... 6=Sa
+    const weekend = dow === 0 || dow === 6;
+    if (weekend) {
+      weSum += pages;
+      weCnt += 1;
+    } else {
+      wdSum += pages;
+      wdCnt += 1;
+    }
+  }
+  const avgWd = wdCnt ? wdSum / wdCnt : 0;
+  const avgWe = weCnt ? weSum / weCnt : 0;
+
+  setText(el.subWeekparts, "Ø Seiten pro Tag (nur aktive Tage)");
+  setText(el.sumWeekparts, `WT: ${formatNumber(avgWd, 1)} · WE: ${formatNumber(avgWe, 1)}`);
+  if (el.chartWeekparts) {
+    renderBarChart(el.chartWeekparts, ["Werktage", "Wochenende"], [avgWd, avgWe], {
+      valueFormatter: (v) => formatNumber(v, 1),
+      suffix: " Seiten",
+    });
+  }
+
+// Heatmap: last 36 months (each month per row, day-of-month per column)
   // Future days (tomorrow, etc.) should be shown as empty cells without a border.
   const now = today;
   const heatRows = [];
