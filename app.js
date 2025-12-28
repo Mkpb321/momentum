@@ -248,6 +248,56 @@ const el = {
   fileImport: document.getElementById("fileImport"),
 };
 
+/* ------------------ modal scroll lock ------------------ */
+
+// Prevent the page behind dialogs from scrolling (avoids double scrollbars
+// when a dialog content itself is scrollable).
+let _modalOpenCount = 0;
+let _prevBodyOverflow = "";
+let _prevBodyPaddingRight = "";
+
+function lockBodyScroll() {
+  if (_modalOpenCount === 0) {
+    _prevBodyOverflow = document.body.style.overflow || "";
+    _prevBodyPaddingRight = document.body.style.paddingRight || "";
+    // Compensate for the disappearing scrollbar to avoid layout shift.
+    const sbw = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    if (sbw > 0) document.body.style.paddingRight = `${sbw}px`;
+  }
+  _modalOpenCount += 1;
+}
+
+function unlockBodyScroll() {
+  _modalOpenCount = Math.max(0, _modalOpenCount - 1);
+  if (_modalOpenCount === 0) {
+    document.body.style.overflow = _prevBodyOverflow;
+    document.body.style.paddingRight = _prevBodyPaddingRight;
+  }
+}
+
+function openDialog(dlg) {
+  if (!dlg || dlg.open) return;
+  lockBodyScroll();
+  try {
+    dlg.showModal();
+  } catch {
+    // Fallback (older browsers): emulate open state.
+    dlg.open = true;
+  }
+}
+
+function closeDialog(dlg) {
+  if (!dlg || !dlg.open) return;
+  const canClose = typeof dlg.close === "function";
+  if (canClose) dlg.close();
+  else {
+    dlg.open = false;
+    // No close event in fallback path; unlock immediately.
+    unlockBodyScroll();
+  }
+}
+
 /* ------------------ info (charts + numbers) ------------------ */
 /**
  * For every metric (chart or number): what it is, how it is calculated, and why it matters.
@@ -736,14 +786,12 @@ function openInfo(key) {
   }
 
 
-  if (typeof el.infoDialog.showModal === "function") el.infoDialog.showModal();
-  else el.infoDialog.open = true;
+  openDialog(el.infoDialog);
 }
 
 function closeInfo() {
   if (!el.infoDialog) return;
-  if (typeof el.infoDialog.close === "function") el.infoDialog.close();
-  else el.infoDialog.open = false;
+  closeDialog(el.infoDialog);
 }
 
 function wireInfoUI() {
@@ -1032,18 +1080,19 @@ function wireAppEvents() {
     updateBooksControls(el, showFinished);
   });
 
-  el.btnCloseAddBook?.addEventListener("click", () => el.dlgAddBook.close());
-  el.btnCancelAddBook?.addEventListener("click", () => el.dlgAddBook.close());
+  el.btnCloseAddBook?.addEventListener("click", () => closeDialog(el.dlgAddBook));
+  el.btnCancelAddBook?.addEventListener("click", () => closeDialog(el.dlgAddBook));
 
-  el.btnCloseBookX?.addEventListener("click", () => el.dlgBook.close());
+  el.btnCloseBookX?.addEventListener("click", () => closeDialog(el.dlgBook));
 
-  // Ensure the toast is not trapped in a closed dialog (which would hide it abruptly).
-  const detachToasts = () => {
+  // On close: unlock background scroll and ensure the toast is not trapped in a closed dialog.
+  const onDialogClosed = () => {
+    unlockBodyScroll();
     if (el.toast && el.toast.parentElement !== document.body) document.body.appendChild(el.toast);
   };
-  el.dlgAddBook?.addEventListener("close", detachToasts);
-  el.dlgBook?.addEventListener("close", detachToasts);
-  el.infoDialog?.addEventListener("close", detachToasts);
+  el.dlgAddBook?.addEventListener("close", onDialogClosed);
+  el.dlgBook?.addEventListener("close", onDialogClosed);
+  el.infoDialog?.addEventListener("close", onDialogClosed);
 
   // Heatmap inline info close
   el.heatmapInfoClose?.addEventListener("click", hideHeatmapInfoPanel);
@@ -1276,7 +1325,7 @@ function openBook(bookId) {
       `).join("")
     : `<div class="muted" style="padding:6px;">Noch keine Einträge.</div>`;
 
-  el.dlgBook.showModal();
+  openDialog(el.dlgBook);
   el.inpPage.focus();
   el.inpPage.select();
 }
@@ -1286,7 +1335,7 @@ function openAddBook() {
     toast("Bitte einloggen.");
     return;
   }
-  el.dlgAddBook.showModal();
+  openDialog(el.dlgAddBook);
   const first = el.formAddBook.querySelector("input[name='title']");
   first?.focus();
 }

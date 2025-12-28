@@ -565,7 +565,10 @@ h2{
   padding: 0;
   background: transparent;
   max-width: calc(100vw - 24px);
-  overflow-x: hidden;
+  /* Prevent the <dialog> element itself from becoming a scroll container.
+     Scrolling should happen only inside .modal__card to avoid double scrollbars. */
+  overflow: hidden;
+  max-height: calc(100vh - 24px);
 }
 .modal__card{
   width: min(520px, calc(100vw - 24px));
