@@ -1325,14 +1325,61 @@ function toast(msg) {
   }, 3800);
 }
 
-// Heatmap: inline detail field (above the heatmap) + selection highlighting
-let _selectedHeatmapRect = null;
-function setHeatmapSelection(rect) {
-  if (_selectedHeatmapRect && _selectedHeatmapRect !== rect) {
-    _selectedHeatmapRect.classList.remove("heatmapcell--selected");
+// Heatmap: Detailfeld (unter der Heatmap) + Auswahlrahmen (doppelter Rahmen)
+let _heatmapSelectionOverlay = null;
+
+function clearHeatmapSelectionOverlay() {
+  if (_heatmapSelectionOverlay && _heatmapSelectionOverlay.parentNode) {
+    _heatmapSelectionOverlay.parentNode.removeChild(_heatmapSelectionOverlay);
   }
-  _selectedHeatmapRect = rect || null;
-  if (_selectedHeatmapRect) _selectedHeatmapRect.classList.add("heatmapcell--selected");
+  _heatmapSelectionOverlay = null;
+}
+
+function setHeatmapSelection(rect) {
+  clearHeatmapSelectionOverlay();
+  if (!rect) return;
+
+  const svg = rect.ownerSVGElement;
+  if (!svg) return;
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const g = document.createElementNS(svgNS, "g");
+  g.setAttribute("class", "heatmapselect");
+  g.style.pointerEvents = "none";
+
+  const x0 = Number(rect.getAttribute("x") || 0);
+  const y0 = Number(rect.getAttribute("y") || 0);
+  const w0 = Number(rect.getAttribute("width") || 0);
+  const h0 = Number(rect.getAttribute("height") || 0);
+  const rx0 = Number(rect.getAttribute("rx") || 0);
+  const ry0 = Number(rect.getAttribute("ry") || 0);
+
+  const mkRect = (cls, insetPx) => {
+    const r = document.createElementNS(svgNS, "rect");
+    const inset = Number.isFinite(insetPx) ? insetPx : 0;
+    const x = x0 + inset;
+    const y = y0 + inset;
+    const w = Math.max(0, w0 - inset * 2);
+    const h = Math.max(0, h0 - inset * 2);
+    const rx = Math.max(0, rx0 - inset);
+    const ry = Math.max(0, ry0 - inset);
+
+    r.setAttribute("x", String(x));
+    r.setAttribute("y", String(y));
+    r.setAttribute("width", String(w));
+    r.setAttribute("height", String(h));
+    r.setAttribute("rx", String(rx));
+    r.setAttribute("ry", String(ry));
+    r.setAttribute("class", cls);
+    return r;
+  };
+
+  // Outer white frame, inner black frame — visible on both bright and dark fills.
+  g.appendChild(mkRect("heatmapselect__outer", 0));
+  g.appendChild(mkRect("heatmapselect__inner", 1));
+
+  svg.appendChild(g);
+  _heatmapSelectionOverlay = g;
 }
 
 function showHeatmapInfoPanel(text, rect) {

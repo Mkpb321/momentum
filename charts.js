@@ -468,7 +468,7 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
         title.textContent = tooltipText;
         rect.appendChild(title);
 
-        // Click: show details in the inline heatmap info panel (above the heatmap).
+        // Click: show details in the inline heatmap info panel (unter der Heatmap).
         rect.style.cursor = "pointer";
         rect.addEventListener("click", (ev) => {
           ev.preventDefault();
