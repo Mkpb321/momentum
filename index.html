@@ -473,6 +473,7 @@
 </div>
 <button aria-label="Schließen" class="iconbtn" id="btnCloseAddBook" type="button">×</button>
 </div>
+<div class="modal__scroll">
 <div class="fields">
 <label class="field">
 <span>Titel</span>
@@ -491,6 +492,7 @@
 <input inputmode="numeric" min="0" name="initialPages" placeholder="z.B. 50" step="1" type="number"/>
 </label>
 </div>
+</div>
 <div class="modal__actions">
 <button class="btn btn--ghost" id="btnCancelAddBook" type="button">Abbrechen</button>
 <button class="btn" id="btnCreateBook" type="submit">Hinzufügen</button>
@@ -507,6 +509,7 @@
 </div>
 <button aria-label="Schließen" class="iconbtn" id="btnCloseBookX" type="button">×</button>
 </div>
+<div class="modal__scroll">
 <div class="bookdetail">
 <div class="bookdetail__progress">
 <div class="progress">
@@ -530,6 +533,7 @@
 <div class="history" id="historyList"></div>
 </div>
 </div>
+</div>
 <div class="modal__actions modal__actions--spread">
 <button class="btn btn--danger" id="btnDeleteBook" type="button">Buch löschen</button>
 <div></div>
@@ -548,7 +552,9 @@
 </div>
 <button aria-label="Schliessen" class="btn btn--ghost" id="btnCloseInfo" type="button">✕</button>
 </div>
+<div class="modal__scroll">
 <div class="info__preview" hidden="" id="infoPreview"></div><div class="info__body" id="infoBody"></div>
+</div>
 <div class="modal__actions">
 <button class="btn" id="btnInfoOk" type="button">OK</button>
 </div>
