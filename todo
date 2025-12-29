@@ -1,7 +1,14 @@
+die punkte der grafiken haben ja mehr infos per mouseover. um mobilen user zu helfen soll bei einem klick ein toast oben links des bildausschnittes erscheinen, wenn man auf einen punkt klickt. dieser ounkt ist dann visuell markiert mit einem weissen ramen innen und dann schwarzen ramen aussen. der toast kann mit einem x knopf geschlossen werden oder esc und dann ist auch der punkt nicht mehr markiert. oder es kann auch durch erneutes klichen des punktes deselektiert werden, so wird dann auch der toast geschlossen. über das gleiche toast system sollen auch markierte heatmappunkte. dafür nichtmehr die infos unter der heatmap anzeigen. der toast soll immer sticki oben links sein, also immer auf dem screen
+
+Letzte 12 Wochen. ist die aktuelle woche immer am absaken aber ja noch nich komplett. vielleicht auch so lassen
+
+wenn heatmap info werden andere nebendrann auch grösser das ist doch blöd
+
+letzte grafik nicht nut 36 monate
 
 bei ausgewählten heatmaip fierechen soll nur der ramen schwarz sein der momentan für alle grau ist und schon besteht, aber genau die grösse. und der weisse dann gegen innen, aber nur wenig
 
-macht es wirklich sinn werte nur pro aktive tage zu rechnen oder soll man einfach ab dem ersten mal lesen rechnen? was wenn einer mal ein jahr nichtmehr liest und die app wieder nuzen will?
+macht es wirklich sinn werte nur pro aktive tage zu rechnen oder soll man einfach ab dem ersten mal lesen rechnen? was wenn einer mal ein jahr nichtmehr liest und die app wieder nuzen will? 
 
 scrollen auf heatmap detail ist so komisch verzögert
 

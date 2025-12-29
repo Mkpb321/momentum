@@ -788,7 +788,11 @@ h2{
 
 @media (max-width: 680px){
   .chartrow{
-    display: block;
+    /* On small screens the chartrow stacks vertically. Use an explicit gap so
+       the heatmap card has the same spacing as other cards. */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     grid-column: auto;
   }
 }
