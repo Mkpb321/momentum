@@ -470,10 +470,11 @@ h2{
   overflow:hidden;
   text-overflow: ellipsis;
 }
-.book__right{ width: 220px; }
+.book__right{ width: 220px; flex: 0 1 220px; }
 @media (max-width: 480px){
-  .book{ flex-direction:column; align-items:stretch; }
-  .book__right{ width:auto; }
+  .book{ flex-direction:row; align-items:center; }
+  .book__right{ width: 180px; flex-basis: 180px; }
+  .progress__meta{ font-size: 11px; }
 }
 .progress{
   height: 9px;

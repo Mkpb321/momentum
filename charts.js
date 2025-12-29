@@ -444,15 +444,15 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
       rect.dataset.baseStroke = baseStroke;
       rect.dataset.baseStrokeWidth = baseStrokeW;
 
-      // Tooltip: date, total, blank line, per-book breakdown.
+      // Tooltip: header (date + total), then per-book breakdown.
       let tooltipText = "";
       if (cellData.valid) {
         const lines = [];
         const dateStr = cellData.date ? formatDateKey(cellData.date) : "";
-        if (dateStr) lines.push(dateStr);
-
         const totalRounded = Math.round(v);
-        lines.push(`${totalRounded} S.`);
+        // Title line should already contain the total pages.
+        const header = dateStr ? `${dateStr} - ${totalRounded} S.` : `${totalRounded} S.`;
+        lines.push(header);
 
         const byBook = Array.isArray(cellData.byBook) ? cellData.byBook : [];
         const bookLines = [];
@@ -461,10 +461,7 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
           const p = Number.isFinite(b.pages) ? Math.round(b.pages) : 0;
           if (p > 0) bookLines.push(`${name}: ${p} S.`);
         }
-        if (bookLines.length) {
-          lines.push(""); // Leerzeile zwischen Total und Büchern
-          lines.push(...bookLines);
-        }
+        if (bookLines.length) lines.push(...bookLines);
         tooltipText = lines.join("\n");
       }
 
