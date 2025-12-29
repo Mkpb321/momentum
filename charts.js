@@ -435,9 +435,14 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
       rect.setAttribute("ry", "2");
       rect.setAttribute("class", cellData.valid ? "heatmapcell" : "heatmapcell heatmapcell--invalid");
       rect.setAttribute("fill", cellData.valid ? fillFor(v) : "rgb(255,255,255)");
-      // Days that don't exist in the month should not have a border.
-      rect.setAttribute("stroke", cellData.valid ? "#e8e2db" : "none");
-      rect.setAttribute("stroke-width", cellData.valid ? "1" : "0");
+      // Days that don't exist in the month (or are in the future) should not have a border.
+      const baseStroke = cellData.valid ? "#e8e2db" : "none";
+      const baseStrokeW = cellData.valid ? "1" : "0";
+      rect.setAttribute("stroke", baseStroke);
+      rect.setAttribute("stroke-width", baseStrokeW);
+      // Persist base style for selection toggling.
+      rect.dataset.baseStroke = baseStroke;
+      rect.dataset.baseStrokeWidth = baseStrokeW;
 
       // Tooltip: date, total, blank line, per-book breakdown.
       let tooltipText = "";
@@ -473,7 +478,7 @@ export function renderMonthDayHeatmap(containerEl, rows, opts = {}) {
         rect.addEventListener("click", (ev) => {
           ev.preventDefault();
           ev.stopPropagation();
-          if (typeof window?.showHeatmapInfoPanel === "function") window.showHeatmapInfoPanel(tooltipText, rect);
+          if (typeof window?.showHeatmapInfoPanel === "function") window.showHeatmapInfoPanel(tooltipText, rect, cellData.date);
         });
       }
 

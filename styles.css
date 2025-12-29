@@ -362,19 +362,15 @@ h2{
   word-break: break-word;
 }
 
-/* Heatmap: Auswahlrahmen (doppelt) */
+/* Heatmap: Auswahlrahmen
+   - äußerer Rahmen = bestehender Zell-Rand (wird per JS schwarz gesetzt)
+   - zusätzlicher, dünner Innenrahmen (weiß) für Kontrast */
 .heatmapselect{ pointer-events:none; }
-.heatmapselect__outer{
-  fill:none;
-  stroke:#141312;
-  stroke-width: 3;
-  vector-effect: non-scaling-stroke;
-  shape-rendering: crispEdges;
-}
+.heatmapselect__outer{ display:none; }
 .heatmapselect__inner{
   fill:none;
   stroke: #ffffff;
-  stroke-width: 1.5;
+  stroke-width: 1;
   vector-effect: non-scaling-stroke;
   shape-rendering: crispEdges;
 }

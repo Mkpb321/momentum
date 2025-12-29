@@ -212,6 +212,37 @@ export function renderStatsAndKpis(el, state) {
   setText(el.kpiAvgPerActiveMonth, formatNumber(avgPerActiveMonth, 1));
   setText(el.kpiAvgPerActiveYear, formatNumber(avgPerActiveYear, 1));
 
+  // Durchschnitte seit Start inkl. 0‑Tage/Monate/Jahre
+  const dailyKeysAll = [...daily.keys()].sort();
+  const firstKeyAll = dailyKeysAll.length ? dailyKeysAll[0] : today;
+  const startDateAll = parseDate(firstKeyAll);
+  const endDateAll = parseDate(today);
+  const daysSpanAll = Math.max(1, Math.floor((endDateAll.getTime() - startDateAll.getTime()) / 86400000) + 1);
+
+  const w0 = startOfWeek(startDateAll);
+  const wN = startOfWeek(endDateAll);
+  const weeksSpanAll = Math.max(1, Math.floor((wN.getTime() - w0.getTime()) / (7 * 86400000)) + 1);
+
+  const m0 = new Date(startDateAll.getFullYear(), startDateAll.getMonth(), 1);
+  const mN = new Date(endDateAll.getFullYear(), endDateAll.getMonth(), 1);
+  const monthsSpanAll = Math.max(1, (mN.getFullYear() * 12 + mN.getMonth()) - (m0.getFullYear() * 12 + m0.getMonth()) + 1);
+
+  const yearsSpanAll = Math.max(1, endDateAll.getFullYear() - startDateAll.getFullYear() + 1);
+
+  const avgPerDayAll = totalPages / daysSpanAll;
+  const avgPerWeekAll = totalPages / weeksSpanAll;
+  const avgPerMonthAll = totalPages / monthsSpanAll;
+  const avgPerYearAll = totalPages / yearsSpanAll;
+  const activeDaySharePct = (activeDays / daysSpanAll) * 100;
+  const avgActiveDaysPerWeekAll = activeDays / weeksSpanAll;
+
+  setText(el.kpiAvgPerDayAll, formatNumber(avgPerDayAll, 1));
+  setText(el.kpiAvgPerWeekAll, formatNumber(avgPerWeekAll, 0));
+  setText(el.kpiAvgPerMonthAll, formatNumber(avgPerMonthAll, 0));
+  setText(el.kpiAvgPerYearAll, formatNumber(avgPerYearAll, 0));
+  setText(el.kpiActiveDayShare, `${formatNumber(activeDaySharePct, 1)}%`);
+  setText(el.kpiAvgActiveDaysPerWeekAll, formatNumber(avgActiveDaysPerWeekAll, 1));
+
   setText(el.kpiBestWeek, String(maxMapValue(weekTotals)));
   setText(el.kpiBestMonth, String(maxMapValue(monthTotals)));
 
@@ -490,14 +521,21 @@ export function renderCharts(el, state) {
     });
   }
 
-      // Ø Seiten pro Monat (Saisonalität): Durchschnittliche Monatsseiten nach Kalendermonat (Jan–Dez)
-  // Basis: letzte 36 Monate (inkl. aktuellem Monat bis heute)
+  // Ø Seiten pro Monat (Saisonalität): Durchschnittliche Monatsseiten nach Kalendermonat (Jan–Dez)
+  // Basis: alle Kalendermonate seit dem ersten Eintrag bis heute (Monate ohne Einträge zählen als 0)
   const monthTotalsAll = computeMonthTotals(daily);
   const monthSums = Array(12).fill(0);
   const monthCnts = Array(12).fill(0);
 
-  for (let i = 35; i >= 0; i--) {
-    const m = addMonths(today, -i);
+  const dailyKeys = [...daily.keys()].sort();
+  const firstKey = dailyKeys.length ? dailyKeys[0] : dateKey(today);
+  const firstDate = parseDate(firstKey);
+  const startMonth = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+  const endMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthsSpan = Math.max(1, (endMonth.getFullYear() * 12 + endMonth.getMonth()) - (startMonth.getFullYear() * 12 + startMonth.getMonth()) + 1);
+
+  for (let i = 0; i < monthsSpan; i++) {
+    const m = addMonths(startMonth, i);
     const mk = monthKey(m);
     const total = monthTotalsAll.get(mk) ?? 0;
     const mi = m.getMonth(); // 0..11
@@ -507,9 +545,9 @@ export function renderCharts(el, state) {
 
   const monthNames = ["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"];
   const monthAvg = monthSums.map((s, i) => monthCnts[i] ? (s / monthCnts[i]) : 0);
-  const avgPerMonthAll = monthSums.reduce((a, b) => a + b, 0) / Math.max(1, monthCnts.reduce((a, b) => a + b, 0));
+  const avgPerMonthAll = (monthSums.reduce((a, b) => a + b, 0)) / monthsSpan;
 
-  setText(el.subAvgMonth, "Kalendermonate (Jan–Dez) – Ø der letzten 36 Monate");
+  setText(el.subAvgMonth, `Kalendermonate (Jan–Dez) – Ø seit ${formatMonthLabel(startMonth)}`);
   setText(el.sumAvgMonth, `Ø/Monat: ${formatNumber(avgPerMonthAll, 0)} Seiten`);
   if (el.chartAvgMonth) {
     renderBarChart(el.chartAvgMonth, monthNames, monthAvg, {

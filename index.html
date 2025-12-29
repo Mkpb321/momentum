@@ -184,6 +184,7 @@
 </li>
 </ul>
 </div>
+
 <div class="moregroup">
 <div class="moregroup__title">Aktivität &amp; Durchschnitt</div>
 <ul class="moregroup__list">
@@ -228,6 +229,42 @@
 <span class="moreitem__meta">inkl. 0-Tage</span>
 </li>
 </ul>
+</div>
+
+<div class="moregroup">
+  <div class="moregroup__title">Durchschnitte (inkl. 0 seit Start)</div>
+  <ul class="moregroup__list">
+    <li class="moreitem">
+      <span class="moreitem__label">Ø Seiten / Tag <button aria-label="Info: Ø Seiten / Tag" class="info-btn info-btn--inline" data-info-key="kpiAvgPerDayAll" type="button">i</button></span>
+      <span class="moreitem__value" id="kpiAvgPerDayAll">0</span>
+      <span class="moreitem__meta">inkl. 0‑Tage</span>
+    </li>
+    <li class="moreitem">
+      <span class="moreitem__label">Ø Seiten / Woche <button aria-label="Info: Ø Seiten / Woche" class="info-btn info-btn--inline" data-info-key="kpiAvgPerWeekAll" type="button">i</button></span>
+      <span class="moreitem__value" id="kpiAvgPerWeekAll">0</span>
+      <span class="moreitem__meta">inkl. 0‑Wochen</span>
+    </li>
+    <li class="moreitem">
+      <span class="moreitem__label">Ø Seiten / Monat <button aria-label="Info: Ø Seiten / Monat" class="info-btn info-btn--inline" data-info-key="kpiAvgPerMonthAll" type="button">i</button></span>
+      <span class="moreitem__value" id="kpiAvgPerMonthAll">0</span>
+      <span class="moreitem__meta">inkl. 0‑Monate</span>
+    </li>
+    <li class="moreitem">
+      <span class="moreitem__label">Ø Seiten / Jahr <button aria-label="Info: Ø Seiten / Jahr" class="info-btn info-btn--inline" data-info-key="kpiAvgPerYearAll" type="button">i</button></span>
+      <span class="moreitem__value" id="kpiAvgPerYearAll">0</span>
+      <span class="moreitem__meta">inkl. 0‑Jahre</span>
+    </li>
+    <li class="moreitem">
+      <span class="moreitem__label">Anteil aktive Tage <button aria-label="Info: Anteil aktive Tage" class="info-btn info-btn--inline" data-info-key="kpiActiveDayShare" type="button">i</button></span>
+      <span class="moreitem__value" id="kpiActiveDayShare">0%</span>
+      <span class="moreitem__meta">seit Start</span>
+    </li>
+    <li class="moreitem">
+      <span class="moreitem__label">Ø aktive Tage / Woche <button aria-label="Info: Ø aktive Tage / Woche" class="info-btn info-btn--inline" data-info-key="kpiAvgActiveDaysPerWeekAll" type="button">i</button></span>
+      <span class="moreitem__value" id="kpiAvgActiveDaysPerWeekAll">0</span>
+      <span class="moreitem__meta">inkl. 0‑Wochen</span>
+    </li>
+  </ul>
 </div>
 <div class="moregroup">
 <div class="moregroup__title">Bestwerte</div>
@@ -444,7 +481,7 @@
   <div class="chart__body--heatmap" id="chartHeatmap36"></div>
 <div class="heatmapinfo" hidden id="heatmapInfoPanel">
     <div class="heatmapinfo__head">
-      <div class="heatmapinfo__title">Auswahl</div>
+      <div class="heatmapinfo__title" id="heatmapInfoTitle">—</div>
       <button aria-label="Schliessen" class="heatmapinfo__close" id="heatmapInfoClose" type="button">✕</button>
     </div>
     <div class="heatmapinfo__text" id="heatmapInfoText"></div>

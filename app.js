@@ -157,6 +157,14 @@ const el = {
   kpiAvgLast7Days: document.getElementById("kpiAvgLast7Days"),
   kpiAvgLast30Days: document.getElementById("kpiAvgLast30Days"),
 
+  // Ø-Werte inkl. 0 (seit Start)
+  kpiAvgPerDayAll: document.getElementById("kpiAvgPerDayAll"),
+  kpiAvgPerWeekAll: document.getElementById("kpiAvgPerWeekAll"),
+  kpiAvgPerMonthAll: document.getElementById("kpiAvgPerMonthAll"),
+  kpiAvgPerYearAll: document.getElementById("kpiAvgPerYearAll"),
+  kpiActiveDayShare: document.getElementById("kpiActiveDayShare"),
+  kpiAvgActiveDaysPerWeekAll: document.getElementById("kpiAvgActiveDaysPerWeekAll"),
+
   kpiTotalPages: document.getElementById("kpiTotalPages"),
   kpiActiveDays: document.getElementById("kpiActiveDays"),
   kpiActiveWeeks: document.getElementById("kpiActiveWeeks"),
@@ -243,6 +251,7 @@ const el = {
 
   // Heatmap inline info (above heatmap)
   heatmapInfoPanel: document.getElementById("heatmapInfoPanel"),
+  heatmapInfoTitle: document.getElementById("heatmapInfoTitle"),
   heatmapInfoClose: document.getElementById("heatmapInfoClose"),
   heatmapInfoText: document.getElementById("heatmapInfoText"),
 
@@ -380,10 +389,10 @@ const INFO = {
 
   avgMonth: {
     title: "Ø Seiten pro Monat",
-    subtitle: "Kalendermonate (Jan–Dez) – Ø der letzten 36 Monate",
-    what: "Zeigt, wie viele Seiten du im Durchschnitt pro Kalendermonat liest – getrennt nach Jan bis Dez (über die letzten 36 Monate).",
-    how: "Wir summieren für jeden Kalendermonat (z.B. alle Januare innerhalb der letzten 36 Monate) die Monatsseiten und teilen durch die Anzahl vorkommender Monate dieser Kategorie.",
-    why: "So erkennst du Saisonalität und Muster: in welchen Monaten du typischerweise mehr oder weniger liest – unabhängig vom konkreten Jahr.",
+    subtitle: "Kalendermonate (Jan–Dez) – Ø seit Start",
+    what: "Zeigt, wie viele Seiten du im Durchschnitt pro Kalendermonat liest – getrennt nach Jan bis Dez (über alle Monate seit deinem ersten Eintrag).",
+    how: "Wir betrachten alle Kalendermonate vom ersten Eintrag bis heute (Monate ohne Einträge zählen als 0). Für jeden Monatsnamen (z.B. alle Januare) summieren wir die Monatsseiten und teilen durch die Anzahl dieser Monate.",
+    why: "So erkennst du Saisonalität und Muster über deine gesamte Historie – unabhängig vom konkreten Jahr und ohne dass leere Monate ‚unter den Tisch fallen‘.",
   },
 
   heatmap36: {
@@ -524,6 +533,49 @@ const INFO = {
     what: "Durchschnittliche Seiten pro Tag über die letzten 30 Tage.",
     how: "Seiten der letzten 30 Tage geteilt durch 30 (Tage ohne Eintrag zählen als 0).",
     why: "Robuster als 7 Tage: zeigt dein ‚Basis‑Tempo‘ und glättet einzelne Ausreißer.",
+  },
+
+  kpiAvgPerDayAll: {
+    title: "Ø Seiten / Tag",
+    subtitle: "seit Start, inkl. 0‑Tage",
+    what: "Dein langfristiger Durchschnitt an Seiten pro Kalendertag – inklusive Pausentagen.",
+    how: "Gesamtseiten geteilt durch Anzahl Kalendertage vom ersten Eintrag bis heute (inklusive). Tage ohne Eintrag zählen als 0.",
+    why: "Eine stabile Pace‑Zahl: ideal, um langfristige Ziele abzuleiten, ohne dass nur ‚aktive‘ Tage den Schnitt schönrechnen.",
+  },
+  kpiAvgPerWeekAll: {
+    title: "Ø Seiten / Woche",
+    subtitle: "seit Start, inkl. 0‑Wochen",
+    what: "Dein langfristiger Durchschnitt an Seiten pro Kalenderwoche (Mo–So) seit deinem ersten Eintrag.",
+    how: "Gesamtseiten geteilt durch Anzahl Kalenderwochen vom Start bis heute (inklusive). Wochen ohne Eintrag zählen als 0.",
+    why: "Wochen sind eine praktische Ziel‑Einheit. Du siehst, welches Wochen‑Tempo du im Schnitt wirklich gehalten hast.",
+  },
+  kpiAvgPerMonthAll: {
+    title: "Ø Seiten / Monat",
+    subtitle: "seit Start, inkl. 0‑Monate",
+    what: "Dein langfristiger Durchschnitt an Seiten pro Kalendermonat seit deinem ersten Eintrag.",
+    how: "Gesamtseiten geteilt durch Anzahl Kalendermonate vom Startmonat bis zum aktuellen Monat (inklusive). Monate ohne Eintrag zählen als 0.",
+    why: "Monate glätten kurzfristige Schwankungen. Gut, um zu prüfen, ob du über mehrere Monate in deinem Zielbereich liegst.",
+  },
+  kpiAvgPerYearAll: {
+    title: "Ø Seiten / Jahr",
+    subtitle: "seit Start, inkl. 0‑Jahre",
+    what: "Dein langfristiger Durchschnitt an Seiten pro Kalenderjahr seit dem Jahr deines ersten Eintrags.",
+    how: "Gesamtseiten geteilt durch Anzahl Kalenderjahre vom Startjahr bis zum aktuellen Jahr (inklusive). Jahre ohne Eintrag zählen als 0.",
+    why: "Ein klarer Langfrist‑Indikator: du erkennst, ob du über die Jahre konstant bleibst oder eher ‚Phasen‘ hast.",
+  },
+  kpiActiveDayShare: {
+    title: "Anteil aktive Tage",
+    subtitle: "seit Start",
+    what: "Wie oft du seit dem ersten Eintrag an einem Kalendertag tatsächlich gelesen hast.",
+    how: "Aktive Tage (Tages‑Summe > 0) geteilt durch alle Kalendertage seit Start × 100.",
+    why: "Das ist Gewohnheit in Prozent: eine einfache Kennzahl für Konstanz – unabhängig von der Seitenmenge.",
+  },
+  kpiAvgActiveDaysPerWeekAll: {
+    title: "Ø aktive Tage / Woche",
+    subtitle: "seit Start, inkl. 0‑Wochen",
+    what: "Wie viele Tage pro Kalenderwoche du im Durchschnitt aktiv gelesen hast.",
+    how: "Anzahl aktiver Tage geteilt durch Anzahl Kalenderwochen seit Start (inklusive). Wochen ohne Eintrag zählen als 0.",
+    why: "Hilft beim Planen: statt ‚wie viele Seiten‘ geht es um ‚wie oft‘ – ein Hebel, der meist leichter steuerbar ist.",
   },
 
   kpiBestDay: {
@@ -1386,23 +1438,48 @@ function toast(msg) {
   }, 3800);
 }
 
-// Heatmap: Detailfeld (unter der Heatmap) + Auswahlrahmen (doppelter Rahmen)
-let _heatmapSelectionOverlay = null;
+// Heatmap: Detailfeld (unter der Heatmap) + Auswahlrahmen
+// - Titel der Auswahl ist das Datum
+// - Erneutes Klicken auf dasselbe Feld deselectet und schließt das Detailfeld
+// - Auswahlrahmen: vorhandener Rand wird schwarz, zusätzlich ein dünner weißer Innenrand
+let _heatmapSelectedKey = null;
+let _heatmapSelectedRect = null;
+let _heatmapInnerOverlay = null;
 
-function clearHeatmapSelectionOverlay() {
-  if (_heatmapSelectionOverlay && _heatmapSelectionOverlay.parentNode) {
-    _heatmapSelectionOverlay.parentNode.removeChild(_heatmapSelectionOverlay);
+function clearHeatmapSelection() {
+  if (_heatmapInnerOverlay && _heatmapInnerOverlay.parentNode) {
+    _heatmapInnerOverlay.parentNode.removeChild(_heatmapInnerOverlay);
   }
-  _heatmapSelectionOverlay = null;
+  _heatmapInnerOverlay = null;
+
+  if (_heatmapSelectedRect) {
+    const baseStroke = _heatmapSelectedRect.dataset.baseStroke;
+    const baseStrokeWidth = _heatmapSelectedRect.dataset.baseStrokeWidth;
+    if (baseStroke != null) _heatmapSelectedRect.setAttribute("stroke", baseStroke);
+    if (baseStrokeWidth != null) _heatmapSelectedRect.setAttribute("stroke-width", baseStrokeWidth);
+  }
+  _heatmapSelectedRect = null;
+  _heatmapSelectedKey = null;
 }
 
-function setHeatmapSelection(rect) {
-  clearHeatmapSelectionOverlay();
+function setHeatmapSelection(rect, key) {
+  clearHeatmapSelection();
   if (!rect) return;
 
   const svg = rect.ownerSVGElement;
   if (!svg) return;
 
+  _heatmapSelectedRect = rect;
+  _heatmapSelectedKey = key || null;
+
+  // Persist original stroke so we can restore it.
+  if (rect.dataset.baseStroke == null) rect.dataset.baseStroke = rect.getAttribute("stroke") || "";
+  if (rect.dataset.baseStrokeWidth == null) rect.dataset.baseStrokeWidth = rect.getAttribute("stroke-width") || "";
+
+  // Outer border (existing one) becomes black.
+  rect.setAttribute("stroke", "#141312");
+
+  // Add a subtle inner white border for contrast on dark fills.
   const svgNS = "http://www.w3.org/2000/svg";
   const g = document.createElementNS(svgNS, "g");
   g.setAttribute("class", "heatmapselect");
@@ -1414,47 +1491,50 @@ function setHeatmapSelection(rect) {
   const h0 = Number(rect.getAttribute("height") || 0);
   const rx0 = Number(rect.getAttribute("rx") || 0);
   const ry0 = Number(rect.getAttribute("ry") || 0);
+  const inset = 1; // small, stays inside the existing border
 
-  const mkRect = (cls, insetPx) => {
-    const r = document.createElementNS(svgNS, "rect");
-    const inset = Number.isFinite(insetPx) ? insetPx : 0;
-    const x = x0 + inset;
-    const y = y0 + inset;
-    const w = Math.max(0, w0 - inset * 2);
-    const h = Math.max(0, h0 - inset * 2);
-    const rx = Math.max(0, rx0 - inset);
-    const ry = Math.max(0, ry0 - inset);
-
-    r.setAttribute("x", String(x));
-    r.setAttribute("y", String(y));
-    r.setAttribute("width", String(w));
-    r.setAttribute("height", String(h));
-    r.setAttribute("rx", String(rx));
-    r.setAttribute("ry", String(ry));
-    r.setAttribute("class", cls);
-    return r;
-  };
-
-  // Outer white frame, inner black frame — visible on both bright and dark fills.
-  g.appendChild(mkRect("heatmapselect__outer", 0));
-  g.appendChild(mkRect("heatmapselect__inner", 1));
+  const inner = document.createElementNS(svgNS, "rect");
+  inner.setAttribute("x", String(x0 + inset));
+  inner.setAttribute("y", String(y0 + inset));
+  inner.setAttribute("width", String(Math.max(0, w0 - inset * 2)));
+  inner.setAttribute("height", String(Math.max(0, h0 - inset * 2)));
+  inner.setAttribute("rx", String(Math.max(0, rx0 - inset)));
+  inner.setAttribute("ry", String(Math.max(0, ry0 - inset)));
+  inner.setAttribute("class", "heatmapselect__inner");
+  g.appendChild(inner);
 
   svg.appendChild(g);
-  _heatmapSelectionOverlay = g;
+  _heatmapInnerOverlay = g;
 }
 
-function showHeatmapInfoPanel(text, rect) {
-  if (!el.heatmapInfoPanel || !el.heatmapInfoText) return;
-  el.heatmapInfoText.textContent = String(text ?? "");
+function showHeatmapInfoPanel(text, rect, key) {
+  if (!el.heatmapInfoPanel || !el.heatmapInfoText || !el.heatmapInfoTitle) return;
+
+  const nextKey = String(key || "");
+  const isSame = Boolean(nextKey) && _heatmapSelectedKey === nextKey;
+  const isOpen = el.heatmapInfoPanel.hidden === false;
+  if (isOpen && isSame) {
+    hideHeatmapInfoPanel();
+    return;
+  }
+
+  const raw = String(text ?? "");
+  const lines = raw.split(/\r?\n/);
+  const title = (lines[0] || "—").trim() || "—";
+  const body = lines.slice(1).join("\n");
+
+  el.heatmapInfoTitle.textContent = title;
+  el.heatmapInfoText.textContent = body;
   el.heatmapInfoPanel.hidden = false;
-  setHeatmapSelection(rect);
+  setHeatmapSelection(rect, nextKey);
 }
 
 function hideHeatmapInfoPanel() {
-  if (!el.heatmapInfoPanel || !el.heatmapInfoText) return;
+  if (!el.heatmapInfoPanel || !el.heatmapInfoText || !el.heatmapInfoTitle) return;
   el.heatmapInfoPanel.hidden = true;
+  el.heatmapInfoTitle.textContent = "—";
   el.heatmapInfoText.textContent = "";
-  setHeatmapSelection(null);
+  clearHeatmapSelection();
 }
 
 // Allow charts.js (SVG click handlers) to trigger the heatmap panel without tight coupling.
