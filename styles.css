@@ -219,6 +219,7 @@ body{
   align-items:baseline;
   justify-content:space-between;
   gap:12px;
+  flex-wrap: wrap;
   padding: 4px 4px 12px 4px;
 }
 h2{
@@ -294,6 +295,7 @@ h2{
   align-items:flex-start;
   justify-content:space-between;
   gap:10px;
+  flex-wrap: wrap;
   margin-bottom: 10px;
 }
 .chart__title{
@@ -305,7 +307,11 @@ h2{
 }
 
 .chart__sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
-.chart__body{ width:100%; }
+.chart__body{
+  width:100%;
+  /* Clip any SVG overhang on very narrow screens so it never creates page-wide horizontal overflow. */
+  overflow: hidden;
+}
 
 .chart__body--heatmap{
   /* Avoid two vertical scrollbars (page + inner container). Let the page handle vertical scrolling.
@@ -315,7 +321,12 @@ h2{
   max-height: none;
   padding-right: 0;
 }
-.heatmapsvg{ display:block; }
+/* SVGs should not be able to paint outside their box (prevents accidental page overflow) */
+svg.chartsvg,
+.heatmapsvg{
+  display:block;
+  overflow: hidden;
+}
 .heatmapcell{ shape-rendering: crispEdges; }
 .heatmaplabel{ font-size:10px; fill:#7a756f; }
 
@@ -898,8 +909,12 @@ svg.chartsvg{
   .search{ width: 100%; max-width: none; font-size:16px; }
 }
 
-/* Prevent horizontal overflow in general */
-body{ overflow-x:hidden; }
+/* Prevent horizontal overflow (iOS/Safari can scroll the <html> element) */
+html, body{
+  width: 100%;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
 
 /* Modal: fit on narrow screens and avoid cut-off */
 .bookdetail__row input{ min-width: 0; }
