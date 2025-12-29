@@ -470,10 +470,19 @@ h2{
   overflow:hidden;
   text-overflow: ellipsis;
 }
-.book__right{ width: 220px; flex: 0 1 220px; }
+.book__right{
+  /* Keep list layout in two columns (text left, progress right) even on narrow screens.
+     The progress area must be able to shrink responsively to avoid horizontal scrolling. */
+  width: clamp(140px, 35vw, 220px);
+  flex: 0 1 clamp(140px, 35vw, 220px);
+  min-width: 0;
+}
 @media (max-width: 480px){
   .book{ flex-direction:row; align-items:center; }
-  .book__right{ width: 180px; flex-basis: 180px; }
+  .book__right{
+    width: clamp(110px, 40vw, 170px);
+    flex-basis: clamp(110px, 40vw, 170px);
+  }
   .progress__meta{ font-size: 11px; }
 }
 .progress{
@@ -493,6 +502,8 @@ h2{
   margin-top: 8px;
   display:flex;
   justify-content:space-between;
+  gap: 8px;
+  flex-wrap: wrap;
   font-size: 12px;
   color: var(--muted);
 }

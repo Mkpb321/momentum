@@ -99,7 +99,6 @@ export function renderBooks(el, state, showFinished, searchQuery, onOpenBook) {
         <div class="book__title" title="${escapeHtml(book.title)}">${escapeHtml(book.title)}</div>
         <div class="book__author" title="${escapeHtml(book.author || "—")}">${escapeHtml(book.author || "—")}</div>
       </div>
-      </div>
       <div class="book__right">
         <div class="progress"><div class="progress__bar" style="width:${pct}%"></div></div>
         <div class="progress__meta">
