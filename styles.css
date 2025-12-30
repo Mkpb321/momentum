@@ -738,6 +738,9 @@ svg.chartsvg{
 .field textarea:focus{ outline:none; box-shadow: var(--focus); border-color: #d9d2ca; }
 .field--textarea{ margin-top: 10px; }
 
+/* extra spacing in the book update form so the textarea label doesn't stick to the save button */
+.bookdetail__update .field--textarea{ margin-top: 14px; }
+
 .bookdetail{
   display:grid;
   grid-template-columns: 1fr;
@@ -765,6 +768,13 @@ svg.chartsvg{
   /* Prevent horizontal scroll in modals on iPhone widths */
   .modal__actions{ flex-direction: column; align-items: stretch; }
   .modal__actions .btn{ width: 100%; }
+
+  /* iOS Safari auto-zooms on focus when font-size is <16px */
+  input,
+  textarea,
+  select{
+    font-size: 16px;
+  }
 }
 
 .history{
