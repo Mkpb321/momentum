@@ -322,7 +322,12 @@ h2{
   padding-right: 0;
 }
 /* SVGs should not be able to paint outside their box (prevents accidental page overflow) */
-svg.chartsvg,
+svg.chartsvg{
+  display:block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
 .heatmapsvg{
   display:block;
   overflow: hidden;

@@ -44,12 +44,23 @@ function defaultValueFormatter(v) {
 }
 
 function makeChartSvg(containerEl, height, padL, padR) {
-  const w = containerEl.clientWidth || 640;
+  // IMPORTANT: never allow a browser default SVG width (often 300px) to decide layout.
+  // On narrow screens this can create document-wide horizontal overflow and asymmetrical page gutters.
+  // Use the container width when available, otherwise fall back to a reasonable width.
+  const rectW = (containerEl?.getBoundingClientRect?.().width ?? 0);
+  // If the container is not yet laid out (width 0), approximate using viewport width.
+  const approxW = Math.max(320, Math.min(640, Math.round((window?.innerWidth ?? 640) - 80)));
+  const w = Math.max(1, Math.round(rectW || containerEl.clientWidth || approxW));
 
   const svgNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNS, "svg");
   svg.setAttribute("class", "chartsvg");
   svg.setAttribute("viewBox", `0 0 ${w} ${height}`);
+  // Make the SVG size follow the container width (prevents page overflow on mobile).
+  // "none" avoids letterboxing when width changes but height stays constant.
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("width", "100%");
+  svg.setAttribute("height", String(height));
 
   return { svg, svgNS, w };
 }
