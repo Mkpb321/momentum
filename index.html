@@ -573,12 +573,18 @@
 </div>
 </div>
 <div class="bookdetail__update">
-<div class="bookdetail__label">Gelesen bis Seite</div>
-<div class="bookdetail__row">
+<div class="bookdetail__label">Eintrag</div>
+
+<label class="field">
+<span>Datum</span>
 <input aria-label="Datum" id="inpDate" type="date"/>
-<input aria-label="Seite" id="inpPage" inputmode="numeric" min="0" placeholder="z.B. 75" step="1" type="number"/>
-<button class="btn" id="btnSavePage" type="submit">Speichern</button>
-</div>
+</label>
+
+<label class="field">
+<span>Bis Seite</span>
+<input aria-label="Bis Seite" id="inpPage" inputmode="numeric" min="0" placeholder="z.B. 75" step="1" type="number"/>
+</label>
+
 <label class="field field--textarea">
 <span>Erkenntnis (optional)</span>
 <textarea aria-label="Erkenntnis" id="inpInsight" placeholder="Deine Erkenntnis zum gelesenen Abschnitt…" rows="3"></textarea>
@@ -590,9 +596,12 @@
 </div>
 </div>
 </div>
-<div class="modal__actions modal__actions--spread">
+<div class="modal__actions modal__actions--stack">
+<button class="btn btn--block" id="btnSavePage" type="submit">Speichern</button>
+<div class="actionsrow actionsrow--spread">
 <button class="btn btn--danger" id="btnDeleteBook" type="button">Buch löschen</button>
 <button class="btn btn--ghost" id="btnShowInsights" type="button">Erkenntnisse anzeigen</button>
+</div>
 </div>
 
 <!-- Insights Overlay (lives inside the book dialog; closes without closing the book dialog) -->

@@ -1230,7 +1230,12 @@ function wireAppEvents() {
     const book = getActiveBook();
     if (!book) return;
 
-    const raw = el.inpPage.value;
+    const raw = String(el.inpPage.value || "").trim();
+    if (!raw) {
+      toast("Bitte Seitenzahl eingeben.");
+      el.inpPage.focus();
+      return;
+    }
     const newPage = clampInt(raw, 0, book.totalPages);
     const date = selectedLogDate();
 
@@ -1273,6 +1278,31 @@ function wireAppEvents() {
   // Update page input when date changes
   el.inpDate?.addEventListener("change", () => {
     syncPageInputForDate();
+  });
+
+  // Select / deselect a history entry (toggles back to today on second click)
+  el.historyList?.addEventListener("click", (ev) => {
+    const row = ev.target.closest(".histrow");
+    if (!row) return;
+
+    const date = String(row.getAttribute("data-date") || "").trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return;
+
+    const current = selectedLogDate();
+    if (date === current && date !== todayKey()) {
+      setLogDate(todayKey());
+    } else {
+      setLogDate(date);
+    }
+    syncPageInputForDate();
+  });
+
+  el.historyList?.addEventListener("keydown", (ev) => {
+    if (ev.key !== "Enter" && ev.key !== " ") return;
+    const row = ev.target.closest(".histrow");
+    if (!row) return;
+    ev.preventDefault();
+    row.click();
   });
 
   // Delete book
@@ -1414,13 +1444,19 @@ function openBook(bookId) {
   // history list (latest first)
   const rows = [...book.history].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12);
   el.historyList.innerHTML = rows.length
-    ? rows.map(r => `
-        <div class="histrow">
+    ? rows.map(r => {
+      const active = selectedLogDate();
+      const isActive = (active !== todayKey()) && (r.date === active);
+      return `
+        <div class="histrow${isActive ? " histrow--active" : ""}" data-date="${r.date}" role="button" tabindex="0" aria-pressed="${isActive ? "true" : "false"}">
           <div class="histrow__date">${formatDateShort(r.date)}</div>
           <div class="histrow__val">bis ${r.page}</div>
         </div>
-      `).join("")
+      `;
+    }).join("")
     : `<div class="muted" style="padding:6px;">Noch keine Einträge.</div>`;
+
+  syncHistorySelectionUI();
 
   openDialog(el.dlgBook);
   el.inpPage.focus();
@@ -1605,6 +1641,18 @@ function setLogDate(dateKeyStr) {
   el.inpDate.value = dateKeyStr;
 }
 
+function syncHistorySelectionUI() {
+  const active = selectedLogDate();
+  const isToday = active === todayKey();
+  const rows = document.querySelectorAll("#historyList .histrow");
+  rows.forEach(row => {
+    const d = String(row.getAttribute("data-date") || "");
+    const on = !isToday && d === active;
+    row.classList.toggle("histrow--active", on);
+    row.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+}
+
 function syncPageInputForDate() {
   const book = getActiveBook();
   if (!book) return;
@@ -1612,11 +1660,15 @@ function syncPageInputForDate() {
   const date = selectedLogDate();
   const entry = book.history.find(h => h.date === date);
 
-  // If there is an entry on that date, show it; otherwise prefill with last known value before that date.
-  const base = (date === todayKey()) ? latestPage(book) : latestPageBefore(book, date);
-  el.inpPage.value = String(entry?.page ?? base);
+  const isToday = date === todayKey();
+  const base = latestPageBefore(book, date);
+
+  el.inpPage.value = String(entry?.page ?? (isToday ? "" : base));
   if (el.inpInsight) el.inpInsight.value = String(entry?.insight ?? "");
+
+  syncHistorySelectionUI();
 }
+
 
 function isInsightsOverlayOpen() {
   return !!(el.insightsOverlay && el.insightsOverlay.hidden === false);
