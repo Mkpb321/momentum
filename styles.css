@@ -595,6 +595,7 @@ svg.chartsvg{
   max-height: calc(100vh - 24px);
 }
 .modal__card{
+  position: relative;
   width: min(520px, calc(100vw - 24px));
   border-radius: var(--radius);
   border: 1px solid var(--line);
@@ -651,6 +652,67 @@ svg.chartsvg{
   align-items:center;
 }
 
+/* --- Insights overlay (inside book dialog) --- */
+.overlay{
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  background: rgba(20,19,18,.24);
+  backdrop-filter: blur(4px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 14px;
+}
+.overlay[hidden]{ display:none !important; }
+.overlay__card{
+  width: min(560px, 100%);
+  max-height: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--card);
+  box-shadow: var(--shadow);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.overlay__head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding: 14px 14px 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.overlay__title{ font-weight: 700; letter-spacing: .2px; }
+.overlay__sub{ color: var(--muted); font-size: 12px; margin-top: 2px; }
+.overlay__scroll{
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow:auto;
+  padding: 12px 14px 14px 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(20,19,18,.25) transparent;
+}
+.overlay__actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding: 12px 14px 14px 14px;
+  border-top: 1px solid var(--line);
+}
+.insrow{
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.insrow:last-child{ border-bottom: none; }
+.insrow__title{ font-weight: 700; }
+.insrow__text{
+  margin-top: 6px;
+  color: var(--accent);
+  white-space: pre-wrap;
+}
+
 .fields{ display:grid; gap:10px; }
 .field span{ display:block; font-size:12px; color: var(--muted); margin-bottom:6px; }
 .field input{
@@ -662,6 +724,19 @@ svg.chartsvg{
   font-size: 14px;
 }
 .field input:focus{ outline:none; box-shadow: var(--focus); border-color: #d9d2ca; }
+
+.field textarea{
+  width:100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--chip);
+  font-size: 14px;
+  resize: vertical;
+  min-height: 84px;
+}
+.field textarea:focus{ outline:none; box-shadow: var(--focus); border-color: #d9d2ca; }
+.field--textarea{ margin-top: 10px; }
 
 .bookdetail{
   display:grid;

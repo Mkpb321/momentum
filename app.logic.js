@@ -163,13 +163,24 @@ export function earliestPageAfter(book, dateKeyStr) {
   return hist.length ? clampInt(hist[0].page, 0, book.totalPages) : null;
 }
 
-export function upsertHistory(book, date, page) {
+export function upsertHistory(book, date, page, insight) {
+  const raw = (insight == null) ? null : String(insight);
+  const clean = raw == null ? null : raw.trim();
+
   const i = (book.history || []).findIndex(h => h.date === date);
   if (i >= 0) {
     book.history[i].page = page;
+    if (clean && clean.length) {
+      book.history[i].insight = clean;
+    } else {
+      // Keep docs lean: remove empty insights.
+      delete book.history[i].insight;
+    }
   } else {
     book.history = book.history || [];
-    book.history.push({ date, page });
+    const entry = { date, page };
+    if (clean && clean.length) entry.insight = clean;
+    book.history.push(entry);
     book.history.sort((a, b) => a.date.localeCompare(b.date));
   }
 }

@@ -579,6 +579,10 @@
 <input aria-label="Seite" id="inpPage" inputmode="numeric" min="0" placeholder="z.B. 75" step="1" type="number"/>
 <button class="btn" id="btnSavePage" type="submit">Speichern</button>
 </div>
+<label class="field field--textarea">
+<span>Erkenntnis (optional)</span>
+<textarea aria-label="Erkenntnis" id="inpInsight" placeholder="Deine Erkenntnis zum gelesenen Abschnitt…" rows="3"></textarea>
+</label>
 </div>
 <div class="bookdetail__history">
 <div class="bookdetail__label">Letzte Einträge</div>
@@ -588,7 +592,24 @@
 </div>
 <div class="modal__actions modal__actions--spread">
 <button class="btn btn--danger" id="btnDeleteBook" type="button">Buch löschen</button>
-<div></div>
+<button class="btn btn--ghost" id="btnShowInsights" type="button">Erkenntnisse anzeigen</button>
+</div>
+
+<!-- Insights Overlay (lives inside the book dialog; closes without closing the book dialog) -->
+<div class="overlay" hidden="" id="insightsOverlay" role="dialog" aria-modal="false" aria-label="Erkenntnisse">
+<div class="overlay__card">
+<div class="overlay__head">
+<div>
+<div class="overlay__title">Erkenntnisse</div>
+<div class="overlay__sub" id="insightsBookTitle">—</div>
+</div>
+<button aria-label="Schließen" class="iconbtn" id="btnCloseInsightsX" type="button">×</button>
+</div>
+<div class="overlay__scroll" id="insightsList"></div>
+<div class="overlay__actions">
+<button class="btn" id="btnInsightsOk" type="button">OK</button>
+</div>
+</div>
 </div>
 </form>
 </dialog>

@@ -125,9 +125,18 @@ const el = {
   bookProgPct: document.getElementById("bookProgPct"),
   inpDate: document.getElementById("inpDate"),
   inpPage: document.getElementById("inpPage"),
+  inpInsight: document.getElementById("inpInsight"),
   historyList: document.getElementById("historyList"),
   btnDeleteBook: document.getElementById("btnDeleteBook"),
   btnCloseBookX: document.getElementById("btnCloseBookX"),
+
+  // insights overlay (inside book dialog)
+  btnShowInsights: document.getElementById("btnShowInsights"),
+  insightsOverlay: document.getElementById("insightsOverlay"),
+  insightsBookTitle: document.getElementById("insightsBookTitle"),
+  insightsList: document.getElementById("insightsList"),
+  btnCloseInsightsX: document.getElementById("btnCloseInsightsX"),
+  btnInsightsOk: document.getElementById("btnInsightsOk"),
 
   bookList: document.getElementById("bookList"),
   emptyState: document.getElementById("emptyState"),
@@ -307,6 +316,7 @@ function closeDialog(dlg) {
     dlg.open = false;
     // No close event in fallback path; unlock immediately.
     unlockBodyScroll();
+    if (el.insightsOverlay) el.insightsOverlay.hidden = true;
   }
 }
 
@@ -1149,9 +1159,31 @@ function wireAppEvents() {
 
   el.btnCloseBookX?.addEventListener("click", () => closeDialog(el.dlgBook));
 
+  // Insights overlay
+  el.btnShowInsights?.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    openInsightsOverlay();
+  });
+  el.btnCloseInsightsX?.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    closeInsightsOverlay();
+  });
+  el.btnInsightsOk?.addEventListener("click", (ev) => {
+    ev.preventDefault();
+    closeInsightsOverlay();
+  });
+
+  // When the insights overlay is open, Escape should close only the overlay (not the book dialog).
+  el.dlgBook?.addEventListener("cancel", (ev) => {
+    if (!isInsightsOverlayOpen()) return;
+    ev.preventDefault();
+    closeInsightsOverlay();
+  });
+
   // On close: unlock background scroll and ensure the toast is not trapped in a closed dialog.
   const onDialogClosed = () => {
     unlockBodyScroll();
+    if (el.insightsOverlay) el.insightsOverlay.hidden = true;
     if (el.toast && el.toast.parentElement !== document.body) document.body.appendChild(el.toast);
   };
   el.dlgAddBook?.addEventListener("close", onDialogClosed);
@@ -1224,7 +1256,8 @@ function wireAppEvents() {
       return;
     }
 
-    upsertHistory(book, date, newPage);
+    const insight = String(el.inpInsight?.value || "");
+    upsertHistory(book, date, newPage, insight);
 
     try {
       await upsertBook(ctx.db, ctx.user.uid, book);
@@ -1582,6 +1615,62 @@ function syncPageInputForDate() {
   // If there is an entry on that date, show it; otherwise prefill with last known value before that date.
   const base = (date === todayKey()) ? latestPage(book) : latestPageBefore(book, date);
   el.inpPage.value = String(entry?.page ?? base);
+  if (el.inpInsight) el.inpInsight.value = String(entry?.insight ?? "");
+}
+
+function isInsightsOverlayOpen() {
+  return !!(el.insightsOverlay && el.insightsOverlay.hidden === false);
+}
+
+function openInsightsOverlay() {
+  const book = getActiveBook();
+  if (!book || !el.insightsOverlay || !el.insightsList) return;
+
+  el.insightsOverlay.hidden = false;
+  if (el.insightsBookTitle) el.insightsBookTitle.textContent = book.title;
+
+  // Build list: only entries with an insight.
+  // Title: bold date + reading range (delta logic) like: "14.09.2025 – S. 51–66"
+  const hist = [...(book.history || [])].sort((a, b) => a.date.localeCompare(b.date));
+  let prev = clampInt(book.initialPage ?? 0, 0, book.totalPages);
+  const rows = [];
+
+  for (const entry of hist) {
+    const insight = String(entry?.insight ?? "").trim();
+    const page = clampInt(entry?.page ?? 0, 0, book.totalPages);
+
+    let from = prev + 1;
+    let to = page;
+    if (from > to) from = to;
+
+    if (insight) {
+      rows.push({
+        title: `${formatDateShort(entry.date)} – S. ${from}–${to}`,
+        text: insight
+      });
+    }
+
+    prev = Math.max(prev, page);
+  }
+
+  if (!rows.length) {
+    el.insightsList.innerHTML = `<div class="muted" style="padding:6px 0;">Noch keine Erkenntnisse.</div>`;
+  } else {
+    el.insightsList.innerHTML = rows.map(r => `
+      <div class="insrow">
+        <div class="insrow__title">${escapeHtml(r.title)}</div>
+        <div class="insrow__text">${escapeHtml(r.text)}</div>
+      </div>
+    `.trim()).join('');
+  }
+
+  el.btnCloseInsightsX?.focus();
+}
+
+function closeInsightsOverlay() {
+  if (!el.insightsOverlay) return;
+  el.insightsOverlay.hidden = true;
+  el.btnShowInsights?.focus();
 }
 
 function friendlyAuthError(e) {

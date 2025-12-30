@@ -154,11 +154,21 @@ function normalizeHistory(h, totalPages = 100000) {
     if (!x || typeof x !== "object") continue;
     const date = String(x.date || "").slice(0, 10);
     const page = clampInt(x.page, 0, totalPages);
+
+    // Accept a few legacy keys on import.
+    const rawInsight = (x.insight ?? x.erkenntnis ?? x.note ?? x.notiz ?? "");
+    const insight = String(rawInsight || "").trim();
+
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
-    map.set(date, page); // last wins
+    map.set(date, { page, insight: insight || null }); // last wins
   }
+
   return [...map.entries()]
-    .map(([date, page]) => ({ date, page }))
+    .map(([date, v]) => {
+      const out = { date, page: v.page };
+      if (v.insight) out.insight = v.insight;
+      return out;
+    })
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
