@@ -1442,7 +1442,7 @@ function openBook(bookId) {
   syncPageInputForDate();
 
   // history list (latest first)
-  const rows = [...book.history].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12);
+  const rows = [...book.history].sort((a, b) => b.date.localeCompare(a.date));
   el.historyList.innerHTML = rows.length
     ? rows.map(r => {
       const active = selectedLogDate();
