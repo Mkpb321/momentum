@@ -1264,6 +1264,10 @@ function wireAppEvents() {
     const insight = String(el.inpInsight?.value || "");
     upsertHistory(book, date, newPage, insight);
 
+    // Optimistic: move this book to the top immediately after a change.
+    // Firestore will set the authoritative updatedAt server-side.
+    book.updatedAt = new Date().toISOString();
+
     try {
       await upsertBook(ctx.db, ctx.user.uid, book);
       toast("Gespeichert.");
@@ -1403,6 +1407,7 @@ async function addBook({ title, author, totalPages, initialPage }) {
     totalPages,
     initialPage: clampInt(initialPage, 0, totalPages),
     createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     history: []
   };
 

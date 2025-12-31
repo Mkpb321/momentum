@@ -140,6 +140,9 @@ function normalizeBook(b) {
   // In-memory: keep createdAt as ISO string for stable sorting/export.
   // Firestore stores createdAt as a Timestamp; we convert it when loading.
   const createdAt = coerceToIsoString(b.createdAt) || new Date().toISOString();
+  // In-memory: keep updatedAt as ISO string too, so UI can sort by "last changed".
+  // Firestore stores updatedAt as a Timestamp; we convert it when loading.
+  const updatedAt = coerceToIsoString(b.updatedAt) || createdAt;
   const initialPage = clampInt(b.initialPage ?? b.initialPages ?? 0, 0, totalPages);
 
   return {
@@ -149,6 +152,7 @@ function normalizeBook(b) {
     totalPages,
     initialPage,
     createdAt,
+    updatedAt,
     history: normalizeHistory(b.history, totalPages)
   };
 }

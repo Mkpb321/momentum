@@ -48,11 +48,16 @@ export function updateBooksControls(el, showFinished) {
 export function renderBooks(el, state, showFinished, searchQuery, onOpenBook) {
   let books = [...(state?.books || [])];
 
-  // Sort: zuletzt gelesen zuerst (nach letztem History-Datum), sonst nach Erstellungsdatum
+  // Sort: zuletzt geändert zuerst (updatedAt), dann nach letzter Lese-Aktivität, dann nach createdAt.
   books.sort((a, b) => {
+    const au = String(a.updatedAt || "");
+    const bu = String(b.updatedAt || "");
+    if (au !== bu) return bu.localeCompare(au);
+
     const ad = lastEntryDateKey(a);
     const bd = lastEntryDateKey(b);
     if (ad !== bd) return bd.localeCompare(ad);
+
     return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
   });
 

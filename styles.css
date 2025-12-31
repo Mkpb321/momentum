@@ -753,6 +753,8 @@ svg.chartsvg{
 .field input[type="date"]{
   min-width: 0;
   max-width: 100%;
+  display: block;
+  width: 100%;
   padding-right: 44px;
   overflow: hidden;
 }
@@ -806,11 +808,21 @@ svg.chartsvg{
   .modal__actions{ flex-direction: column; align-items: stretch; }
   .modal__actions .btn{ width: 100%; }
 
-  /* iOS Safari auto-zooms on focus when font-size is <16px */
-  input,
-  textarea,
-  select{
+  /* iOS Safari auto-zooms on focus when font-size is <16px.
+     Must match/beat specificity of .field input/.field textarea rules above. */
+  .field input,
+  .field textarea,
+  .field select,
+  .bookdetail__row input,
+  .bookdetail__row textarea,
+  .bookdetail__row select{
     font-size: 16px;
+  }
+
+  /* Date inputs can be stubborn on iOS; ensure they never exceed the card width */
+  .field input[type="date"]{
+    max-width: 100%;
+    padding-right: 38px;
   }
 }
 
