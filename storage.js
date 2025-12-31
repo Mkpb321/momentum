@@ -52,7 +52,7 @@ export async function loadState(db, uid) {
   return normalizeState({ version: 1, books });
 }
 
-export async function upsertBook(db, uid, book) {
+export async function upsertBook(db, uid, book, opts = {}) {
   const b = normalizeBook(book);
   const ref = bookDoc(db, uid, b.id);
 
@@ -62,10 +62,13 @@ export async function upsertBook(db, uid, book) {
     author: b.author,
     totalPages: b.totalPages,
     initialPage: b.initialPage,
-    createdAt: b.createdAt,
     history: b.history,
     updatedAt: serverTimestamp()
   };
+
+  // createdAt is set exactly once (server-side) when the document is created.
+  // We intentionally do not attempt a read-before-write here (offline/latency concerns).
+  if (opts && opts.isNew === true) payload.createdAt = serverTimestamp();
 
   await setDoc(ref, payload, { merge: true });
 }
@@ -106,7 +109,8 @@ export async function replaceAllBooks(db, uid, books) {
           author: op.book.author,
           totalPages: op.book.totalPages,
           initialPage: op.book.initialPage,
-          createdAt: op.book.createdAt,
+          // createdAt/updatedAt are always server-side timestamps.
+          createdAt: serverTimestamp(),
           history: op.book.history,
           updatedAt: serverTimestamp()
         }, { merge: true });
@@ -133,7 +137,9 @@ function normalizeState(s) {
 function normalizeBook(b) {
   const totalPages = clampInt(b.totalPages, 1, 100000);
   const id = String(b.id || crypto.randomUUID());
-  const createdAt = String(b.createdAt || new Date().toISOString());
+  // In-memory: keep createdAt as ISO string for stable sorting/export.
+  // Firestore stores createdAt as a Timestamp; we convert it when loading.
+  const createdAt = coerceToIsoString(b.createdAt) || new Date().toISOString();
   const initialPage = clampInt(b.initialPage ?? b.initialPages ?? 0, 0, totalPages);
 
   return {
@@ -145,6 +151,49 @@ function normalizeBook(b) {
     createdAt,
     history: normalizeHistory(b.history, totalPages)
   };
+}
+
+function coerceToIsoString(v) {
+  if (v == null) return "";
+  // Firestore Timestamp (client SDK) exposes toDate().
+  if (typeof v === "object" && typeof v.toDate === "function") {
+    try {
+      return v.toDate().toISOString();
+    } catch {
+      return "";
+    }
+  }
+  // Serialized Timestamp-like object: { seconds, nanoseconds }
+  if (typeof v === "object" && typeof v.seconds === "number") {
+    try {
+      const ms = (v.seconds * 1000) + Math.floor((Number(v.nanoseconds || 0) || 0) / 1e6);
+      return new Date(ms).toISOString();
+    } catch {
+      return "";
+    }
+  }
+  if (typeof v === "number") {
+    try {
+      return new Date(v).toISOString();
+    } catch {
+      return "";
+    }
+  }
+  if (typeof v === "string") {
+    const s = v.trim();
+    if (!s) return "";
+    // If it's already an ISO string, keep it.
+    if (/^\d{4}-\d{2}-\d{2}T/.test(s)) return s;
+    // Last resort: attempt to parse.
+    const t = Date.parse(s);
+    if (Number.isFinite(t)) return new Date(t).toISOString();
+    return s;
+  }
+  try {
+    return String(v);
+  } catch {
+    return "";
+  }
 }
 
 function normalizeHistory(h, totalPages = 100000) {

@@ -1409,7 +1409,7 @@ async function addBook({ title, author, totalPages, initialPage }) {
   state.books.unshift(book);
 
   try {
-    await upsertBook(ctx.db, ctx.user.uid, book);
+    await upsertBook(ctx.db, ctx.user.uid, book, { isNew: true });
     toast("Buch hinzugefügt.");
     rerenderAll();
   } catch (e) {

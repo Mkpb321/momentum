@@ -94,13 +94,18 @@ Ein `book` Dokument enthält u.a.:
   "author": "…",
   "totalPages": 320,
   "initialPage": 0,
-  "createdAt": "2025-12-20T12:00:00.000Z",
+  "createdAt": "<Firestore Timestamp>",
   "history": [
     {"date":"2025-12-18","page":50},
     {"date":"2025-12-19","page":70}
-  ]
+  ],
+  "updatedAt": "<Firestore Timestamp>"
 }
 ```
+
+Hinweis: **createdAt** und **updatedAt** sind echte **Firestore Timestamps** und werden **serverseitig** gesetzt.
+Im JSON-Export der App werden sie weiterhin als ISO-Strings serialisiert, weil Firestore-Timestamps in JSON nicht
+standardisiert darstellbar sind.
 
 **Wichtig:** Die Logik „Vergangenheit nachtragen / Einträge korrigieren“ bleibt erhalten,
 weil `history` wie bisher vom Client gepflegt wird.
@@ -141,9 +146,10 @@ service cloud.firestore {
         && data.author is string && data.author.size() <= 200
         && data.totalPages is int && data.totalPages >= 1 && data.totalPages <= 100000
         && data.initialPage is int && data.initialPage >= 0 && data.initialPage <= data.totalPages
-        && data.createdAt is string && data.createdAt.size() <= 40
+        && data.createdAt is timestamp
         && data.history is list
-        && data.history.size() <= 5000;
+        && data.history.size() <= 5000
+        && data.updatedAt is timestamp;
         // Hinweis: Vollständige Validierung jedes history-Items ist in Rules nur eingeschränkt möglich,
         // da es keine Schleifen über Listen gibt.
     }
