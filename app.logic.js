@@ -217,8 +217,17 @@ export function addDays(date, delta) {
 }
 
 export function addMonths(date, delta) {
+  // IMPORTANT:
+  // Using Date#setMonth directly while keeping the current day-of-month can overflow
+  // into the next month (e.g. Mar 31 - 1 month => Mar 03), which can lead to
+  // duplicated / skipped months in month-based UIs (like the 36-month heatmap).
+  // Fix: move to day 1 first, change month, then clamp the day-of-month.
   const d = new Date(date.getTime());
+  const day = d.getDate();
+  d.setDate(1);
   d.setMonth(d.getMonth() + delta);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, lastDay));
   return d;
 }
 
