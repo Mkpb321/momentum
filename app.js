@@ -1696,8 +1696,9 @@ function openInsightsOverlay() {
     if (from > to) from = to;
 
     if (insight) {
+      const range = (from === to) ? `S. ${to}` : `S. ${from}–${to}`;
       rows.push({
-        title: `${formatDateShort(entry.date)} – S. ${from}–${to}`,
+        title: `${formatDateShort(entry.date)} – ${range}`,
         text: insight
       });
     }

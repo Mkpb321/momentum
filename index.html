@@ -589,19 +589,18 @@
 <span>Erkenntnis (optional)</span>
 <textarea aria-label="Erkenntnis" id="inpInsight" placeholder="Deine Erkenntnis zum gelesenen Abschnitt…" rows="3"></textarea>
 </label>
+
+<button class="btn btn--block bookdetail__save" id="btnSavePage" type="submit">Speichern</button>
 </div>
 <div class="bookdetail__history">
-<div class="bookdetail__label">Letzte Einträge</div>
+<div class="bookdetail__label">Einträge</div>
 <div class="history" id="historyList"></div>
 </div>
 </div>
 </div>
-<div class="modal__actions modal__actions--stack">
-<button class="btn btn--block" id="btnSavePage" type="submit">Speichern</button>
-<div class="actionsrow actionsrow--spread">
+<div class="modal__actions modal__actions--spread">
 <button class="btn btn--danger" id="btnDeleteBook" type="button">Buch löschen</button>
 <button class="btn btn--ghost" id="btnShowInsights" type="button">Erkenntnisse anzeigen</button>
-</div>
 </div>
 
 <!-- Insights Overlay (lives inside the book dialog; closes without closing the book dialog) -->

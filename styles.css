@@ -736,6 +736,7 @@ svg.chartsvg{
 .field span{ display:block; font-size:12px; color: var(--muted); margin-bottom:6px; }
 .field input{
   width:100%;
+  min-width:0;
   padding: 11px 12px;
   border-radius: 12px;
   border: 1px solid var(--line);
@@ -743,6 +744,21 @@ svg.chartsvg{
   font-size: 14px;
 }
 .field input:focus{ outline:none; box-shadow: var(--focus); border-color: #d9d2ca; }
+
+
+/* Book log: save button sits between inputs and entries */
+.bookdetail__save{ margin-top: 2px; }
+
+/* Date input: prevent overflow on narrow screens (iOS/Chrome) */
+.field input[type="date"]{
+  min-width: 0;
+  max-width: 100%;
+  padding-right: 44px;
+  overflow: hidden;
+}
+.field input[type="date"]::-webkit-calendar-picker-indicator{
+  opacity: .7;
+}
 
 .field textarea{
   width:100%;
