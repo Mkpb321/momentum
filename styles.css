@@ -18,6 +18,7 @@
 }
 
 *{ box-sizing:border-box; }
+html{ -webkit-text-size-adjust: 100%; }
 html, body{ height:100%; }
 body{
   margin:0;
@@ -757,9 +758,23 @@ svg.chartsvg{
   width: 100%;
   padding-right: 44px;
   overflow: hidden;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
 }
 .field input[type="date"]::-webkit-calendar-picker-indicator{
   opacity: .7;
+}
+
+/* iOS/Safari: the date control often centers/enlarges its value; force left alignment and avoid overpainting */
+.field input[type="date"]::-webkit-date-and-time-value{
+  text-align: left;
+  margin: 0;
+  width: 100%;
+}
+
+.field input[type="date"]::-webkit-datetime-edit,
+.field input[type="date"]::-webkit-datetime-edit-fields-wrapper{
+  padding: 0;
 }
 
 .field textarea{
@@ -822,7 +837,25 @@ svg.chartsvg{
   /* Date inputs can be stubborn on iOS; ensure they never exceed the card width */
   .field input[type="date"]{
     max-width: 100%;
-    padding-right: 38px;
+    padding-right: 12px;
+  }
+}
+
+/* Touch devices (iOS/Android): prevent iOS focus-zoom reliably and keep date inputs inside the card */
+@media (hover: none) and (pointer: coarse){
+  .field input,
+  .field textarea,
+  .field select,
+  .bookdetail__row input,
+  .bookdetail__row textarea,
+  .bookdetail__row select{
+    font-size: 16px !important;
+  }
+
+  .field input[type="date"]{
+    padding-right: 12px;
+    -webkit-appearance: none;
+    appearance: none;
   }
 }
 
